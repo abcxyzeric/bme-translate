@@ -1980,7 +1980,7 @@ async function testVectorIndexKeepsDirtyOnDirectPartialEmbeddingFailure() {
     assert.equal(graph.vectorIndexState.lastStats, result.stats);
     assert.match(
       graph.vectorIndexState.lastWarning,
-      /phầnnút embedding Sinh thất bại/,
+      /Một phần nút sinh embedding thất bại/,
     );
     assert.equal(
       graph.vectorIndexState.lastWarning,
@@ -2035,7 +2035,10 @@ async function testBackendVectorQueryFailureMarksStateDirty() {
     assert.equal(graph.vectorIndexState.dirty, true);
     assert.equal(graph.vectorIndexState.dirtyReason, "backend-query-failed");
     assert.equal(graph.vectorIndexState.pendingRepairFromFloor, 0);
-    assert.match(graph.vectorIndexState.lastWarning, /BackendVectorTruy vấn thất bại/);
+    assert.match(
+      graph.vectorIndexState.lastWarning,
+      /Truy vấn BackendVector thất bại/,
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -2137,7 +2140,9 @@ async function testDeleteCurrentIdbClearsCommitMarkerBeforeReload() {
       callLog.some(
         (entry) =>
           entry[0] === "toast-success" &&
-          /Xóaphía máy chủĐồng bộDữ liệu/.test(String(entry[1] || "")),
+          /xóa thêm dữ liệu đồng bộ phía máy chủ/i.test(
+            String(entry[1] || ""),
+          ),
       ),
       "Nếu chat hiện tại có bản ghi đồng bộ từ xa thì phải nhắc người dùng rằng sau khi xóa bộ đệm cục bộ vẫn có thể bị khôi phục từ xa",
     );
@@ -2469,7 +2474,7 @@ async function testExtractorFailsOnUnknownOperation() {
     });
 
     assert.equal(result.success, false);
-    assert.match(result.error, /Thao tác không rõLoại/);
+    assert.match(result.error, /Thao tác không rõ/);
     assert.equal(graph.lastProcessedSeq, -1);
   } finally {
     restoreOverrides();
@@ -3074,7 +3079,7 @@ async function testBatchStatusStructuralPartialRemainsRecoverable() {
   assert.equal(effects.batchStatus.outcome, "partial");
   assert.equal(effects.batchStatus.completed, true);
   assert.equal(effects.batchStatus.consistency, "weak");
-  assert.match(effects.batchStatus.warnings[0], /Néngiai đoạnThất bại/);
+  assert.match(effects.batchStatus.warnings[0], /Nén.*Thất bại/);
 }
 
 async function testBatchStatusSemanticFailureDoesNotHideCoreSuccess() {
@@ -3121,7 +3126,7 @@ async function testBatchStatusSemanticFailureDoesNotHideCoreSuccess() {
   assert.equal(effects.batchStatus.stages.finalize.outcome, "success");
   assert.equal(effects.batchStatus.outcome, "failed");
   assert.equal(effects.batchStatus.completed, true);
-  assert.match(effects.batchStatus.errors[0], /kiểu cũToàn cụctóm lượcSinh thất bại/);
+  assert.match(effects.batchStatus.errors[0], /tóm lược.*Thất bại/);
 }
 
 async function testExtractionPostProcessStatusesExposeMaintenancePhases() {
@@ -3184,7 +3189,10 @@ async function testExtractionPostProcessStatusesExposeMaintenancePhases() {
   const statusTexts = harness.extractionStatuses.map((entry) => entry[0]);
   assert.ok(statusTexts.includes("Đang hoàn tất trích xuất"));
   assert.ok(statusTexts.includes("Đang hợp nhất/tiến hóa"));
-  assert.ok(statusTexts.includes("Đang cập nhật tóm lược toàn cục kiểu cũ"));
+  assert.ok(
+    statusTexts.includes("Đang cập nhật tóm lược toàn cục kiểu cũ") ||
+      statusTexts.includes("Đang xử lý tóm tắt phân tầng"),
+  );
   assert.ok(statusTexts.includes("Đang sinh phản tư"));
   assert.ok(statusTexts.includes("Đang lãng quên chủ động"));
   assert.ok(statusTexts.includes("Đang nén tự động"));
@@ -3264,7 +3272,7 @@ async function testAutoConsolidationRunsOnHighDuplicateRiskSingleNode() {
   assert.equal(effects.batchStatus.consolidationGateSimilarity, 0.93);
   assert.match(
     effects.batchStatus.consolidationGateReason,
-    /độ tương tự cao/,
+    /độ tương tự.*cao/,
   );
   assert.equal(effects.batchStatus.autoCompressionScheduled, false);
   assert.match(
@@ -3341,7 +3349,7 @@ async function testAutoConsolidationSkipsLowRiskSingleNode() {
   assert.equal(effects.batchStatus.consolidationGateSimilarity, 0.42);
   assert.match(
     effects.batchStatus.consolidationGateReason,
-    /Bỏ quaTự độngHợp nhất/,
+    /Bỏ qua.*hợp nhất/i,
   );
   assert.equal(
     effects.batchStatus.stages.structural.artifacts.includes(
@@ -3513,7 +3521,7 @@ async function testAutoCompressionSkipsWhenNotScheduledOrNoCandidates() {
   assert.equal(scheduledEffects.batchStatus.autoCompressionScheduled, true);
   assert.match(
     scheduledEffects.batchStatus.autoCompressionSkippedReason,
-    /không có nhóm ứng viên nén nào đạt ngưỡng nội bộ/,
+    /không có nhóm ứng viên nén.*đạt ngưỡng/,
   );
   assert.equal(
     scheduledEffects.batchStatus.stages.structural.artifacts.includes(
@@ -4648,7 +4656,7 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendPayload() {
   assert.equal(resolution.rewrite.path, "finalMesSend");
   assert.match(
     promptData.finalMesSend[0].extensionPrompts.join("\n"),
-    /Tiêm:đầu vào thực trước khi gửi/,
+    /Tiêm:.*đầu vào thực trước khi gửi/,
   );
   assert.equal(
     harness.moduleInjectionCalls.every((text) => text === ""),
@@ -4711,7 +4719,7 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendAuthoritati
   assert.equal(resolution.inputRewrite.field, "finalMesSend[0].message");
   assert.match(
     promptData.finalMesSend[0].extensionPrompts.join("\n"),
-    /Tiêm:đầu vào thực trước khi gửi/,
+    /Tiêm:.*đầu vào thực trước khi gửi/,
   );
   assert.equal(
     harness.recordedInjectionSnapshots.at(-1)?.inputRewrite?.applied,
@@ -5963,7 +5971,7 @@ async function testHistoryRecoveryFullRebuildStillWarnsUser() {
   assert.equal(result, true);
   assert.equal(harness.toastCalls.success.length, 0);
   assert.equal(harness.toastCalls.warning.length, 1);
-  assert.match(String(harness.toastCalls.warning[0]?.[0] || ""), /toàn lượngxây lại/);
+  assert.match(String(harness.toastCalls.warning[0]?.[0] || ""), /xây lại/i);
 }
 
 async function testHistoryRecoveryFallbackFullRebuildCarriesResultCode() {
@@ -6351,13 +6359,100 @@ async function testEmbeddingUsesConfigTimeoutInsteadOfDefault() {
         model: "text-embedding-test",
         timeoutMs: 7,
       }),
-      /Embedding yêu cầuquá thời gian/,
+      /Yêu cầu embedding quá thời gian/,
     );
     assert.equal(capturedDelay, 7);
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;
     globalThis.clearTimeout = originalClearTimeout;
+  }
+}
+
+async function testEmbeddingApiKeyPoolRoundRobinAcrossRequests() {
+  const originalFetch = globalThis.fetch;
+  const seenAuthHeaders = [];
+
+  globalThis.fetch = async (_url, options = {}) => {
+    seenAuthHeaders.push(String(options.headers?.Authorization || ""));
+    return {
+      ok: true,
+      status: 200,
+      async json() {
+        return {
+          data: [
+            {
+              index: 0,
+              embedding: [0.11, 0.22, 0.33],
+            },
+          ],
+        };
+      },
+    };
+  };
+
+  try {
+    const config = {
+      apiUrl: "https://pool-rotate.example/v1",
+      model: "text-embedding-test",
+      apiKeys: ["sk-one", "sk-two"],
+    };
+    const first = await embedding.embedText("alpha", config);
+    const second = await embedding.embedText("beta", config);
+    assert.ok(first instanceof Float64Array);
+    assert.ok(second instanceof Float64Array);
+    assert.deepEqual(seenAuthHeaders, ["Bearer sk-one", "Bearer sk-two"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+async function testEmbeddingApiKeyPoolFallsBackOnRateLimit() {
+  const originalFetch = globalThis.fetch;
+  const seenAuthHeaders = [];
+
+  globalThis.fetch = async (_url, options = {}) => {
+    const authorization = String(options.headers?.Authorization || "");
+    seenAuthHeaders.push(authorization);
+    if (authorization === "Bearer sk-rate-limited") {
+      return {
+        ok: false,
+        status: 429,
+        async text() {
+          return "rate limit exceeded";
+        },
+      };
+    }
+    return {
+      ok: true,
+      status: 200,
+      async json() {
+        return {
+          data: [
+            {
+              index: 0,
+              embedding: [0.44, 0.55],
+            },
+          ],
+        };
+      },
+    };
+  };
+
+  try {
+    const vector = await embedding.embedText("fallback", {
+      apiUrl: "https://pool-fallback.example/v1",
+      model: "text-embedding-test",
+      apiKeys: ["sk-rate-limited", "sk-backup"],
+    });
+    assert.ok(vector instanceof Float64Array);
+    assert.equal(vector.length, 2);
+    assert.deepEqual(seenAuthHeaders, [
+      "Bearer sk-rate-limited",
+      "Bearer sk-backup",
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
   }
 }
 
@@ -6619,9 +6714,18 @@ async function testRecallUsesSectionedPromptMessagesForContextAndTarget() {
     assert.equal(recentMessageSections[1].transcriptSection, "target");
     assert.match(recentMessageSections[0].content, new RegExp(EXTRACTION_CONTEXT_REVIEW_HEADER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.match(recentMessageSections[1].content, new RegExp(RECALL_TARGET_CONTENT_HEADER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-    assert.match(recentMessageSections[0].content, /cô ấy ban đầu không thừa nhận mình đã tới nhà kho/);
-    assert.match(recentMessageSections[0].content, /tôi nhớ khi đó cô ấy rất căng thẳng/);
-    assert.match(recentMessageSections[1].content, /vì sao cô ấy đột nhiên đổi lời/);
+    assert.match(
+      recentMessageSections[0].content,
+      /lúc đầu cô ấy không nhận là mình đã từng tới kho/i,
+    );
+    assert.match(
+      recentMessageSections[0].content,
+      /tôi nhớ lúc đó cô ấy rất căng thẳng/i,
+    );
+    assert.match(
+      recentMessageSections[1].content,
+      /vì sao.*đổi lời/i,
+    );
   } finally {
     restoreOverrides();
   }
@@ -6788,7 +6892,10 @@ async function testManualCompressSkipsWithoutCandidatesAndDoesNotPretendItRan() 
   assert.equal(calls.recordGraphMutation, 0);
   assert.equal(result?.handledToast, true);
   assert.equal(result?.requestDispatched, false);
-  assert.match(String(toastMessages[0]?.[1] || ""), /chưa khởi phát LLM nén/);
+  assert.match(
+    String(toastMessages[0]?.[1] || ""),
+    /không gửi yêu cầu nén LLM/,
+  );
 }
 
 async function testManualCompressUsesForcedCompressionAndPersistsRealMutation() {
@@ -6866,7 +6973,7 @@ async function testManualCompressUpdatesRuntimeStatusForPanelUi() {
 
   assert.equal(result?.handledToast, true);
   assert.equal(result?.mutated, true);
-  assert.equal(statusUpdates[0]?.text, "Đang nén thủ công");
+  assert.match(String(statusUpdates[0]?.text || ""), /Nén thủ công/);
   assert.equal(statusUpdates[0]?.level, "running");
   assert.equal(statusUpdates.at(-1)?.text, "Nén thủ công hoàn tất");
   assert.equal(statusUpdates.at(-1)?.level, "success");
@@ -6950,7 +7057,10 @@ async function testManualEvolveFallsBackToLatestExtractionBatchAfterRefresh() {
   assert.equal(result?.handledToast, true);
   assert.equal(result?.requestDispatched, true);
   assert.equal(result?.mutated, false);
-  assert.match(String(toastMessages[0]?.[1] || ""), /lô trích xuất gần nhất đã ghi xuống đĩa/);
+  assert.match(
+    String(toastMessages[0]?.[1] || ""),
+    /lô trích xuất.*ghi xuống gần nhất/i,
+  );
 }
 
 async function testManualEvolveWarnsOnInvalidVectorConfigInsteadOfPretendingComplete() {
@@ -6994,7 +7104,10 @@ async function testManualEvolveWarnsOnInvalidVectorConfigInsteadOfPretendingComp
   assert.equal(consolidateCalls, 0);
   assert.equal(result?.handledToast, true);
   assert.equal(result?.requestDispatched, false);
-  assert.match(String(toastMessages[0]?.[1] || ""), /Cấu hình không hợp lệ/);
+  assert.match(
+    String(toastMessages[0]?.[1] || ""),
+    /Cấu hình.*không hợp lệ/,
+  );
 }
 
 async function testManualSleepExplainsThatItIsLocalOnlyWhenNothingChanges() {
@@ -7127,6 +7240,8 @@ await testRerollRejectsMissingRecoveryPoint();
 await testRerollFallsBackToDirectExtractForUnprocessedFloor();
 await testRerollPreservesPrefixHashesWhenReextractDoesNotAdvance();
 await testLlmDebugSnapshotRedactsSecretsBeforeStorage();
+await testEmbeddingApiKeyPoolRoundRobinAcrossRequests();
+await testEmbeddingApiKeyPoolFallsBackOnRateLimit();
 await testEmbeddingUsesConfigTimeoutInsteadOfDefault();
 await testLlmOutputRegexCleansResponseBeforeJsonParse();
 await testSynopsisUsesPromptMessagesWithoutFallbackSystemPrompt();

@@ -105,6 +105,7 @@ export const defaultSettings = {
   // Embedding Cấu hình API
   embeddingApiUrl: "",
   embeddingApiKey: "",
+  embeddingApiKeyPool: "",
   embeddingModel: "text-embedding-3-small",
   embeddingTransportMode: "direct",
   embeddingBackendSource: "openai",

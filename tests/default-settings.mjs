@@ -67,6 +67,7 @@ assert.equal(defaultSettings.worldInfoFilterMode, "default");
 assert.equal(defaultSettings.worldInfoFilterCustomKeywords, "");
 assert.equal("maintenanceAutoMinNewNodes" in defaultSettings, false);
 assert.equal(defaultSettings.embeddingTransportMode, "direct");
+assert.equal(defaultSettings.embeddingApiKeyPool, "");
 assert.equal(defaultSettings.graphUseNativeLayout, false);
 assert.equal(defaultSettings.graphNativeLayoutThresholdNodes, 280);
 assert.equal(defaultSettings.graphNativeLayoutThresholdEdges, 1600);

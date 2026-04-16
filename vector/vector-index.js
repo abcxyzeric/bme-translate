@@ -151,6 +151,14 @@ export function getVectorConfigFromSettings(settings = {}) {
   const autoSuffix = settings.embeddingAutoSuffix !== false;
 
   if (mode === "direct") {
+    const directApiKeyPool = Array.from(
+      new Set(
+        String(settings.embeddingApiKeyPool || settings.embeddingApiKey || "")
+          .split(/\r?\n|[;,]/)
+          .map((item) => item.trim())
+          .filter(Boolean),
+      ),
+    );
     return {
       mode,
       source: "direct",
@@ -158,7 +166,8 @@ export function getVectorConfigFromSettings(settings = {}) {
         settings.embeddingApiUrl,
         autoSuffix,
       ),
-      apiKey: String(settings.embeddingApiKey || "").trim(),
+      apiKey: directApiKeyPool[0] || "",
+      apiKeys: directApiKeyPool,
       model: String(settings.embeddingModel || "").trim(),
       autoSuffix,
       timeoutMs: getConfiguredTimeoutMs(settings),
@@ -987,23 +996,36 @@ async function fetchOpenAICompatibleModelList(apiUrl, apiKey = "") {
     throw new Error("Hãy điền địa chỉ API trước");
   }
 
-  const response = await fetchWithTimeout(`${normalizedUrl}/models`, {
-    method: "GET",
-    headers: {
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-    },
-  });
+  const apiKeys = Array.isArray(apiKey)
+    ? apiKey.map((item) => String(item || "").trim()).filter(Boolean)
+    : [String(apiKey || "").trim()].filter(Boolean);
+  const candidates = apiKeys.length > 0 ? apiKeys : [""];
+  let lastError = null;
 
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(
-      payload?.error?.message || payload?.message || response.statusText,
+  for (const candidateKey of candidates) {
+    const response = await fetchWithTimeout(`${normalizedUrl}/models`, {
+      method: "GET",
+      headers: {
+        ...(candidateKey ? { Authorization: `Bearer ${candidateKey}` } : {}),
+      },
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (response.ok) {
+      return normalizeModelOptions(payload?.data || payload, {
+        embeddingOnly: false,
+      });
+    }
+
+    lastError = new Error(
+      payload?.error?.message ||
+        payload?.message ||
+        response.statusText ||
+        `HTTP ${response.status}`,
     );
   }
 
-  return normalizeModelOptions(payload?.data || payload, {
-    embeddingOnly: false,
-  });
+  throw lastError || new Error("Không lấy được danh sách model");
 }
 
 async function fetchOllamaModelList(apiUrl) {
@@ -1043,7 +1065,12 @@ export async function fetchAvailableEmbeddingModels(config) {
   try {
     if (isDirectVectorConfig(config)) {
       const models = normalizeModelOptions(
-        await fetchOpenAICompatibleModelList(config.apiUrl, config.apiKey),
+        await fetchOpenAICompatibleModelList(
+          config.apiUrl,
+          Array.isArray(config.apiKeys) && config.apiKeys.length > 0
+            ? config.apiKeys
+            : config.apiKey,
+        ),
       );
       if (models.length === 0) {
         return {

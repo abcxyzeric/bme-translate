@@ -34,15 +34,18 @@ function injectOptionsMenuEntry(runtime) {
   const menuItem = doc.createElement("a");
   menuItem.id = "option_st_bme_panel";
   menuItem.innerHTML =
-    '<i class="fa-lg fa-solid fa-brain"></i><span>đồ thị ký ức</span>';
+    '<i class="fa-lg fa-solid fa-brain"></i><span>Đồ thị ký ức</span>';
   menuItem.addEventListener("click", async () => {
     try {
       await ensurePanelBridgeReady(runtime);
       openPanelController(runtime);
       runtime.$?.("#options")?.hide?.();
     } catch (error) {
-      runtime.console.error("[ST-BME] Nhấn menu mở bảng thất bại:", error);
-      globalThis.toastr?.error?.("đồ thị ký ứcTải bảng thất bại, vui lòng xem lỗi trong console", "ST-BME");
+      runtime.console.error("[ST-BME] Mở bảng từ menu thất bại:", error);
+      globalThis.toastr?.error?.(
+        "Tải bảng đồ thị ký ức thất bại, vui lòng xem lỗi trong console",
+        "ST-BME",
+      );
     }
   });
 
@@ -71,7 +74,7 @@ function injectFloatingBootstrap(runtime) {
     fab.setAttribute("data-bme-bootstrap", "true");
     fab.innerHTML = `
       <i class="fa-solid fa-brain bme-fab-icon"></i>
-      <span class="bme-fab-tooltip">BME đồ thị ký ức</span>
+      <span class="bme-fab-tooltip">BME Đồ thị ký ức</span>
     `;
     const mountTarget = doc.body || doc.documentElement;
     if (!mountTarget) return false;
@@ -86,8 +89,11 @@ function injectFloatingBootstrap(runtime) {
       await ensurePanelBridgeReady(runtime);
       openPanelController(runtime);
     } catch (error) {
-      runtime.console.error("[ST-BME] Nhấn bóng nổi mở bảng thất bại:", error);
-      globalThis.toastr?.error?.("đồ thị ký ứcTải bảng thất bại, vui lòng xem lỗi trong console", "ST-BME");
+      runtime.console.error("[ST-BME] Mở bảng từ nút nổi thất bại:", error);
+      globalThis.toastr?.error?.(
+        "Tải bảng đồ thị ký ức thất bại, vui lòng xem lỗi trong console",
+        "ST-BME",
+      );
     }
   });
   return true;
@@ -97,7 +103,7 @@ function scheduleOptionsMenuInjection(runtime, attempt = 0) {
   try {
     injectFloatingBootstrap(runtime);
   } catch (error) {
-    runtime.console.warn("[ST-BME] Cài sẵn lối vào bóng nổi thất bại:", error);
+    runtime.console.warn("[ST-BME] Gắn nút nổi khởi động thất bại:", error);
   }
 
   try {
@@ -105,12 +111,12 @@ function scheduleOptionsMenuInjection(runtime, attempt = 0) {
       return;
     }
   } catch (error) {
-    runtime.console.warn("[ST-BME] Tiêm lối vào menu thất bại, sẽ thử lại sau:", error);
+    runtime.console.warn("[ST-BME] Gắn lối vào menu thất bại, sẽ thử lại:", error);
   }
 
   if (attempt >= MENU_ENTRY_MAX_ATTEMPTS) {
     runtime.console.warn(
-      "[ST-BME] Tiêm lối vào menu bảng điều khiển thất bại: DOM options của host quá lâu vẫn chưa sẵn sàng",
+      "[ST-BME] Gắn lối vào menu bảng điều khiển thất bại: DOM options của host vẫn chưa sẵn sàng",
     );
     return;
   }
@@ -176,6 +182,9 @@ export async function initializePanelBridgeController(runtime) {
       "[ST-BME] Tải bảng điều khiển thất bại (chức năng lõi không bị ảnh hưởng):",
       panelError,
     );
-    globalThis.toastr?.error?.("đồ thị ký ứcTiền tải bảng thất bại, có thể thử bấm menu lại sau", "ST-BME");
+    globalThis.toastr?.error?.(
+      "Tiền tải bảng đồ thị ký ức thất bại, bạn có thể thử bấm menu lại sau",
+      "ST-BME",
+    );
   }
 }

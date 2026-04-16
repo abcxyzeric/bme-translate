@@ -2,8 +2,9 @@
 // Hỗ trợ giao diện /v1/embeddings tương thích OpenAI
 
 /**
- * Dịch vụ Embedding
- * Gọi API bên ngoài để lấy vector văn bản và cung cấp tìm kiếm cosine độ tương đồng kiểu brute force
+ * Dịch vụ embedding
+ * Gọi API bên ngoài để lấy vector văn bản và cung cấp tìm kiếm cosine
+ * tương đồng kiểu brute force.
  */
 
 import { extension_settings } from "../../../../extensions.js";
@@ -11,15 +12,14 @@ import { resolveConfiguredTimeoutMs } from "../runtime/request-timeout.js";
 
 const MODULE_NAME = "st_bme";
 const EMBEDDING_REQUEST_TIMEOUT_MS = 300000;
+const EMBEDDING_KEY_POOL_STATE = new Map();
 
 function getEmbeddingTestOverride(name) {
   const override = globalThis.__stBmeTestOverrides?.embedding?.[name];
   return typeof override === "function" ? override : null;
 }
 
-function getConfiguredTimeoutMs(
-  settings = extension_settings[MODULE_NAME] || {},
-) {
+function getConfiguredTimeoutMs(settings = extension_settings[MODULE_NAME] || {}) {
   return typeof resolveConfiguredTimeoutMs === "function"
     ? resolveConfiguredTimeoutMs(settings, EMBEDDING_REQUEST_TIMEOUT_MS)
     : (() => {
@@ -67,6 +67,83 @@ function createCombinedAbortSignal(...signals) {
   return controller.signal;
 }
 
+function normalizeEmbeddingApiKeys(config = {}) {
+  const fromArray = Array.isArray(config?.apiKeys)
+    ? config.apiKeys
+    : [config?.apiKey];
+  return Array.from(
+    new Set(
+      fromArray
+        .flatMap((item) => String(item || "").split(/\r?\n|[;,]/))
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+function buildEmbeddingPoolId(config = {}) {
+  return [
+    normalizeOpenAICompatibleBaseUrl(config?.apiUrl),
+    String(config?.model || "").trim(),
+  ].join("|");
+}
+
+function buildEmbeddingApiKeyAttempts(config = {}) {
+  const apiKeys = normalizeEmbeddingApiKeys(config);
+  if (apiKeys.length <= 1) {
+    return {
+      poolId: buildEmbeddingPoolId(config),
+      apiKeys,
+      attempts: apiKeys.length > 0 ? [{ apiKey: apiKeys[0], keyIndex: 0 }] : [{ apiKey: "", keyIndex: -1 }],
+    };
+  }
+
+  const poolId = buildEmbeddingPoolId(config);
+  const rawStartIndex = Number(EMBEDDING_KEY_POOL_STATE.get(poolId) || 0);
+  const startIndex =
+    Number.isFinite(rawStartIndex) && rawStartIndex >= 0
+      ? rawStartIndex % apiKeys.length
+      : 0;
+
+  return {
+    poolId,
+    apiKeys,
+    attempts: apiKeys.map((_, offset) => {
+      const keyIndex = (startIndex + offset) % apiKeys.length;
+      return {
+        apiKey: apiKeys[keyIndex],
+        keyIndex,
+      };
+    }),
+  };
+}
+
+function commitEmbeddingApiKeySuccess(poolId, apiKeys, keyIndex) {
+  if (!poolId || !Array.isArray(apiKeys) || apiKeys.length <= 1 || keyIndex < 0) {
+    return;
+  }
+  EMBEDDING_KEY_POOL_STATE.set(poolId, (keyIndex + 1) % apiKeys.length);
+}
+
+function shouldRotateOnEmbeddingResponse(status, errorText = "", hasMoreKeys = false) {
+  if (!hasMoreKeys) return false;
+  if (
+    status === 401 ||
+    status === 403 ||
+    status === 408 ||
+    status === 409 ||
+    status === 425 ||
+    status === 429 ||
+    (status >= 500 && status <= 599)
+  ) {
+    return true;
+  }
+
+  return /(rate limit|quota|insufficient_quota|too many requests|request limit|credit|billing|exhausted|capacity)/i.test(
+    String(errorText || ""),
+  );
+}
+
 async function fetchWithTimeout(
   url,
   options = {},
@@ -102,9 +179,10 @@ async function fetchWithTimeout(
  *
  * @param {string} text - văn bản cần nhúng
  * @param {object} config - cấu hình API
- * @param {string} config.apiUrl - địa chỉ gốc của API (ví dụ https://api.openai.com/v1)
- * @param {string} config.apiKey - API Key
- * @param {string} config.model - tên model (ví dụ text-embedding-3-small)
+ * @param {string} config.apiUrl - địa chỉ gốc của API
+ * @param {string} config.apiKey - API key đầu tiên hoặc legacy single key
+ * @param {string[]} [config.apiKeys] - danh sách API key để xoay vòng
+ * @param {string} config.model - tên model
  * @returns {Promise<Float64Array|null>} vector hoặc null
  */
 export async function embedText(text, config, { signal } = {}) {
@@ -119,51 +197,83 @@ export async function embedText(text, config, { signal } = {}) {
     return null;
   }
 
-  try {
-    const response = await fetchWithTimeout(
-      `${apiUrl}/embeddings`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(config.apiKey
-            ? { Authorization: `Bearer ${config.apiKey}` }
-            : {}),
+  const requestPlan = buildEmbeddingApiKeyAttempts(config);
+  const totalAttempts = requestPlan.attempts.length;
+
+  for (let attemptIndex = 0; attemptIndex < totalAttempts; attemptIndex++) {
+    const attempt = requestPlan.attempts[attemptIndex];
+    const hasMoreKeys = attemptIndex < totalAttempts - 1;
+
+    try {
+      const response = await fetchWithTimeout(
+        `${apiUrl}/embeddings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(attempt.apiKey
+              ? { Authorization: `Bearer ${attempt.apiKey}` }
+              : {}),
+          },
+          signal,
+          body: JSON.stringify({
+            model: config.model,
+            input: text,
+          }),
         },
-        signal,
-        body: JSON.stringify({
-          model: config.model,
-          input: text,
-        }),
-      },
-      getConfiguredTimeoutMs(config),
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[ST-BME] Embedding API Lỗi (${response.status}):`,
-        errorText,
+        getConfiguredTimeoutMs(config),
       );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (
+          shouldRotateOnEmbeddingResponse(
+            response.status,
+            errorText,
+            hasMoreKeys,
+          )
+        ) {
+          console.warn(
+            `[ST-BME] Embedding key ${
+              attemptIndex + 1
+            } bị giới hạn hoặc lỗi tạm thời, chuyển sang key tiếp theo`,
+          );
+          continue;
+        }
+        console.error(
+          `[ST-BME] Embedding API lỗi (${response.status}):`,
+          errorText,
+        );
+        return null;
+      }
+
+      const data = await response.json();
+      const vector = data?.data?.[0]?.embedding;
+
+      if (!vector || !Array.isArray(vector)) {
+        console.error(
+          "[ST-BME] Embedding API trả về định dạng bất thường:",
+          data,
+        );
+        return null;
+      }
+
+      commitEmbeddingApiKeySuccess(
+        requestPlan.poolId,
+        requestPlan.apiKeys,
+        attempt.keyIndex,
+      );
+      return new Float64Array(vector);
+    } catch (error) {
+      if (isAbortError(error)) {
+        throw error;
+      }
+      console.error("[ST-BME] Gọi Embedding API thất bại:", error);
       return null;
     }
-
-    const data = await response.json();
-    const vector = data?.data?.[0]?.embedding;
-
-    if (!vector || !Array.isArray(vector)) {
-      console.error("[ST-BME] Embedding API trả vềđịnh dạngbất thường:", data);
-      return null;
-    }
-
-    return new Float64Array(vector);
-  } catch (e) {
-    if (isAbortError(e)) {
-      throw e;
-    }
-    console.error("[ST-BME] Embedding API Gọi thất bại:", e);
-    return null;
   }
+
+  return null;
 }
 
 /**
@@ -184,58 +294,86 @@ export async function embedBatch(texts, config, { signal } = {}) {
     return texts.map(() => null);
   }
 
-  try {
-    const response = await fetchWithTimeout(
-      `${apiUrl}/embeddings`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(config.apiKey
-            ? { Authorization: `Bearer ${config.apiKey}` }
-            : {}),
+  const requestPlan = buildEmbeddingApiKeyAttempts(config);
+  const totalAttempts = requestPlan.attempts.length;
+
+  for (let attemptIndex = 0; attemptIndex < totalAttempts; attemptIndex++) {
+    const attempt = requestPlan.attempts[attemptIndex];
+    const hasMoreKeys = attemptIndex < totalAttempts - 1;
+
+    try {
+      const response = await fetchWithTimeout(
+        `${apiUrl}/embeddings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(attempt.apiKey
+              ? { Authorization: `Bearer ${attempt.apiKey}` }
+              : {}),
+          },
+          signal,
+          body: JSON.stringify({
+            model: config.model,
+            input: texts,
+          }),
         },
-        signal,
-        body: JSON.stringify({
-          model: config.model,
-          input: texts,
-        }),
-      },
-      getConfiguredTimeoutMs(config),
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(
-        `[ST-BME] Embedding API hàng loạtLỗi (${response.status}):`,
-        errorText,
+        getConfiguredTimeoutMs(config),
       );
-      return texts.map(() => null);
-    }
 
-    const data = await response.json();
-    const embeddings = data?.data;
-
-    if (!Array.isArray(embeddings)) {
-      return texts.map(() => null);
-    }
-
-    // Xếp lại theo index (API có thể không đảm bảo thứ tự)
-    embeddings.sort((a, b) => a.index - b.index);
-
-    return embeddings.map((item) => {
-      if (item?.embedding && Array.isArray(item.embedding)) {
-        return new Float64Array(item.embedding);
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (
+          shouldRotateOnEmbeddingResponse(
+            response.status,
+            errorText,
+            hasMoreKeys,
+          )
+        ) {
+          console.warn(
+            `[ST-BME] Embedding key ${
+              attemptIndex + 1
+            } bị giới hạn hoặc lỗi tạm thời, chuyển sang key tiếp theo`,
+          );
+          continue;
+        }
+        console.error(
+          `[ST-BME] Embedding API hàng loạt lỗi (${response.status}):`,
+          errorText,
+        );
+        return texts.map(() => null);
       }
-      return null;
-    });
-  } catch (e) {
-    if (isAbortError(e)) {
-      throw e;
+
+      const data = await response.json();
+      const embeddings = data?.data;
+
+      if (!Array.isArray(embeddings)) {
+        return texts.map(() => null);
+      }
+
+      embeddings.sort((left, right) => left.index - right.index);
+
+      commitEmbeddingApiKeySuccess(
+        requestPlan.poolId,
+        requestPlan.apiKeys,
+        attempt.keyIndex,
+      );
+      return embeddings.map((item) => {
+        if (item?.embedding && Array.isArray(item.embedding)) {
+          return new Float64Array(item.embedding);
+        }
+        return null;
+      });
+    } catch (error) {
+      if (isAbortError(error)) {
+        throw error;
+      }
+      console.error("[ST-BME] Gọi Embedding API hàng loạt thất bại:", error);
+      return texts.map(() => null);
     }
-    console.error("[ST-BME] Embedding API hàng loạtGọi thất bại:", e);
-    return texts.map(() => null);
   }
+
+  return texts.map(() => null);
 }
 
 /**
@@ -268,12 +406,11 @@ export function cosineSimilarity(vecA, vecB) {
 
 /**
  * Tìm kiếm brute force: tìm ra Top-K nút giống nhất với vector truy vấn
- * Engine vector của PeroCore cũng có tìm kiếm brute force (khi <1000 nút thì nhanh hơn HNSW)
  *
  * @param {Float64Array|number[]} queryVec - vector truy vấn
- * @param {Array<{nodeId: string, embedding: Float64Array|number[]}>} candidates - Nút ứng viên
+ * @param {Array<{nodeId: string, embedding: Float64Array|number[]}>} candidates
  * @param {number} topK - số lượng trả về
- * @returns {Array<{nodeId: string, score: number}>} sắp xếp giảm dần theo độ tương đồng
+ * @returns {Array<{nodeId: string, score: number}>}
  */
 export function searchSimilar(queryVec, candidates, topK = 20) {
   const override = getEmbeddingTestOverride("searchSimilar");
@@ -284,14 +421,14 @@ export function searchSimilar(queryVec, candidates, topK = 20) {
   if (!queryVec || candidates.length === 0) return [];
 
   const scored = candidates
-    .filter((c) => c.embedding && c.embedding.length > 0)
-    .map((c) => ({
-      nodeId: c.nodeId,
-      score: cosineSimilarity(queryVec, c.embedding),
+    .filter((candidate) => candidate.embedding && candidate.embedding.length > 0)
+    .map((candidate) => ({
+      nodeId: candidate.nodeId,
+      score: cosineSimilarity(queryVec, candidate.embedding),
     }))
     .filter((item) => item.score > 0);
 
-  scored.sort((a, b) => b.score - a.score);
+  scored.sort((left, right) => right.score - left.score);
 
   return scored.slice(0, topK);
 }
@@ -309,7 +446,7 @@ export async function testConnection(config) {
       return { success: true, dimensions: vec.length, error: "" };
     }
     return { success: false, dimensions: 0, error: "API trả về kết quả rỗng" };
-  } catch (e) {
-    return { success: false, dimensions: 0, error: String(e) };
+  } catch (error) {
+    return { success: false, dimensions: 0, error: String(error) };
   }
 }

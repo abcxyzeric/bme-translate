@@ -55,11 +55,13 @@ assert.equal(validateVectorConfig(backendConfig).valid, true);
 const directConfig = getVectorConfigFromSettings({
   embeddingTransportMode: "direct",
   embeddingApiUrl: "https://example.com/v1/embeddings",
-  embeddingApiKey: "sk-test",
+  embeddingApiKeyPool: "sk-test\nsk-backup",
   embeddingModel: "text-embedding-3-small",
 });
 assert.equal(directConfig.mode, "direct");
 assert.equal(directConfig.apiUrl, "https://example.com/v1");
+assert.equal(directConfig.apiKey, "sk-test");
+assert.deepEqual(Array.from(directConfig.apiKeys), ["sk-test", "sk-backup"]);
 assert.equal(validateVectorConfig(directConfig).valid, true);
 
 const defaultModeConfig = getVectorConfigFromSettings({

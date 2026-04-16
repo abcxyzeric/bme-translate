@@ -12413,6 +12413,7 @@ function updateModuleSettings(patch = {}) {
   const vectorConfigKeys = new Set([
     "embeddingApiUrl",
     "embeddingApiKey",
+    "embeddingApiKeyPool",
     "embeddingModel",
     "embeddingTransportMode",
     "embeddingBackendSource",

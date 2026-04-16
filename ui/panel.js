@@ -6285,7 +6285,10 @@ function _refreshConfigTab() {
   _setInputValue("bme-setting-timeout-ms", settings.timeoutMs ?? 300000);
 
   _setInputValue("bme-setting-embed-url", settings.embeddingApiUrl || "");
-  _setInputValue("bme-setting-embed-key", settings.embeddingApiKey || "");
+  _setInputValue(
+    "bme-setting-embed-key",
+    settings.embeddingApiKeyPool || settings.embeddingApiKey || "",
+  );
   _setInputValue(
     "bme-setting-embed-model",
     settings.embeddingModel || "text-embedding-3-small",
@@ -6350,6 +6353,8 @@ function _refreshConfigTab() {
 
 function _bindConfigControls() {
   if (!panelEl || panelEl.dataset.bmeConfigBound === "true") return;
+
+  _prepareEmbeddingApiKeyPoolUi();
 
   panelEl.querySelectorAll(".bme-config-nav-btn").forEach((btn) => {
     if (btn.dataset.bmeBound === "true") return;
@@ -6935,9 +6940,13 @@ function _bindConfigControls() {
   bindText("bme-setting-embed-url", (value) =>
     _patchSettings({ embeddingApiUrl: value.trim() }),
   );
-  bindText("bme-setting-embed-key", (value) =>
-    _patchSettings({ embeddingApiKey: value.trim() }),
-  );
+  bindText("bme-setting-embed-key", (value) => {
+    const normalizedPool = _normalizeEmbeddingApiKeyPoolText(value);
+    _patchSettings({
+      embeddingApiKeyPool: normalizedPool,
+      embeddingApiKey: _getPrimaryEmbeddingApiKeyFromPoolText(normalizedPool),
+    });
+  });
   bindText("bme-setting-embed-model", (value) =>
     _patchSettings({ embeddingModel: value.trim() }),
   );
@@ -12558,6 +12567,125 @@ function _setInputValue(id, value) {
   const el = document.getElementById(id);
   if (el && el.value !== String(value ?? "")) {
     el.value = String(value ?? "");
+  }
+}
+
+function _splitEmbeddingApiKeyPoolText(value) {
+  return Array.from(
+    new Set(
+      String(value ?? "")
+        .split(/\r?\n|[;,]/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  );
+}
+
+function _normalizeEmbeddingApiKeyPoolText(value) {
+  return _splitEmbeddingApiKeyPoolText(value).join("\n");
+}
+
+function _getPrimaryEmbeddingApiKeyFromPoolText(value) {
+  return _splitEmbeddingApiKeyPoolText(value)[0] || "";
+}
+
+function _prepareEmbeddingApiKeyPoolUi() {
+  const backendUrlInput = document.getElementById(
+    "bme-setting-embed-backend-url",
+  );
+  if (backendUrlInput) {
+    backendUrlInput.placeholder = "Chỉ Ollama / llama.cpp / vLLM mới cần điền";
+  }
+
+  const autoSuffixLabel = document.querySelector(
+    'label[for="bme-setting-embed-auto-suffix"] span',
+  );
+  if (autoSuffixLabel) {
+    autoSuffixLabel.textContent = "Tự động bổ sung hậu tố /embeddings";
+  }
+
+  const backendHelp = document.querySelector(
+    "#bme-embed-backend-fields .bme-config-help",
+  );
+  if (backendHelp) {
+    backendHelp.textContent =
+      "Nếu trang hiện tại dùng HTTPS mà bạn lại điền HTTP, trình duyệt cục bộ có thể chặn mixed content; khi triển khai từ xa hãy ưu tiên dùng HTTPS hoặc lối vào cùng nguồn mà host có thể truy cập.";
+  }
+
+  const directFields = document.getElementById("bme-embed-direct-fields");
+  const directHelp = directFields?.querySelector(".bme-config-help");
+  if (directHelp) {
+    directHelp.textContent =
+      "Chế độ trực tiếp sẽ dùng bộ cấu hình riêng bên dưới.";
+  }
+
+  const embedUrlLabel = document.querySelector('label[for="bme-setting-embed-url"]');
+  if (embedUrlLabel) {
+    embedUrlLabel.textContent = "Địa chỉ API Embedding";
+  }
+
+  const embedModelLabel = document.querySelector(
+    'label[for="bme-setting-embed-model"]',
+  );
+  if (embedModelLabel) {
+    embedModelLabel.textContent = "Model Embedding";
+  }
+
+  const embedKeyLabel = document.querySelector('label[for="bme-setting-embed-key"]');
+  if (embedKeyLabel) {
+    embedKeyLabel.textContent = "Danh sách API Key Embedding";
+  }
+
+  let embedKeyInput = document.getElementById("bme-setting-embed-key");
+  if (
+    embedKeyInput &&
+    String(embedKeyInput.tagName || "").toUpperCase() !== "TEXTAREA"
+  ) {
+    const textarea = document.createElement("textarea");
+    textarea.id = embedKeyInput.id;
+    textarea.className = "bme-config-textarea";
+    textarea.rows = 4;
+    textarea.value = embedKeyInput.value || "";
+    textarea.placeholder = "sk-key-1\nsk-key-2\nsk-key-3";
+    for (const attr of embedKeyInput.getAttributeNames()) {
+      if (["id", "class", "type", "placeholder", "value"].includes(attr)) {
+        continue;
+      }
+      textarea.setAttribute(attr, embedKeyInput.getAttribute(attr) || "");
+    }
+    embedKeyInput.replaceWith(textarea);
+    embedKeyInput = textarea;
+  }
+
+  if (embedKeyInput) {
+    embedKeyInput.className = "bme-config-textarea";
+    embedKeyInput.placeholder = "sk-key-1\nsk-key-2\nsk-key-3";
+    embedKeyInput.setAttribute("rows", "4");
+  }
+
+  let keyPoolHelp = directFields?.querySelector(".bme-embed-key-pool-help");
+  if (!keyPoolHelp && embedKeyInput?.parentElement) {
+    keyPoolHelp = document.createElement("div");
+    keyPoolHelp.className = "bme-config-help bme-embed-key-pool-help";
+    embedKeyInput.insertAdjacentElement("afterend", keyPoolHelp);
+  }
+  if (keyPoolHelp) {
+    keyPoolHelp.textContent =
+      "Mỗi dòng một key. BME sẽ xoay vòng theo pool; nếu key hiện tại bị rate limit hoặc hết quota, extension sẽ thử key kế tiếp. Cơ chế này chỉ áp dụng cho embedding trực tiếp.";
+  }
+
+  const fetchModelLabel = document.querySelector(
+    "#bme-fetch-embed-direct-models span",
+  );
+  if (fetchModelLabel) {
+    fetchModelLabel.textContent = "Lấy model";
+  }
+
+  const defaultModelOption = document.querySelector(
+    '#bme-select-embed-direct-model option[value=""]',
+  );
+  if (defaultModelOption) {
+    defaultModelOption.textContent = "Chọn model từ kết quả tải về";
   }
 }
 

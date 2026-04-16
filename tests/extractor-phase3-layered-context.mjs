@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -90,12 +90,12 @@ globalThis.__stBmeTestContext = {
 };
 
 const baseMessages = [
-  { seq: 10, role: "user", content: "第一轮tin nhắn", name: "người chơi", speaker: "người chơi" },
-  { seq: 11, role: "assistant", content: "第一轮Phản hồi", name: "Ailin", speaker: "Ailin" },
-  { seq: 12, role: "user", content: "第二轮tin nhắn", name: "người chơi", speaker: "người chơi" },
-  { seq: 13, role: "assistant", content: "第二轮Phản hồi", name: "Ailin", speaker: "Ailin" },
-  { seq: 14, role: "user", content: "第三轮tin nhắn", name: "người chơi", speaker: "người chơi" },
-  { seq: 15, role: "assistant", content: "第三轮Phản hồi", name: "Ailin", speaker: "Ailin" },
+  { seq: 10, role: "user", content: "vòng đầutin nhắn", name: "người chơi", speaker: "người chơi" },
+  { seq: 11, role: "assistant", content: "vòng đầuPhản hồi", name: "Ailin", speaker: "Ailin" },
+  { seq: 12, role: "user", content: "vòng haitin nhắn", name: "người chơi", speaker: "người chơi" },
+  { seq: 13, role: "assistant", content: "vòng haiPhản hồi", name: "Ailin", speaker: "Ailin" },
+  { seq: 14, role: "user", content: "vòng batin nhắn", name: "người chơi", speaker: "người chơi" },
+  { seq: 15, role: "assistant", content: "vòng baPhản hồi", name: "Ailin", speaker: "Ailin" },
 ];
 
 function collectAllPromptContent(captured) {
@@ -116,7 +116,7 @@ function collectAllPromptContent(captured) {
   const graph = createEmptyGraph();
   normalizeGraphSummaryState(graph);
   const entry = appendSummaryEntry(graph, {
-    text: "Gần nhất的局面总结Kiểm thử文本",
+    text: "Văn bản kiểm thử tóm tắt cục diện gần nhất",
     messageRange: [5, 9],
     level: 1,
   });
@@ -149,7 +149,7 @@ function collectAllPromptContent(captured) {
     const allContent = collectAllPromptContent(captured);
 
     // activeSummaries should be somewhere in prompt content
-    assert.match(allContent, /Gần nhất的局面总结Kiểm thử文本/, "active summaries text should appear in prompt");
+    assert.match(allContent, /Văn bản kiểm thử tóm tắt cục diện gần nhất/, "active summaries text should appear in prompt");
 
     // storyTimeContext should be somewhere in prompt content
     assert.match(allContent, /Sáng sớm ngày thứ hai/, "story time label should appear in prompt");
@@ -159,7 +159,7 @@ function collectAllPromptContent(captured) {
       (m) => m.sourceKey === "recentMessages",
     );
     assert.ok(recentBlock, "recentMessages block should exist");
-    assert.match(String(recentBlock.content || ""), /第一轮/, "recentMessages should contain dialogue content");
+    assert.match(String(recentBlock.content || ""), /vòng đầu/, "recentMessages should contain dialogue content");
   } finally {
     restore();
   }
@@ -184,7 +184,7 @@ function collectAllPromptContent(captured) {
         {
           seq: 10,
           role: "user",
-          content: "第一轮tin nhắn",
+          content: "vòng đầutin nhắn",
           name: "người chơi",
           speaker: "người chơi",
           isContextOnly: true,
@@ -192,7 +192,7 @@ function collectAllPromptContent(captured) {
         {
           seq: 11,
           role: "assistant",
-          content: "第一轮Phản hồi",
+          content: "vòng đầuPhản hồi",
           name: "Ailin",
           speaker: "Ailin",
           isContextOnly: true,
@@ -200,7 +200,7 @@ function collectAllPromptContent(captured) {
         {
           seq: 12,
           role: "user",
-          content: "第二轮tin nhắn",
+          content: "vòng haitin nhắn",
           name: "người chơi",
           speaker: "người chơi",
           isContextOnly: false,
@@ -208,7 +208,7 @@ function collectAllPromptContent(captured) {
         {
           seq: 13,
           role: "assistant",
-          content: "第二轮Phản hồi",
+          content: "vòng haiPhản hồi",
           name: "Ailin",
           speaker: "Ailin",
           isContextOnly: false,
@@ -233,15 +233,15 @@ function collectAllPromptContent(captured) {
     assert.equal(recentMessages.length, 2, "recentMessages should split into 2 section system messages");
     assert.equal(recentMessages[0]?.role, "system");
     assert.equal(recentMessages[0]?.transcriptSection, "context");
-    assert.match(String(recentMessages[0]?.content || ""), /^--- 以下是上下文回顾（已Trích xuất过），仅供理解剧情 ---/);
-    assert.match(String(recentMessages[0]?.content || ""), /#10 \[user\|người chơi\]: 第一轮tin nhắn/);
+    assert.match(String(recentMessages[0]?.content || ""), /^--- Dưới đây là phần nhìn lại ngữ cảnh (đã trích xuất), chỉ để hiểu cốt truyện ---/);
+    assert.match(String(recentMessages[0]?.content || ""), /#10 \[user\|người chơi\]: vòng đầutin nhắn/);
     assert.equal(recentMessages[1]?.role, "system");
     assert.equal(recentMessages[1]?.transcriptSection, "target");
-    assert.match(String(recentMessages[1]?.content || ""), /^--- 以下是本lần需要Trích xuấtKý ức的新对话Nội dung ---/);
-    assert.match(String(recentMessages[1]?.content || ""), /#12 \[user\|người chơi\]: 第二轮tin nhắn/);
+    assert.match(String(recentMessages[1]?.content || ""), /^--- sau đây là phầnlầncầnTrích xuấtKý ứcmới củahội thoạiNội dung ---/);
+    assert.match(String(recentMessages[1]?.content || ""), /#12 \[user\|người chơi\]: vòng haitin nhắn/);
     assert.ok(
-      recentMessages[0].content.includes("已Trích xuất过") &&
-        recentMessages[1].content.includes("本lần需要Trích xuất"),
+      recentMessages[0].content.includes("đã trích xuất") &&
+        recentMessages[1].content.includes("lần này cần trích xuất"),
       "context and target sections should each be emitted as a single system message",
     );
   } finally {
@@ -285,8 +285,8 @@ function collectAllPromptContent(captured) {
     );
     assert.ok(recentBlock, "recentMessages block should exist");
     const recentContent = String(recentBlock.content || "");
-    assert.match(recentContent, /第三轮/, "capped messages should contain the last messages");
-    assert.doesNotMatch(recentContent, /第一轮/, "capped messages should not contain early messages");
+    assert.match(recentContent, /vòng ba/, "capped messages should contain the last messages");
+    assert.doesNotMatch(recentContent, /vòng đầu/, "capped messages should not contain early messages");
   } finally {
     restore();
   }
@@ -333,7 +333,7 @@ function collectAllPromptContent(captured) {
     // (structured mode excludes dialogueText)
     const allContent = collectAllPromptContent(captured);
     // In "structured" mode, the user prompt fallback or blocks may reference structured messages
-    assert.match(recentContent, /第一轮/, "structured messages should contain dialogue");
+    assert.match(recentContent, /vòng đầu/, "structured messages should contain dialogue");
   } finally {
     restore();
   }
@@ -371,7 +371,7 @@ function collectAllPromptContent(captured) {
 
     // In transcript mode, the content should still be present in some form
     const allContent = collectAllPromptContent(captured);
-    assert.match(allContent, /第一轮/, "transcript mode should have dialogue content");
+    assert.match(allContent, /vòng đầu/, "transcript mode should have dialogue content");
     // recentMessages block should exist and have transcript content
     const recentBlock = (Array.isArray(captured.promptMessages) ? captured.promptMessages : []).find(
       (m) => m.sourceKey === "recentMessages",
@@ -387,7 +387,7 @@ function collectAllPromptContent(captured) {
   const graph = createEmptyGraph();
   normalizeGraphSummaryState(graph);
   appendSummaryEntry(graph, {
-    text: "这条总结不应出现",
+    text: "Tóm tắt này không nên xuất hiện",
     messageRange: [5, 9],
     level: 1,
   });
@@ -420,7 +420,7 @@ function collectAllPromptContent(captured) {
     assert.ok(captured);
 
     const allContent = collectAllPromptContent(captured);
-    assert.doesNotMatch(allContent, /这条总结不应出现/, "summaries should be excluded when disabled");
+    assert.doesNotMatch(allContent, /Tóm tắt này không nên xuất hiện/, "summaries should be excluded when disabled");
   } finally {
     restore();
   }
@@ -429,7 +429,7 @@ function collectAllPromptContent(captured) {
 // ── Test 6: extractIncludeStoryTime = false omits story time ──
 {
   const graph = createEmptyGraph();
-  applyBatchStoryTime(graph, { label: "隐藏的时间标签", tense: "ongoing" }, "extract");
+  applyBatchStoryTime(graph, { label: "nhãn thời gian ẩn", tense: "ongoing" }, "extract");
 
   let captured = null;
   const restore = setTestOverrides({
@@ -459,7 +459,7 @@ function collectAllPromptContent(captured) {
     assert.ok(captured);
 
     const allContent = collectAllPromptContent(captured);
-    assert.doesNotMatch(allContent, /隐藏的时间标签/, "story time should be excluded when disabled");
+    assert.doesNotMatch(allContent, /nhãn thời gian ẩn/, "story time should be excluded when disabled");
   } finally {
     restore();
   }
@@ -475,8 +475,8 @@ function collectAllPromptContent(captured) {
       seq: 3,
       importance: 8,
       fields: {
-        title: "中文告白",
-        summary: "她认真地Yêu cầu你再说一遍喜欢她。",
+        title: "Tỏ tình bằng tiếng Trung",
+        summary: "cô ấy nghiêm túc yêu cầu bạn nói lại một lần nữa rằng bạn thích cô ấy.",
       },
     }),
   );
@@ -487,8 +487,8 @@ function collectAllPromptContent(captured) {
       seq: 4,
       importance: 7,
       fields: {
-        title: "感情升温",
-        summary: "两人的关系在这lần告白后快速拉近。",
+        title: "Tình cảm ấm lên",
+        summary: "Quan hệ của hai người nhanh chóng xích lại gần nhau sau lần tỏ tình này.",
       },
     }),
   );
@@ -519,14 +519,14 @@ function collectAllPromptContent(captured) {
         {
           seq: 10,
           role: "user",
-          content: "中文告白之后，她还是很害羞。",
+          content: "Sau lời tỏ tình bằng tiếng Trung, cô ấy vẫn còn rất ngại ngùng.",
           name: "người chơi",
           speaker: "người chơi",
         },
         {
           seq: 11,
           role: "assistant",
-          content: "这lần中文告白让你们的感情升温了。",
+          content: "Lần tỏ tình bằng tiếng Trung này đã khiến tình cảm của hai người ấm lên.",
           name: "Ailin",
           speaker: "Ailin",
         },
@@ -546,10 +546,10 @@ function collectAllPromptContent(captured) {
     );
     assert.ok(graphStatsBlock, "graphStats block should exist");
     const graphStatsContent = String(graphStatsBlock.content || "");
-    assert.match(graphStatsContent, /### Nút đồ thị统计/);
+    assert.match(graphStatsContent, /### Nút đồ thịthống kê/);
     assert.match(graphStatsContent, /Sự kiện: 1/);
     assert.match(graphStatsContent, /tuyến chính: 1/);
-    assert.match(graphStatsContent, /\[G1\|Sự kiện\] 中文告白/);
+    assert.match(graphStatsContent, /\[G1\|Sự kiện\] Tỏ tình bằng tiếng Trung/);
     assert.doesNotMatch(graphStatsContent, new RegExp(confessionNode.id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   } finally {
     restore();
@@ -566,3 +566,4 @@ function collectAllPromptContent(captured) {
 }
 
 console.log("extractor-phase3-layered-context tests passed");
+

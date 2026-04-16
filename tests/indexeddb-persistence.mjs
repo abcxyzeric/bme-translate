@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   BME_DB_SCHEMA_VERSION,
@@ -31,7 +31,7 @@ async function setupIndexedDbTestEnv() {
     fakeIndexedDbLoaded = true;
   } catch (error) {
     console.warn(
-      `${PREFIX} fake-indexeddb 未安装，Lùi về到当前运行时 indexedDB:`,
+      `${PREFIX} fake-indexeddb chưa được cài, fallback về indexedDB runtime hiện tại:`,
       error?.message || error,
     );
   }
@@ -47,9 +47,9 @@ async function setupIndexedDbTestEnv() {
 
   await ensureDexieLoaded();
 
-  assert.equal(typeof globalThis.Dexie, "function", "Dexie 构造函数必须可用");
-  assert.ok(globalThis.indexedDB, "indexedDB 必须可用");
-  assert.ok(globalThis.IDBKeyRange, "IDBKeyRange 必须可用");
+  assert.equal(typeof globalThis.Dexie, "function", "Hàm tạo Dexie bắt buộc phải dùng được");
+  assert.ok(globalThis.indexedDB, "indexedDB bắt buộcdùng được");
+  assert.ok(globalThis.IDBKeyRange, "IDBKeyRange bắt buộcdùng được");
 
   return { fakeIndexedDbLoaded };
 }
@@ -93,7 +93,7 @@ async function testCrudAndMeta() {
       archived: false,
       updatedAt: Date.now(),
       fields: {
-        title: "第一lần相遇",
+        title: "Lần gặp đầu tiên",
       },
     },
   ]);
@@ -252,7 +252,7 @@ async function testReplaceImportResetsStaleMeta() {
     },
   );
 
-  assert.ok(importResult.revision > revisionBefore, "replace Nhập后 revision 必须单调递增");
+  assert.ok(importResult.revision > revisionBefore, "sau khi thay thế bằng nhập thì revision bắt buộc tăng đơn điệu");
   assert.equal(await db.getMeta("chatId", ""), chatId);
   assert.equal(await db.getMeta("lastProcessedFloor", -1), 3);
   assert.equal(await db.getMeta("extractionCount", 0), 2);
@@ -556,7 +556,7 @@ async function testGraphSnapshotConverters() {
   assert.equal(
     reusedSnapshot.nodes[0],
     snapshot.nodes[0],
-    "未变化nút应直接复用 baseSnapshot 记录đối tượng",
+    "nút chưa thay đổi nên tái dùng trực tiếp đối tượng bản ghi baseSnapshot",
   );
   nextGraph.nodes[0].updatedAt = Number(nextGraph.nodes[0].updatedAt || 0) + 1;
   const changedSnapshot = buildSnapshotFromGraph(nextGraph, {
@@ -567,7 +567,7 @@ async function testGraphSnapshotConverters() {
   assert.notEqual(
     changedSnapshot.nodes[0],
     snapshot.nodes[0],
-    "nút变化后不应复用 baseSnapshot 记录đối tượng",
+    "sau khi nút thay đổi thì không nên tái dùng đối tượng bản ghi baseSnapshot",
   );
 
   const rebuilt = buildGraphFromSnapshot(snapshot, {
@@ -606,3 +606,4 @@ async function main() {
 }
 
 await main();
+

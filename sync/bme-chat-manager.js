@@ -68,7 +68,7 @@ export class BmeChatManager {
     if (!db) {
       db = await Promise.resolve(this._databaseFactory(normalizedChatId));
       if (!db || typeof db.open !== "function") {
-        throw new Error("BmeChatManager: databaseFactory 必须返回可 open() 的实例");
+        throw new Error("BmeChatManager: databaseFactory bắt buộc phải trả về một thể hiện có thể open()")
       }
       this._dbByChatId.set(normalizedChatId, {
         db,
@@ -109,7 +109,7 @@ export class BmeChatManager {
       try {
         await db.close();
       } catch (error) {
-        console.warn("[ST-BME] Tắt BME chat Dữ liệu库Thất bại:", error);
+        console.warn("[ST-BME] Tắt cơ sở dữ liệu chat BME thất bại:", error);
       }
     }
 

@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   addNode,
@@ -12,12 +12,12 @@ import {
 const graph = createEmptyGraph();
 const objectiveNode = createNode({
   type: "character",
-  fields: { name: "Ailin", state: "平静" },
+  fields: { name: "Ailin", state: "bình tĩnh" },
   seq: 1,
 });
 const povNode = createNode({
   type: "character",
-  fields: { name: "Ailin", state: "怀疑一切" },
+  fields: { name: "Ailin", state: "nghi ngờ mọi thứ" },
   seq: 2,
   scope: {
     layer: "pov",
@@ -60,7 +60,7 @@ const legacyGraph = deserializeGraph({
     {
       id: "legacy-1",
       type: "event",
-      fields: { title: "旧Sự kiện", summary: "旧tóm tắt" },
+      fields: { title: "Sự kiện cũ", summary: "tóm tắt cũ" },
       seq: 0,
       seqRange: [0, 0],
       archived: false,
@@ -139,7 +139,7 @@ restored.timelineState.segments.push({
   normalizedKey: "Sáng sớm ngày thứ hai",
   matcherKey: "Sáng sớm ngày thứ hai::after",
   order: 1,
-  aliases: ["lần日清晨"],
+  aliases: ["sáng sớm hôm đó"],
   parentId: "",
   relationToParent: "after",
   anchorLabel: "",
@@ -164,3 +164,4 @@ assert.equal(roundTrip.timelineState?.manualActiveSegmentId, "tl-1");
 assert.equal(roundTrip.historyState?.activeStoryTimeLabel, "Sáng sớm ngày thứ hai");
 
 console.log("scoped-memory tests passed");
+

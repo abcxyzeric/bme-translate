@@ -1,4 +1,4 @@
-const DEFAULT_UNAVAILABLE_REASON = "Host能力Không khả dụng";
+const DEFAULT_UNAVAILABLE_REASON = "Hostnăng lựcKhông khả dụng";
 
 export const HOST_ADAPTER_VERSION = "phase1-bridge-skeleton";
 
@@ -99,7 +99,7 @@ export function buildCapabilityCollectionSnapshot(
     available,
     mode,
     fallbackReason:
-      available || totalCount === 0 ? "" : "未检测到可用Host桥接能力",
+      available || totalCount === 0 ? "" : "Không phát hiện được năng lực cầu nối host khả dụng",
     versionHints: mergeVersionHints(
       {
         adapter: HOST_ADAPTER_VERSION,

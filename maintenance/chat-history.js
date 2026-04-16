@@ -1,6 +1,6 @@
-// ST-BME: 聊天历史纯函数
-// 此模块中的函数均不依赖 index.js 模块级可变Trạng thái，
-// 可被 index.js 及其他模块安全Nhập。
+// ST-BME: chatlịch sửhàm thuần
+// Các hàm trong mô-đun này đều không phụ thuộc vào trạng thái biến đổi cấp mô-đun của index.js,
+// nên có thể được index.js và các mô-đun khác import an toàn.
 
 import { clampInt } from "../ui/ui-status.js";
 import { sanitizePlannerMessageText } from "../runtime/planner-tag-utils.js";
@@ -251,7 +251,7 @@ export function isAssistantChatMessage(
 
 export function getAssistantTurns(chat) {
   const assistantTurns = [];
-  // 从 index 1 开始：index 0 是Nhân vật卡首 tin nhắn（greeting），不参与Trích xuất
+  // Bắt đầu từ index 1: index 0 là tin nhắn mở đầu của thẻ nhân vật (greeting), không tham gia trích xuất
   for (let index = 1; index < chat.length; index++) {
     if (!isAssistantChatMessage(chat[index], { index, chat })) continue;
     if (!String(chat[index]?.mes ?? "").trim()) continue;
@@ -366,8 +366,8 @@ export function resolveDirtyFloorFromMutationMeta(trigger, primaryArg, meta, cha
   const isDeleteTrigger = String(trigger || "").includes("message-deleted");
   const minExtractableFloor = getMinExtractableAssistantFloor(chat);
 
-  // Xóa后 chat 已是收缩后的Trạng thái，XóaSự kiện携带的 seq 更接近"被删区间起点"，
-  // 因此这里额外向前退一层，避免Khôi phục仍停留在被删tầng对应的旧Cạnh đồ thị界。
+  // Sau khi xóa, chat đã ở trạng thái co lại; seq đi kèm theo sự kiện xóa gần với "điểm bắt đầu của đoạn bị xóa" hơn,
+  // vì vậy ở đây lùi thêm một tầng về trước để tránh việc khôi phục vẫn bị kẹt ở ranh giới cạnh đồ thị cũ của tầng đã xóa.
   if (!isDeleteTrigger && Number.isFinite(meta.messageId)) {
     candidates.push({
       floor: meta.messageId,

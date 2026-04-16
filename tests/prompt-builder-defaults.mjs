@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -59,9 +59,9 @@ const settings = {
 
 const extractPromptBuild = await buildTaskPrompt(settings, "extract", {
   taskName: "extract",
-  charDescription: "Nhân vậtmô tả",
-  userPersona: "Người dùngthiết lập",
-  recentMessages: "A: 你好\nB: 世界",
+  charDescription: "Mô tả nhân vật",
+  userPersona: "Thiết lập người dùng",
+  recentMessages: "A: xin chào\nB: thế giới",
   graphStats: "node_count=3",
   schema: "event(title, summary)",
   currentRange: "1 ~ 2",
@@ -77,19 +77,19 @@ assert.deepEqual(
   extractPayload.promptMessages
     .filter((message) => message.role === "user")
     .map((message) => message.blockName),
-  ["Định dạng đầu ra", "Hành viQuy tắc"],
+  ["Định dạng đầu ra", "Quy tắc hành vi"],
 );
 const extractFormatBlock = extractPayload.promptMessages.find(
   (message) => message.blockName === "Định dạng đầu ra",
 );
 const extractRulesBlock = extractPayload.promptMessages.find(
-  (message) => message.blockName === "Hành viQuy tắc",
+  (message) => message.blockName === "Quy tắc hành vi",
 );
 assert.match(String(extractFormatBlock?.content || ""), /cognitionUpdates/);
 assert.match(String(extractFormatBlock?.content || ""), /regionUpdates/);
 assert.match(String(extractFormatBlock?.content || ""), /batchStoryTime/);
 assert.match(String(extractFormatBlock?.content || ""), /storyTime/);
-assert.match(String(extractRulesBlock?.content || ""), /涉及到的Nhân vật都尽量尝试补 cognitionUpdates/);
+assert.match(String(extractRulesBlock?.content || ""), /Tất cả nhân vật có liên quan đều cố gắng bổ sung cognitionUpdates/);
 assert.match(String(extractRulesBlock?.content || ""), /batchStoryTime/);
 assert.deepEqual(
   extractPayload.promptMessages
@@ -107,11 +107,11 @@ assert.deepEqual(
 
 const recallPromptBuild = await buildTaskPrompt(settings, "recall", {
   taskName: "recall",
-  charDescription: "Nhân vậtmô tả",
-  userPersona: "Người dùngthiết lập",
-  recentMessages: "上下文",
-  userMessage: "Người dùng最新发言",
-  candidateNodes: "候选 1\n候选 2",
+  charDescription: "Mô tả nhân vật",
+  userPersona: "Thiết lập người dùng",
+  recentMessages: "ngữ cảnh",
+  userMessage: "phát ngôn mới nhất của người dùng",
+  candidateNodes: "ứng viên 1\nứng viên 2",
   sceneOwnerCandidates: "character:alice\ncharacter:bob",
   graphStats: "candidate_count=2",
 });
@@ -140,13 +140,13 @@ const recallFormatBlock = recallPayload.promptMessages.find(
   (message) => message.blockName === "Định dạng đầu ra",
 );
 const recallRulesBlock = recallPayload.promptMessages.find(
-  (message) => message.blockName === "Hành viQuy tắc",
+  (message) => message.blockName === "Quy tắc hành vi",
 );
 assert.match(String(recallFormatBlock?.content || ""), /active_owner_keys/);
 assert.match(String(recallFormatBlock?.content || ""), /active_owner_scores/);
 assert.match(String(recallFormatBlock?.content || ""), /selected_keys/);
-assert.match(String(recallRulesBlock?.content || ""), /剧情时间/);
-assert.match(String(recallRulesBlock?.content || ""), /评分Truy hồi/);
+assert.match(String(recallRulesBlock?.content || ""), /thời gian cốt truyện/);
+assert.match(String(recallRulesBlock?.content || ""), /chấm điểm truy hồi/);
 
 const globalRegexPromptBuild = await buildTaskPrompt(
   {
@@ -158,11 +158,11 @@ const globalRegexPromptBuild = await buildTaskPrompt(
   {
     taskName: "recall",
     recentMessages:
-      "Tin nhắn gần nhất <thinking>隐藏思维</thinking> <choice>1. 隐藏选项</choice>",
+      "Tin nhắn gần nhất <thinking>suy nghĩ ẩn</thinking> <choice>1. ẩntùy chọn</choice>",
     userMessage:
-      "Người dùng输入 <updatevariable>secret</updatevariable> <status_current_variable>hp=3</status_current_variable>",
+      "Người dùngđầu vào <updatevariable>secret</updatevariable> <status_current_variable>hp=3</status_current_variable>",
     candidateNodes:
-      "Nút ứng viên <StatusPlaceHolderImpl/> <analysis>隐藏分析</analysis>",
+      "Nút ứng viên <StatusPlaceHolderImpl/> <analysis>phân tích ẩn</analysis>",
   },
 );
 assert.doesNotMatch(
@@ -196,17 +196,17 @@ const regexAwarePromptBuild = await buildTaskPrompt(settings, "extract", {
   taskName: "extract",
   charDescription: "",
   userPersona: "",
-  recentMessages: "这里会被 chatMessages 回填",
+  recentMessages: "ở đây sẽ được chatMessages bù lại",
   chatMessages: [
     {
       seq: 36,
       role: "assistant",
-      content: "<action>挥手</action>继续说明",
+      content: "<action>vẫy tay</action>tiếp tục mô tả",
     },
     {
       seq: 37,
       role: "user",
-      content: "Người dùng<u>输入</u>",
+      content: "Người dùng<u>đầu vào</u>",
     },
   ],
   graphStats: "node_count=1",
@@ -220,8 +220,8 @@ const regexAwarePayload = buildTaskLlmPayload(
 const regexAwareRecentBlock = regexAwarePayload.promptMessages.find(
   (message) => message.sourceKey === "recentMessages",
 );
-assert.match(String(regexAwareRecentBlock?.content || ""), /#36 \[assistant\]: 继续说明/);
-assert.match(String(regexAwareRecentBlock?.content || ""), /#37 \[user\]: Người dùng输入/);
+assert.match(String(regexAwareRecentBlock?.content || ""), /#36 \[assistant\]: tiếp tụcmô tả/);
+assert.match(String(regexAwareRecentBlock?.content || ""), /#37 \[user\]: Người dùngđầu vào/);
 assert.doesNotMatch(String(regexAwareRecentBlock?.content || ""), /action|<u>|<\/u>/i);
 assert.equal(
   formatterCalls.some(
@@ -247,3 +247,4 @@ assert.equal(
 initializeHostAdapter({});
 
 console.log("prompt-builder-defaults tests passed");
+

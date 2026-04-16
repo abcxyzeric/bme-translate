@@ -1,5 +1,5 @@
-// ST-BME: SillyTavern 上下文Dữ liệuĐọc辅助
-// 为 prompt 变量扩展（Phase 2）提供统一的 ST 上下文Dữ liệuGiao diện
+// ST-BME: SillyTavern ngữ cảnhDữ liệuĐọchỗ trợ
+// Cung cấp giao diện dữ liệu ngữ cảnh ST thống nhất cho biến extension trong prompt (Phase 2)
 
 import { getContext } from "../../../../extensions.js";
 import { buildPluginVisibleChatMessages } from "../maintenance/chat-history.js";
@@ -166,11 +166,11 @@ export function getSTContextSnapshot() {
 }
 
 /**
- * 从 SillyTavern 的 getContext() Trích xuất当前上下文Dữ liệu，
- * 返回的字段可直接展开传入 buildTaskPrompt 的 context 参数，
- * Người dùng在自định nghĩa prompt 块中可通过 {{key}} 引用。
+ * Trích xuất dữ liệu ngữ cảnh hiện tại từ getContext() của SillyTavern,
+ * các trường trả về có thể được bung trực tiếp vào tham số context của buildTaskPrompt,
+ * Người dùng có thể tham chiếu bằng {{key}} trong khối prompt tự định nghĩa.
  *
- * @returns {object} 上下文字段映射
+ * @returns {object} ánh xạ trường ngữ cảnh
  */
 export function getSTContextForPrompt() {
   return getSTContextSnapshot().prompt;

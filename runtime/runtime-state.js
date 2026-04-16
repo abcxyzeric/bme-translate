@@ -1,4 +1,4 @@
-// ST-BME: 运行时Trạng thái与历史Khôi phục辅助
+// ST-BME: hỗ trợ trạng thái runtime và khôi phục lịch sử
 import {
   normalizeEdgeMemoryScope,
   normalizeNodeMemoryScope,
@@ -470,7 +470,7 @@ export function normalizeGraphRuntimeState(graph, chatId = "") {
     vectorIndexState.dirty = true;
     vectorIndexState.dirtyReason = "chat-id-changed";
     vectorIndexState.pendingRepairFromFloor = 0;
-    vectorIndexState.lastWarning = "聊天标识变化，Vector索引已标记为待重建";
+    vectorIndexState.lastWarning = "Định danh chat đã thay đổi, chỉ mục vector đã được đánh dấu chờ xây lại";
   }
 
   graph.historyState = historyState;
@@ -692,7 +692,7 @@ export function detectHistoryMutation(chat, historyState) {
     return {
       dirty: true,
       earliestAffectedFloor: chat.length,
-      reason: "Tầng đã xử lý超出Chat hiện tại长度，检测到历史截断",
+      reason: "Tầng đã xử lý vượt quá độ dài chat hiện tại, phát hiện lịch sử bị cắt ngắn",
     };
   }
 
@@ -705,7 +705,7 @@ export function detectHistoryMutation(chat, historyState) {
     return {
       dirty: true,
       earliestAffectedFloor: 0,
-      reason: "Tầng đã xử lý存在，但 processedMessageHashes 缺失，执行保守重放",
+      reason: "Tầng đã xử lý vẫn tồn tại, nhưng processedMessageHashes bị thiếu nên sẽ phát lại theo chế độ bảo thủ",
     };
   }
 
@@ -719,7 +719,7 @@ export function detectHistoryMutation(chat, historyState) {
       return {
         dirty: true,
         earliestAffectedFloor: floor,
-        reason: `tầng ${floor} 缺少已Xử lý哈希，执行保守重放`,
+        reason: `Tầng ${floor} thiếu hash đã xử lý, sẽ phát lại theo chế độ bảo thủ`,
       };
     }
   }
@@ -729,7 +729,7 @@ export function detectHistoryMutation(chat, historyState) {
       return {
         dirty: true,
         earliestAffectedFloor: floor,
-        reason: `tầng ${floor} 已不存在，检测到历史Xóa/截断`,
+        reason: `Tầng ${floor} không còn tồn tại, phát hiện lịch sử bị xóa/cắt ngắn`,
       };
     }
 
@@ -738,7 +738,7 @@ export function detectHistoryMutation(chat, historyState) {
       return {
         dirty: true,
         earliestAffectedFloor: floor,
-        reason: `tầng ${floor} Nội dung或 swipe 已变化`,
+        reason: `Nội dung hoặc swipe của tầng ${floor} đã thay đổi`,
       };
     }
   }
@@ -1170,13 +1170,13 @@ function validateMaintenanceUndoState(graph, entry) {
     if (!current) {
       return {
         ok: false,
-        reason: `nút ${snapshot?.id || "unknown"} 已被后续Thao tác改写`,
+        reason: `Nút ${snapshot?.id || "unknown"} đã bị thao tác về sau ghi đè`,
       };
     }
     if (JSON.stringify(current) !== JSON.stringify(snapshot)) {
       return {
         ok: false,
-        reason: `nút ${snapshot?.id || "unknown"} Trạng thái hiện tại已变化，Không法安全撤销`,
+        reason: `Trạng thái hiện tại của nút ${snapshot?.id || "unknown"} đã thay đổi, không thể hoàn tác an toàn`,
       };
     }
   }
@@ -1186,13 +1186,13 @@ function validateMaintenanceUndoState(graph, entry) {
     if (!current) {
       return {
         ok: false,
-        reason: `边 ${snapshot?.id || "unknown"} 已被后续Thao tác改写`,
+        reason: `Cạnh ${snapshot?.id || "unknown"} đã bị thao tác về sau ghi đè`,
       };
     }
     if (JSON.stringify(current) !== JSON.stringify(snapshot)) {
       return {
         ok: false,
-        reason: `边 ${snapshot?.id || "unknown"} Trạng thái hiện tại已变化，Không法安全撤销`,
+        reason: `Trạng thái hiện tại của cạnh ${snapshot?.id || "unknown"} đã thay đổi, không thể hoàn tác an toàn`,
       };
     }
   }

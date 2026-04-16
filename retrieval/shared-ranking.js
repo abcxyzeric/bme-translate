@@ -129,7 +129,7 @@ export function buildContextQueryBlend(
   const rawParts = [
     {
       kind: "currentUser",
-      label: "当前Người dùngtin nhắn",
+      label: "hiện tạiTin nhắn người dùng",
       text: currentText,
       weight: enabled ? currentWeight : 1,
     },
@@ -147,7 +147,7 @@ export function buildContextQueryBlend(
   if (enabled && previousUserText) {
     rawParts.push({
       kind: "previousUser",
-      label: "上一条 user tin nhắn",
+      label: "Tin nhắn user trước đó",
       text: previousUserText,
       weight: normalizedPreviousUserWeight,
     });

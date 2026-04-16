@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 const {
   isLikelyMvuWorldInfoContent,
@@ -11,25 +11,25 @@ assert.equal(
   true,
 );
 assert.equal(
-  isMvuTaggedWorldInfoNameOrComment("普通条目", "[initvar]"),
+  isMvuTaggedWorldInfoNameOrComment("thông thườngmục", "[initvar]"),
   true,
 );
 assert.equal(
   isLikelyMvuWorldInfoContent(
-    "变量Cập nhậtQuy tắc:\ntype: state\n当前Thời gian: 12:00",
+    "biếnCập nhậtQuy tắc:\ntype: state\nhiện tạiThời gian: 12:00",
   ),
   true,
 );
 assert.equal(
   isLikelyMvuWorldInfoContent(
-    '{"stat_data":{"Địa điểm":"学校"},"display_data":{"Địa điểm":"教室"}}',
+    '{"stat_data":{"Địa điểm":"trường học"},"display_data":{"Địa điểm":"lớp học"}}',
   ),
   true,
 );
-assert.equal(isLikelyMvuWorldInfoContent("Bình thường世界thiết lập"), false);
+assert.equal(isLikelyMvuWorldInfoContent("Bình thườngthế giớithiết lập"), false);
 
 const aggressive = sanitizeMvuContent(
-  "正文\n<updatevariable>hp=1</updatevariable>\n<status_current_variable>secret</status_current_variable>",
+  "nội dung chính\n<updatevariable>hp=1</updatevariable>\n<status_current_variable>secret</status_current_variable>",
   {
     mode: "aggressive",
   },
@@ -42,13 +42,13 @@ assert.deepEqual(
 );
 
 const finalSafe = sanitizeMvuContent(
-  "说明文字\n<updatevariable>hp=1</updatevariable>\n尾巴",
+  "mô tảchữ\n<updatevariable>hp=1</updatevariable>\nđuôi",
   {
     mode: "final-safe",
   },
 );
 assert.equal(finalSafe.dropped, false);
-assert.equal(finalSafe.text, "说明文字\n尾巴");
+assert.equal(finalSafe.text, "mô tảchữ\nđuôi");
 assert.deepEqual(finalSafe.reasons, ["artifact_stripped"]);
 
 const macroSafe = sanitizeMvuContent(
@@ -61,12 +61,13 @@ assert.equal(macroSafe.dropped, false);
 assert.equal(macroSafe.text, "Địa điểm=");
 assert.deepEqual(macroSafe.reasons, ["artifact_stripped"]);
 
-const blocked = sanitizeMvuContent("前缀\n被拦截条目\n后缀", {
+const blocked = sanitizeMvuContent("tiền tố\nmục bị chặn\nhậu tố", {
   mode: "final-safe",
-  blockedContents: ["被拦截条目"],
+  blockedContents: ["mục bị chặn"],
 });
-assert.equal(blocked.text, "前缀\n\n后缀");
+assert.equal(blocked.text, "tiền tố\n\nhậu tố");
 assert.equal(blocked.blockedHitCount, 1);
 assert.deepEqual(blocked.reasons, ["blocked_content_removed"]);
 
 console.log("mvu-compat tests passed");
+

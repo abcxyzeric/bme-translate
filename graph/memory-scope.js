@@ -332,11 +332,11 @@ export function describeScopeBucket(bucket) {
     case MEMORY_SCOPE_BUCKETS.OBJECTIVE_CURRENT_REGION:
       return "Khu vực hiện tạiKhách quan";
     case MEMORY_SCOPE_BUCKETS.OBJECTIVE_ADJACENT_REGION:
-      return "邻近地区Khách quan";
+      return "Khu khách quan lân cận";
     case MEMORY_SCOPE_BUCKETS.OBJECTIVE_GLOBAL:
       return "Toàn cụcKhách quan";
     case MEMORY_SCOPE_BUCKETS.OTHER_POV:
-      return "其他 POV";
+      return "POV khác";
     default:
       return normalizeString(bucket) || "Không rõPhạm vi tác dụng";
   }
@@ -351,11 +351,11 @@ export function describeMemoryScope(scope) {
 
   if (normalized.ownerType) {
     const ownerLabel = normalized.ownerName || normalized.ownerId;
-    parts.push(`${normalized.ownerType}:${ownerLabel || "未命名"}`);
+    parts.push(`${normalized.ownerType}:${ownerLabel || "Chưa đặt tên"}`);
   }
 
   if (normalized.regionPrimary) {
-    parts.push(`地区:${normalized.regionPrimary}`);
+    parts.push(`khu vực:${normalized.regionPrimary}`);
   }
 
   return parts.join(" | ");
@@ -376,13 +376,13 @@ export function buildRegionLine(scope) {
   const normalized = normalizeMemoryScope(scope);
   const parts = [];
   if (normalized.regionPrimary) {
-    parts.push(`主Khu vực: ${normalized.regionPrimary}`);
+    parts.push(`Khu vực chính: ${normalized.regionPrimary}`);
   }
   if (normalized.regionPath.length > 0) {
-    parts.push(`地区路径: ${normalized.regionPath.join(" / ")}`);
+    parts.push(`khu vựcđường đi: ${normalized.regionPath.join(" / ")}`);
   }
   if (normalized.regionSecondary.length > 0) {
-    parts.push(`lần级Khu vực: ${normalized.regionSecondary.join(", ")}`);
+    parts.push(`Khu vực cấp phụ: ${normalized.regionSecondary.join(", ")}`);
   }
   return parts.join(" | ");
 }

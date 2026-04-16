@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   BME_SYNC_DEVICE_ID_KEY,
@@ -316,7 +316,7 @@ async function testUploadPayloadMetaFirstAndDebounce() {
 async function testUploadSanitizesIllegalChatIdFilename() {
   const { fetch, logs } = createMockFetchEnvironment();
   const dbByChatId = new Map();
-  const chatId = "世界书 Kiểm thử(chat)#1";
+  const chatId = "World Info Kiểm thử(chat)#1";
   dbByChatId.set(chatId, new FakeDb(chatId));
 
   const runtime = buildRuntimeOptions({ dbByChatId, fetch });
@@ -479,7 +479,7 @@ async function testMergeRules() {
   const merged = mergeSnapshots(local, remote, { chatId: "chat-merge" });
 
   assert.equal(merged.meta.revision, 11);
-  assert.equal(merged.nodes.length, 0, "tombstone 必须覆盖复活");
+  assert.equal(merged.nodes.length, 0, "tombstone bắt buộc phủ lên lượt hồi sinh");
   assert.equal(merged.state.lastProcessedFloor, 8);
   assert.equal(merged.state.extractionCount, 3);
 }
@@ -595,7 +595,7 @@ async function testMergeRuntimeMetaPolicies() {
 
   const merged = mergeSnapshots(local, remote, { chatId: "chat-merge-meta" });
 
-  assert.equal(merged.state.lastProcessedFloor, 3, "冲突哈希tầng应触发保守Lùi về");
+  assert.equal(merged.state.lastProcessedFloor, 3, "xung đột hash tầng nên kích hoạt fallback bảo thủ");
   assert.equal(merged.state.extractionCount, 7);
   assert.deepEqual(Object.keys(merged.meta.runtimeHistoryState.processedMessageHashes), ["1", "2", "3"]);
   assert.equal(merged.meta.runtimeHistoryState.historyDirtyFrom, 4);
@@ -1128,7 +1128,7 @@ async function testSyncNowLockAndAutoSync() {
 
   assert.equal(r1.action, "upload");
   assert.equal(r2.action, "upload");
-  assert.equal(logs.uploadCalls, 1, "同 chatId 并发 sync 应串行去重");
+  assert.equal(logs.uploadCalls, 1, "sync đồng thời cùng chatId nên khử trùng lặp theo tuần tự");
 
   remoteFiles.set("ST-BME_sync_chat-lock.json", {
     meta: {
@@ -1206,7 +1206,7 @@ async function testDeleteRemoteSyncFileFallsBackToLegacyFilename() {
   const deleteResult = await deleteRemoteSyncFile(chatId, runtime);
   assert.equal(deleteResult.deleted, true);
   assert.equal(deleteResult.filename, "ST-BME_sync_chat~legacy_delete.json");
-  assert.equal(logs.deleteCalls, 2, "应先尝试新文件名，再Lùi vềXóa legacy 文件名");
+  assert.equal(logs.deleteCalls, 2, "nên thử tên tệp mới trước, rồi fallback xóa tên tệp legacy");
 }
 
 async function testAutoSyncOnVisibility() {
@@ -1248,7 +1248,7 @@ async function testAutoSyncOnVisibility() {
 
     visibilityDocument.emitVisibilityChange("visible");
     await sleep(30);
-    assert.equal(logs.uploadCalls, 1, "visibility visible 应触发一lầnTự độngĐồng bộ");
+    assert.equal(logs.uploadCalls, 1, "visibility visible nên kích hoạt một lần tự động đồng bộ");
 
     const secondInstallResult = autoSyncOnVisibility(runtime);
     assert.equal(secondInstallResult.installed, true);
@@ -1440,3 +1440,4 @@ async function main() {
 }
 
 await main();
+

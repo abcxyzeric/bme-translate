@@ -1,8 +1,8 @@
-// ST-BME: nútLoại Schema định nghĩa
-// định nghĩađồ thị中支持的nútLoại、字段、Tiêm策略和NénCấu hình
+﻿// ST-BME: nútLoại Schema định nghĩa
+// Định nghĩa các loại nút, trường, chiến lược tiêm và cấu hình nén được hỗ trợ trong đồ thị
 
 /**
- * Nén模式
+ * Nénchế độ
  */
 export const COMPRESSION_MODE = {
   NONE: "none",
@@ -11,14 +11,14 @@ export const COMPRESSION_MODE = {
 
 /**
  * Mặc địnhnútLoại Schema
- * 每种Loạiđịnh nghĩa了：
- * - id: 唯一标识
- * - label: 显示Tên
- * - tableName: Tiêm时的表名
- * - columns: 字段列表 [{name, hint, required}]
- * - alwaysInject: 是否常驻Tiêm（true=Core, false=需要Truy hồi）
- * - latestOnly: 是否只保留最新版本（用于Nhân vật/Địa điểm等随时间Cập nhật的实体）
- * - forceUpdate: 每lầnTrích xuất是否必须产出此Loạinút
+ * Mỗi loại định nghĩa các mục sau:
+ * - id: mã nhận diện duy nhất
+ * - label: hiển thịTên
+ * - tableName: tên bảng khi tiêm
+ * - columns: danh sách trường [{name, hint, required}]
+ * - alwaysInject: liệu cóthường trúTiêm（true=Core, false=cầnTruy hồi）
+ * - latestOnly: có chỉ giữ lại phiên bản mới nhất hay không (dùng cho các thực thể như nhân vật/địa điểm được cập nhật theo thời gian)
+ * - forceUpdate: mỗi lần trích xuất có bắt buộc sinh ra loại nút này hay không
  * - compression: NénCấu hình
  */
 export const DEFAULT_NODE_SCHEMA = [
@@ -27,9 +27,9 @@ export const DEFAULT_NODE_SCHEMA = [
     label: "Sự kiện",
     tableName: "event_table",
     columns: [
-      { name: "title", hint: "Tên sự kiện ngắn（建议 6-10 字，用于đồ thị显示）", required: false },
-      { name: "summary", hint: "Sự kiệntóm tắt，包含因果关系和Kết quả", required: true },
-      { name: "participants", hint: "参与Tên nhân vật，逗号分隔", required: false },
+      { name: "title", hint: "Tên sự kiện ngắn (khuyến nghị 6-10 ký tự, dùng để hiển thị trên đồ thị)", required: false },
+      { name: "summary", hint: "Tóm tắt sự kiện, gồm quan hệ nhân quả và kết quả", required: true },
+      { name: "participants", hint: "Tên nhân vật tham gia, phân tách bằng dấu phẩy", required: false },
       {
         name: "status",
         hint: "Sự kiệnTrạng thái：ongoing/resolved/blocked",
@@ -46,7 +46,7 @@ export const DEFAULT_NODE_SCHEMA = [
       maxDepth: 10,
       keepRecentLeaves: 6,
       instruction:
-        "将Sự kiệnnútNén为高价值的剧情里程碑tóm tắt。保留因果关系、不可逆Kết quả和未解决的伏笔。",
+        "Nén nút sự kiện thành tóm tắt mốc truyện có giá trị cao. Giữ lại quan hệ nhân quả, kết quả không thể đảo ngược và các manh mối cài cắm chưa được giải quyết.",
     },
   },
   {
@@ -54,12 +54,12 @@ export const DEFAULT_NODE_SCHEMA = [
     label: "Nhân vật",
     tableName: "character_table",
     columns: [
-      { name: "name", hint: "Tên nhân vật（仅规范Tên）", required: true },
-      { name: "traits", hint: "稳定的性格特征和外貌标记", required: false },
-      { name: "state", hint: "Trạng thái hiện tại或处境", required: false },
-      { name: "goal", hint: "当前目标或动机", required: false },
-      { name: "inventory", hint: "携带或拥有的关键物品", required: false },
-      { name: "core_note", hint: "值得长期记住的关键备注", required: false },
+      { name: "name", hint: "Tên nhân vật (chỉ tên chuẩn hóa)", required: true },
+      { name: "traits", hint: "Đặc điểm tính cách ổn định và dấu hiệu ngoại hình", required: false },
+      { name: "state", hint: "Trạng thái hoặc hoàn cảnh hiện tại", required: false },
+      { name: "goal", hint: "Mục tiêu hoặc động cơ hiện tại", required: false },
+      { name: "inventory", hint: "Vật phẩm then chốt đang mang theo hoặc sở hữu", required: false },
+      { name: "core_note", hint: "Ghi chú then chốt đáng để nhớ lâu dài", required: false },
     ],
     alwaysInject: false,
     latestOnly: true,
@@ -78,10 +78,10 @@ export const DEFAULT_NODE_SCHEMA = [
     label: "Địa điểm",
     tableName: "location_table",
     columns: [
-      { name: "name", hint: "Địa điểmTên（仅规范Tên）", required: true },
-      { name: "state", hint: "Trạng thái hiện tại或环境条件", required: false },
-      { name: "features", hint: "重要特征、资源或服务", required: false },
-      { name: "danger", hint: "危险等级或威胁", required: false },
+      { name: "name", hint: "Tên địa điểm (chỉ tên chuẩn hóa)", required: true },
+      { name: "state", hint: "Trạng thái hiện tại hoặc điều kiện môi trường", required: false },
+      { name: "features", hint: "Đặc điểm, tài nguyên hoặc dịch vụ quan trọng", required: false },
+      { name: "danger", hint: "Cấp độ nguy hiểm hoặc mối đe dọa", required: false },
     ],
     alwaysInject: false,
     latestOnly: true,
@@ -100,12 +100,12 @@ export const DEFAULT_NODE_SCHEMA = [
     label: "Quy tắc",
     tableName: "rule_table",
     columns: [
-      { name: "title", hint: "简短Quy tắc名", required: true },
-      { name: "constraint", hint: "不可违反的Quy tắcNội dung", required: true },
-      { name: "scope", hint: "适用Phạm vi/场景", required: false },
+      { name: "title", hint: "Tên quy tắc ngắn", required: true },
+      { name: "constraint", hint: "Nội dung quy tắc không được vi phạm", required: true },
+      { name: "scope", hint: "Phạm vi/cảnh áp dụng", required: false },
       {
         name: "status",
-        hint: "当前有效性：active/suspended/revoked",
+        hint: "Hiệu lực hiện tại: active/suspended/revoked",
         required: false,
       },
     ],
@@ -127,7 +127,7 @@ export const DEFAULT_NODE_SCHEMA = [
     tableName: "thread_table",
     columns: [
       { name: "title", hint: "tuyến chínhTên", required: true },
-      { name: "summary", hint: "当前进展tóm tắt", required: false },
+      { name: "summary", hint: "Tóm tắt tiến triển hiện tại", required: false },
       {
         name: "status",
         hint: "Trạng thái：active/completed/abandoned",
@@ -143,24 +143,24 @@ export const DEFAULT_NODE_SCHEMA = [
       fanIn: 3,
       maxDepth: 5,
       keepRecentLeaves: 3,
-      instruction: "将tuyến chínhnútNén为阶段性进展tóm tắt。保留关键转折和当前目标。",
+      instruction: "Nén nút tuyến chính thành tóm tắt tiến triển theo giai đoạn. Giữ lại các bước ngoặt then chốt và mục tiêu hiện tại.",
     },
   },
-  // ====== v2 新增nútLoại ======
+  // ====== Loại nút mới của v2 ======
   {
     id: "synopsis",
-    label: "Toàn cục概要（旧）",
+    label: "Tóm lược toàn cục (cũ)",
     tableName: "synopsis_table",
     columns: [
       {
         name: "summary",
-        hint: "旧式单条Toàn cục前情提要（兼容 / 迁移兜底）",
+        hint: "Tóm lược toàn cục bối cảnh trước đó kiểu cũ dạng đơn mục (tương thích / đường lùi khi di chuyển)",
         required: true,
       },
-      { name: "scope", hint: "该旧式概要覆盖的tầngPhạm vi", required: false },
+      { name: "scope", hint: "Phạm vi tầng mà bản tóm lược kiểu cũ này bao phủ", required: false },
     ],
-    alwaysInject: true, // 常驻Tiêm（MemoRAG 启发）
-    latestOnly: true, // 只保留最新版本
+    alwaysInject: true, // tiêm thường trú (lấy cảm hứng từ MemoRAG)
+    latestOnly: true, // chỉ giữ lại phiên bản mới nhất
     forceUpdate: false,
     compression: {
       mode: COMPRESSION_MODE.NONE,
@@ -176,11 +176,11 @@ export const DEFAULT_NODE_SCHEMA = [
     label: "Phản tư",
     tableName: "reflection_table",
     columns: [
-      { name: "insight", hint: "对Nhân vậtHành vi或情节的元认知Phản tư", required: true },
-      { name: "trigger", hint: "触发Phản tư的Sự kiện/矛盾", required: false },
-      { name: "suggestion", hint: "对后续叙事的建议", required: false },
+      { name: "insight", hint: "Phản tư siêu nhận thức về hành vi nhân vật hoặc diễn biến cốt truyện", required: true },
+      { name: "trigger", hint: "Sự kiện/mâu thuẫn kích hoạt phản tư", required: false },
+      { name: "suggestion", hint: "Gợi ý cho diễn biến về sau", required: false },
     ],
-    alwaysInject: false, // 需要被Truy hồi
+    alwaysInject: false, // cần được truy hồi
     latestOnly: false,
     forceUpdate: false,
     compression: {
@@ -189,7 +189,7 @@ export const DEFAULT_NODE_SCHEMA = [
       fanIn: 3,
       maxDepth: 3,
       keepRecentLeaves: 3,
-      instruction: "将Phản tư条目合并为高层lần的叙事指导原则。",
+      instruction: "Hợp nhất các mục phản tư thành nguyên tắc chỉ đạo tự sự ở tầng cao hơn.",
     },
   },
   {
@@ -197,16 +197,16 @@ export const DEFAULT_NODE_SCHEMA = [
     label: "Ký ức chủ quan",
     tableName: "pov_memory_table",
     columns: [
-      { name: "summary", hint: "这个视角如何记住这件事", required: true },
-      { name: "belief", hint: "她/他认为发生了什么", required: false },
-      { name: "emotion", hint: "主观Cảm xúc反应", required: false },
-      { name: "attitude", hint: "对人物或Sự kiện的Thái độ", required: false },
+      { name: "summary", hint: "Góc nhìn này ghi nhớ sự việc này như thế nào", required: true },
+      { name: "belief", hint: "Cô ấy/anh ấy cho rằng đã xảy ra điều gì", required: false },
+      { name: "emotion", hint: "Phản ứng cảm xúc chủ quan", required: false },
+      { name: "attitude", hint: "Thái độ với nhân vật hoặc sự kiện", required: false },
       {
         name: "certainty",
-        hint: "确定度：certain/unsure/mistaken",
+        hint: "Mức độ chắc chắn: certain/unsure/mistaken",
         required: false,
       },
-      { name: "about", hint: "Liên kếtđối tượng或引用标签", required: false },
+      { name: "about", hint: "Đối tượng liên kết hoặc nhãn tham chiếu", required: false },
     ],
     alwaysInject: false,
     latestOnly: false,
@@ -218,27 +218,27 @@ export const DEFAULT_NODE_SCHEMA = [
       maxDepth: 4,
       keepRecentLeaves: 4,
       instruction:
-        "将同一视角、同一Nhân vật归属下的Ký ức chủ quanNén成更稳定的第一视角Ký ứctóm tắt，保留误解、Cảm xúc和Thái độ变化。",
+        "Nén ký ức chủ quan cùng góc nhìn và cùng quy thuộc nhân vật thành bản tóm tắt ký ức ngôi thứ nhất ổn định hơn, đồng thời giữ lại hiểu sai, cảm xúc và thay đổi thái độ.",
     },
   },
 ];
 
 /**
- * 规范化的关系Loại
+ * Loại quan hệ đã chuẩn hóa
  */
 export const RELATION_TYPES = [
-  "related", // 一般Liên kết
-  "involved_in", // 参与Sự kiện
-  "occurred_at", // 发生于Địa điểm
-  "advances", // 推进tuyến chính
-  "updates", // Cập nhật实体Trạng thái
-  "contradicts", // 矛盾/冲突（用于抑制边）
-  "evolves", // A-MEM 进化链接（新→旧）
-  "temporal_update", // 时序Cập nhật（Graphiti：新Trạng thái替代旧Trạng thái）
+  "related", // liên kết thông thường
+  "involved_in", // tham giaSự kiện
+  "occurred_at", // xảy ra tại địa điểm
+  "advances", // thúc đẩytuyến chính
+  "updates", // cập nhật trạng thái thực thể
+  "contradicts", // mâu thuẫn/xung đột (dùng cho cạnh ức chế)
+  "evolves", // liên kết tiến hóa A-MEM (mới → cũ)
+  "temporal_update", // cập nhật theo thời gian (Graphiti: trạng thái mới thay thế trạng thái cũ)
 ];
 
 /**
- * 验证 Schema Cấu hình的合法性
+ * Kiểm tra tính hợp lệ của cấu hình schema
  * @param {Array} schema
  * @returns {{valid: boolean, errors: string[]}}
  */
@@ -246,7 +246,7 @@ export function validateSchema(schema) {
   const errors = [];
 
   if (!Array.isArray(schema) || schema.length === 0) {
-    errors.push("Schema 必须是非空数组");
+    errors.push("Schema bắt buộc phải là mảng không rỗng");
     return { valid: false, errors };
   }
 
@@ -255,52 +255,52 @@ export function validateSchema(schema) {
 
   for (const type of schema) {
     if (!type || typeof type !== "object") {
-      errors.push("Schema Loạiđịnh nghĩa必须是đối tượng");
+      errors.push("Schema Loạiđịnh nghĩabắt buộcCóđối tượng");
       continue;
     }
 
     if (!type.id || typeof type.id !== "string") {
-      errors.push("每种Loại必须有 id");
+      errors.push("Mỗi loại bắt buộc phải có id");
       continue;
     }
 
     if (ids.has(type.id)) {
-      errors.push(`Loại ID 重复：${type.id}`);
+      errors.push(`Loại ID trùng lặp：${type.id}`);
     }
     ids.add(type.id);
 
     if (!type.label || typeof type.label !== "string") {
-      errors.push(`Loại ${type.id}：缺少 label`);
+      errors.push(`Loại ${type.id}：thiếu label`);
     }
 
     if (!type.tableName || typeof type.tableName !== "string") {
-      errors.push(`Loại ${type.id}：缺少 tableName`);
+      errors.push(`Loại ${type.id}：thiếu tableName`);
     } else if (tableNames.has(type.tableName)) {
-      errors.push(`表名重复：${type.tableName}`);
+      errors.push(`Tên bảng bị trùng: ${type.tableName}`);
     } else {
       tableNames.add(type.tableName);
     }
 
     if (!Array.isArray(type.columns) || type.columns.length === 0) {
-      errors.push(`Loại ${type.id}：至少需要一个列`);
+      errors.push(`Loại ${type.id}: phải có ít nhất một cột`);
       continue;
     }
 
     const columnNames = new Set();
     for (const column of type.columns) {
       if (!column?.name || typeof column.name !== "string") {
-        errors.push(`Loại ${type.id}：存在缺少 name 的列định nghĩa`);
+        errors.push(`Loại ${type.id}: tồn tại định nghĩa cột thiếu name`);
         continue;
       }
       if (columnNames.has(column.name)) {
-        errors.push(`Loại ${type.id}：列名重复 ${column.name}`);
+        errors.push(`Loại ${type.id}: tên cột bị trùng ${column.name}`);
       }
       columnNames.add(column.name);
     }
 
     const hasRequired = type.columns.some((c) => c?.required);
     if (!hasRequired) {
-      errors.push(`Loại ${type.id}：至少需要一个 required 列`);
+      errors.push(`Loại ${type.id}: phải có ít nhất một cột required`);
     }
 
     if (type.latestOnly) {
@@ -310,7 +310,7 @@ export function validateSchema(schema) {
       );
       if (!hasPrimaryLikeField) {
         errors.push(
-          `Loại ${type.id}：latestOnly Loại至少需要 name/title/summary 之一作为主标识字段`,
+          `Loại ${type.id}: loại latestOnly phải có ít nhất một trong các trường name/title/summary làm trường nhận diện chính`,
         );
       }
     }
@@ -320,7 +320,7 @@ export function validateSchema(schema) {
 }
 
 /**
- * 获取 Schema 中某个Loại的định nghĩa
+ * Lấy định nghĩa của một loại trong schema
  * @param {Array} schema
  * @param {string} typeId
  * @returns {object|null}
@@ -328,3 +328,4 @@ export function validateSchema(schema) {
 export function getSchemaType(schema, typeId) {
   return schema.find((t) => t.id === typeId) || null;
 }
+

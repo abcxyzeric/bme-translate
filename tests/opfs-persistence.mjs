@@ -135,11 +135,11 @@ function createMemoryOpfsRoot() {
 
 function getChatDirectory(rootDirectory, chatId) {
   const opfsRoot = rootDirectory.directories.get("st-bme") || null;
-  assert.ok(opfsRoot, "OPFS 根目录必须存在");
+  assert.ok(opfsRoot, "OPFS thư mục gốcbắt buộctồn tại");
   const chatsDirectory = opfsRoot.directories.get("chats") || null;
-  assert.ok(chatsDirectory, "OPFS chats 目录必须存在");
+  assert.ok(chatsDirectory, "OPFS chats thư mụcbắt buộctồn tại");
   const chatDirectory = chatsDirectory.directories.get(encodeURIComponent(chatId)) || null;
-  assert.ok(chatDirectory, `OPFS chat 目录必须存在: ${chatId}`);
+  assert.ok(chatDirectory, `OPFS chat thư mụcbắt buộctồn tại: ${chatId}`);
   return chatDirectory;
 }
 
@@ -147,13 +147,13 @@ function getNestedDirectory(directoryHandle, ...names) {
   let current = directoryHandle;
   for (const name of names) {
     current = current?.directories?.get(String(name || "")) || null;
-    assert.ok(current, `目录必须存在: ${names.join("/")}`);
+    assert.ok(current, `thư mụcbắt buộctồn tại: ${names.join("/")}`);
   }
   return current;
 }
 
 function readJsonFromDirectory(directoryHandle, filename) {
-  assert.ok(directoryHandle.files.has(filename), `文件必须存在: ${filename}`);
+  assert.ok(directoryHandle.files.has(filename), `tệpbắt buộctồn tại: ${filename}`);
   return JSON.parse(String(directoryHandle.files.get(filename) || ""));
 }
 

@@ -1,5 +1,5 @@
-// ST-BME: Prompt Tiêm模块
-// 将检索Kết quả格式化为表格Tiêm到 LLM 上下文中
+// ST-BME: mô-đun tiêm prompt
+// Định dạng kết quả truy xuất thành bảng để tiêm vào ngữ cảnh LLM
 
 import { getSchemaType } from "../graph/schema.js";
 import { normalizeMemoryScope } from "../graph/memory-scope.js";
@@ -10,9 +10,9 @@ import {
 import { compareSummaryEntriesForDisplay } from "../graph/summary-state.js";
 
 /**
- * 将检索Kết quả转换为Văn bản tiêm
+ * Chuyển kết quả truy xuất thành văn bản tiêm
  *
- * @param {object} retrievalResult - retriever.retrieve() 的返回值
+ * @param {object} retrievalResult - giá trị trả về của retriever.retrieve()
  * @param {object[]} schema - nútLoại Schema
  * @returns {string} Văn bản tiêm
  */
@@ -48,7 +48,7 @@ export function formatInjection(retrievalResult, schema) {
       schema,
       appended,
       showStoryTime,
-      "这些是Người dùng/người chơi侧Ký ức chủ quan，不等于Nhân vật已知事实；只能作为关系、承诺、Cảm xúc和长期互动背景参考。",
+      "Đây là ký ức chủ quan ở phía người dùng/người chơi, không đồng nghĩa với việc nhân vật đã biết sự thật; chỉ nên dùng làm tham chiếu cho quan hệ, lời hứa, cảm xúc và bối cảnh tương tác dài hạn.",
     );
     appendScopeSection(
       parts,
@@ -72,7 +72,7 @@ export function formatInjection(retrievalResult, schema) {
     }
   }
 
-  // ========== Core 常驻Tiêm ==========
+  // ========== Core thường trúTiêm ==========
   if (coreNodes.length > 0) {
     parts.push("[Memory - Core]");
 
@@ -118,10 +118,10 @@ export function formatInjection(retrievalResult, schema) {
     };
 
     appendBucket(parts, "Trạng thái hiện tạiKý ức", buckets.state, schema, appended, showStoryTime);
-    appendBucket(parts, "情景Sự kiệnKý ức", buckets.episodic, schema, appended, showStoryTime);
-    appendBucket(parts, "Phản tư与长期锚点", buckets.reflective, schema, appended, showStoryTime);
-    appendBucket(parts, "Quy tắc与约束", buckets.rule, schema, appended, showStoryTime);
-    appendBucket(parts, "其他Liên kếtKý ức", buckets.other, schema, appended, showStoryTime);
+    appendBucket(parts, "Ký ức sự kiện theo tình cảnh", buckets.episodic, schema, appended, showStoryTime);
+    appendBucket(parts, "Phản tư và mốc neo dài hạn", buckets.reflective, schema, appended, showStoryTime);
+    appendBucket(parts, "Quy tắc và ràng buộc", buckets.rule, schema, appended, showStoryTime);
+    appendBucket(parts, "Ký ức liên kết khác", buckets.other, schema, appended, showStoryTime);
   }
 
   return parts.join("\n");
@@ -239,7 +239,7 @@ function appendScopeSection(parts, title, nodes, schema, appended, showStoryTime
 }
 
 /**
- * 按Loại分组nút
+ * Nhóm nút theo loại
  */
 function groupByType(nodes) {
   const map = new Map();
@@ -265,7 +265,7 @@ function appendBucket(parts, title, nodes, schema, appended, showStoryTime) {
 }
 
 /**
- * 将同Loạinút格式化为 Markdown 表格
+ * Định dạng các nút cùng loại thành bảng Markdown
  */
 function formatTable(nodes, typeDef, appended = new Set(), showStoryTime = true) {
   if (!Array.isArray(nodes) || nodes.length === 0) return "";
@@ -278,7 +278,7 @@ function formatTable(nodes, typeDef, appended = new Set(), showStoryTime = true)
 
   if (uniqueNodes.length === 0) return "";
 
-  // 确定要展示的列（有实际Dữ liệu的列）
+  // Xác định các cột cần hiển thị (các cột có dữ liệu thực tế)
   const activeCols = typeDef.columns.filter((col) =>
     uniqueNodes.some(
       (n) => n.fields?.[col.name] != null && n.fields[col.name] !== "",
@@ -289,18 +289,18 @@ function formatTable(nodes, typeDef, appended = new Set(), showStoryTime = true)
 
   if (allCols.length === 0) return "";
 
-  // 表头
+  // Tiêu đề bảng
   const header = `| ${allCols.map((c) => c.name).join(" | ")} |`;
   const separator = `| ${allCols.map(() => "---").join(" | ")} |`;
 
-  // Dữ liệu行
+  // Dòng dữ liệu
   const rows = uniqueNodes.map((node) => {
     const cells = allCols.map((col) => {
       const val =
         typeof col.getValue === "function"
           ? col.getValue(node)
           : node.fields?.[col.name] ?? "";
-      // 转义管道符，限制单元格长度
+      // Escape ký tự ống và giới hạn độ dài ô
       return String(val)
         .replace(/\|/g, "\\|")
         .replace(/\n/g, " ")
@@ -320,7 +320,7 @@ function buildDerivedColumns(nodes, typeDef, showStoryTime = true) {
       name: "owner",
       getValue(node) {
         const scope = normalizeMemoryScope(node?.scope);
-        const ownerLabel = scope.ownerName || scope.ownerId || "未命名";
+        const ownerLabel = scope.ownerName || scope.ownerId || "Chưa đặt tên";
         if (scope.ownerType === "user") {
           return `Người dùng: ${ownerLabel}`;
         }
@@ -362,15 +362,15 @@ function buildDerivedColumns(nodes, typeDef, showStoryTime = true) {
 }
 
 /**
- * 获取Tiêm提示词的总 token 估算
- * 粗略估算：1 个 token ≈ 2 个中文字符 或 4 个英文字符
+ * Lấy ước tính tổng token của prompt tiêm
+ * Ước tính sơ bộ: 1 token ≈ 2 ký tự CJK hoặc 4 ký tự Latin
  *
  * @param {string} injectionText
- * @returns {number} 估算 token 数
+ * @returns {number} số token ước tính
  */
 export function estimateTokens(injectionText) {
   if (!injectionText) return 0;
-  // 简单估算：中文 2 字符/token，英文 4 字符/token
+  // Ước tính đơn giản: chữ CJK 2 ký tự/token, tiếng Anh 4 ký tự/token
   const cnChars = (injectionText.match(/[\u4e00-\u9fff]/g) || []).length;
   const otherChars = injectionText.length - cnChars;
   return Math.ceil(cnChars / 2 + otherChars / 4);

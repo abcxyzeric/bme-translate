@@ -16,7 +16,7 @@ export const defaultSettings = {
   hideOldMessagesEnabled: false,
   hideOldMessagesKeepLastN: 12,
 
-  // Trích xuất设置
+  // Trích xuấtcài đặt
   extractEvery: 1,
   extractContextTurns: 2,
   extractAutoDelayLatestAssistant: false,
@@ -31,7 +31,7 @@ export const defaultSettings = {
   extractIncludeSummaries: true,
   extractActionMode: "pending",
 
-  // Truy hồi设置
+  // Truy hồicài đặt
   recallEnabled: true,
   recallCardUserInputDisplayMode: "beautify_only",
   worldInfoFilterMode: "default",
@@ -85,17 +85,17 @@ export const defaultSettings = {
   injectUserPovMemory: true,
   injectObjectiveGlobalMemory: true,
 
-  // Tiêm设置
+  // Tiêmcài đặt
   injectPosition: "atDepth",
   injectDepth: 9999,
   injectRole: 0,
 
-  // Chấm điểm hỗn hợp权重
+  // Chấm điểm hỗn hợptrọng số
   graphWeight: 0.6,
   vectorWeight: 0.3,
   importanceWeight: 0.1,
 
-  // LLM bộ nhớ（留空时复用当前酒馆Model）
+  // LLM bộ nhớ (để trống thì tái sử dụng model hiện tại của SillyTavern)
   llmApiUrl: "",
   llmApiKey: "",
   llmModel: "",
@@ -112,7 +112,7 @@ export const defaultSettings = {
   embeddingBackendApiUrl: "",
   embeddingAutoSuffix: true,
 
-  // Native 性能加速（灰度）
+  // Tăng tốc hiệu năng bằng native (triển khai dần)
   graphUseNativeLayout: false,
   graphNativeLayoutThresholdNodes: 280,
   graphNativeLayoutThresholdEdges: 1600,
@@ -128,7 +128,7 @@ export const defaultSettings = {
   // Schema
   nodeTypeSchema: null,
 
-  // 自định nghĩa提示词
+  // Prompt tự định nghĩa
   extractPrompt: "",
   recallPrompt: "",
   consolidationPrompt: "",
@@ -140,7 +140,7 @@ export const defaultSettings = {
   taskProfiles: createDefaultTaskProfiles(),
   globalTaskRegex: createDefaultGlobalTaskRegex(),
 
-  // ====== v2 增强设置 ======
+  // ====== v2 tăng cườngcài đặt ======
   enableConsolidation: true,
   consolidationNeighborCount: 5,
   consolidationThreshold: 0.85,
@@ -165,7 +165,7 @@ export const defaultSettings = {
   enableAutoCompression: true,
   compressionEveryN: 10,
 
-  // UI 面板
+  // UI bảng
   noticeDisplayMode: "normal",
   panelTheme: "crimson",
   graphLocalStorageMode: "auto",

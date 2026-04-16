@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -107,14 +107,14 @@ try {
       {
         seq: 10,
         role: "assistant",
-        content: "<think>隐式思维</think>继续说明",
+        content: "<think></think>tiếp tụcmô tả",
         name: "Ailin",
         speaker: "Ailin",
       },
       {
         seq: 11,
         role: "user",
-        content: "Người dùng输入",
+        content: "Người dùngđầu vào",
         name: "người chơi",
         speaker: "người chơi",
       },
@@ -141,12 +141,13 @@ try {
     (message) => message.sourceKey === "recentMessages",
   );
   assert.ok(recentBlock);
-  assert.match(String(recentBlock?.content || ""), /#10 \[assistant\]: 继续说明/);
-  assert.match(String(recentBlock?.content || ""), /#11 \[user\|người chơi\]: Người dùng输入/);
+  assert.match(String(recentBlock?.content || ""), /#10 \[assistant\]: tiếp tụcmô tả/);
+  assert.match(String(recentBlock?.content || ""), /#11 \[user\|người chơi\]: Người dùngđầu vào/);
   assert.doesNotMatch(String(recentBlock?.content || ""), /#10 \[assistant\|Ailin\]:/);
-  assert.doesNotMatch(String(recentBlock?.content || ""), /隐式思维|<think>/);
+  assert.doesNotMatch(String(recentBlock?.content || ""), /|<think>/);
 } finally {
   restore();
 }
 
 console.log("extractor-input-context tests passed");
+

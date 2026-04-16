@@ -58,13 +58,13 @@ const BUILTIN_BLOCK_DEFINITIONS = [
   },
   {
     sourceKey: "charDescription",
-    name: "Nhân vậtmô tả",
+    name: "Mô tả nhân vật",
     role: "system",
     description: "Chèn phần mô tả chính của thẻ nhân vật hiện tại. Phù hợp với preset cần nhập trực tiếp thiết lập nhân vật vào prompt tác vụ.",
   },
   {
     sourceKey: "userPersona",
-    name: "Người dùngthiết lập",
+    name: "Thiết lập người dùng",
     role: "system",
     description: "Chèn Persona / thiết lập người dùng hiện tại. Phù hợp để tác vụ tham chiếu thiết lập dài hạn của người chơi khi sinh nội dung.",
   },
@@ -100,7 +100,7 @@ const BUILTIN_BLOCK_DEFINITIONS = [
   },
   {
     sourceKey: "userMessage",
-    name: "Người dùngtin nhắn",
+    name: "Tin nhắn người dùng",
     role: "system",
     description: "Chèn nội dung đầu vào mới nhất của người dùng hiện tại. Dùng cho tác vụ recall để khớp với các nút ký ức liên quan nhất.",
   },
@@ -136,13 +136,13 @@ const BUILTIN_BLOCK_DEFINITIONS = [
   },
   {
     sourceKey: "eventSummary",
-    name: "Sự kiệntóm tắt",
+    name: "Tóm tắt sự kiện",
     role: "system",
     description: "Chèn bản tóm tắt dòng thời gian sự kiện gần đây. Dùng cho tác vụ synopsis (tạo phần tóm lược bối cảnh trước đó) và reflection (tạo phản tư).",
   },
   {
     sourceKey: "characterSummary",
-    name: "Nhân vậttóm tắt",
+    name: "Tóm tắt nhân vật",
     role: "system",
     description: "Chèn bản tóm tắt biến đổi trạng thái nhân vật gần đây. Dùng cho synopsis và reflection để giúp LLM nắm được động thái nhân vật.",
   },
@@ -244,21 +244,21 @@ const COMMON_DEFAULT_BLOCK_BLUEPRINTS = [
   },
   {
     id: "default-role",
-    name: "Nhân vậtđịnh nghĩa",
+    name: "Định danh nhân vật",
     type: "custom",
     role: "system",
     contentKey: "role",
   },
   {
     id: "default-char-desc",
-    name: "Nhân vậtmô tả",
+    name: "Mô tả nhân vật",
     type: "builtin",
     role: "system",
     sourceKey: "charDescription",
   },
   {
     id: "default-user-persona",
-    name: "Người dùngthiết lập",
+    name: "Thiết lập người dùng",
     type: "builtin",
     role: "system",
     sourceKey: "userPersona",
@@ -334,7 +334,7 @@ const TASK_CONTEXT_BLOCK_BLUEPRINTS = {
     },
     {
       id: "default-user-message",
-      name: "Người dùngtin nhắn",
+      name: "Tin nhắn người dùng",
       type: "builtin",
       role: "system",
       sourceKey: "userMessage",
@@ -396,14 +396,14 @@ const TASK_CONTEXT_BLOCK_BLUEPRINTS = {
   synopsis: [
     {
       id: "default-event-summary",
-      name: "Sự kiệntóm tắt",
+      name: "Tóm tắt sự kiện",
       type: "builtin",
       role: "system",
       sourceKey: "eventSummary",
     },
     {
       id: "default-character-summary",
-      name: "Nhân vậttóm tắt",
+      name: "Tóm tắt nhân vật",
       type: "builtin",
       role: "system",
       sourceKey: "characterSummary",
@@ -426,14 +426,14 @@ const TASK_CONTEXT_BLOCK_BLUEPRINTS = {
   reflection: [
     {
       id: "default-event-summary",
-      name: "Sự kiệntóm tắt",
+      name: "Tóm tắt sự kiện",
       type: "builtin",
       role: "system",
       sourceKey: "eventSummary",
     },
     {
       id: "default-character-summary",
-      name: "Nhân vậttóm tắt",
+      name: "Tóm tắt nhân vật",
       type: "builtin",
       role: "system",
       sourceKey: "characterSummary",
@@ -472,7 +472,7 @@ const DEFAULT_TRAILING_BLOCK_BLUEPRINTS = [
   },
   {
     id: "default-rules",
-    name: "Hành viQuy tắc",
+    name: "Quy tắc hành vi",
     type: "custom",
     role: "user",
     contentKey: "rules",

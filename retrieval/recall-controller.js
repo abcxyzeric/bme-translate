@@ -1,4 +1,4 @@
-// ST-BME: Truy hồi输入解析与Tiêm控制器（纯函数）
+// ST-BME: bộ điều khiển phân tích đầu vào và tiêm truy hồi (hàm thuần)
 
 import { debugLog } from "../runtime/debug-logging.js";
 import { isSystemMessageForExtraction } from "../maintenance/chat-history.js";
@@ -40,13 +40,13 @@ export function buildRecallRecentMessagesController(
 export function getRecallUserMessageSourceLabelController(source) {
   switch (source) {
     case "send-intent":
-      return "发送意图";
+      return "ý định gửi";
     case "chat-tail-user":
-      return "当前Người dùngtầng";
+      return "hiện tạiNgười dùngtầng";
     case "message-sent":
-      return "已发送Người dùngtầng";
+      return "Tầng người dùng đã gửi";
     case "chat-last-user":
-      return "历史最后Người dùngtầng";
+      return "Tầng người dùng cuối cùng trong lịch sử";
     default:
       return "Không rõ";
   }
@@ -74,7 +74,7 @@ function buildPersistedRecallReuseResult(record = {}) {
         persistedReuse: true,
         llm: {
           status: "persisted",
-          reason: "复用已Lưu bềnTruy hồi",
+          reason: "Tái sử dụng truy hồi đã lưu bền",
           selectionProtocol: "persisted-record-reuse",
           rawSelectedKeys: [],
           resolvedSelectedKeys: [],
@@ -174,7 +174,7 @@ export function resolveRecallInputController(
         override?.lockedSourceLabel ||
           override?.sourceLabel ||
           override?.overrideSourceLabel ||
-          "发送前拦截",
+          "Chặn trước khi gửi",
       ),
       reason: String(
         override?.lockedReason ||
@@ -274,7 +274,7 @@ export function applyRecallInjectionController(
   const isPersistedReuse = Boolean(retrievalMeta.persistedReuse);
   const llmMeta = retrievalMeta.llm || {
     status: settings.recallEnableLLM ? "unknown" : "disabled",
-    reason: settings.recallEnableLLM ? "未提供 LLM Trạng thái" : "LLM 精排已Tắt",
+    reason: settings.recallEnableLLM ? "Chưa cung cấp trạng thái LLM" : "LLM xếp hạng tinh đã tắt",
     selectionProtocol: "",
     rawSelectedKeys: [],
     resolvedSelectedKeys: [],
@@ -292,7 +292,7 @@ export function applyRecallInjectionController(
   if (injectionText && !isPersistedReuse) {
     const tokens = runtime.estimateTokens(injectionText);
     debugLog(
-      `[ST-BME] Tiêm ${tokens} 估算 tokens, Core=${result.stats.coreCount}, Recall=${result.stats.recallCount}`,
+      `[ST-BME] Tiêm ${tokens} token ước tính, Core=${result.stats.coreCount}, Recall=${result.stats.recallCount}`,
     );
     runtime.persistRecallInjectionRecord?.({
       recallInput,
@@ -350,13 +350,13 @@ export function applyRecallInjectionController(
 
   const llmLabel =
     isPersistedReuse
-      ? "复用Truy hồi"
+      ? "dùng lạiTruy hồi"
       : llmMeta.status === "llm"
-      ? "LLM 精排Hoàn tất"
+      ? "LLM xếp hạng tinhHoàn tất"
       : llmMeta.status === "fallback"
-        ? "LLM Lùi về评分"
+        ? "LLM lùi về chấm điểm"
         : llmMeta.status === "disabled"
-          ? "仅评分排序"
+          ? "Chỉ xếp hạng theo điểm"
           : "Truy hồiHoàn tất";
   const hookLabel = runtime.getRecallHookLabel(recallInput.hookName);
   runtime.setLastRecallStatus(
@@ -364,7 +364,7 @@ export function applyRecallInjectionController(
     [
       hookLabel,
       recallInput.sourceLabel,
-      deliveryMode === "immediate" ? "即时Tiêm" : "Đang chờ本轮 rewrite",
+      deliveryMode === "immediate" ? "Tiêm tức thời" : "Đang chờ rewrite của lượt này",
       `ctx ${recentMessages.length}`,
       `vector ${retrievalMeta.vectorHits ?? 0}`,
       retrievalMeta.vectorMergedHits
@@ -391,8 +391,8 @@ export function applyRecallInjectionController(
     if (now - runtime.getLastRecallFallbackNoticeAt() > 15000) {
       runtime.setLastRecallFallbackNoticeAt(now);
       runtime.toastr.warning(
-        llmMeta.reason || "LLM 精排未成功，已改用评分排序并继续TiêmKý ức",
-        "ST-BME Truy hồi提示",
+        llmMeta.reason || "LLM xếp hạng tinh chưa thành công, đã chuyển sang xếp hạng theo điểm và tiếp tục tiêm ký ức",
+        "ST-BME Truy hồinhắc",
         { timeOut: 4500 },
       );
     }
@@ -409,19 +409,19 @@ export function applyRecallInjectionController(
 
 export async function runRecallController(runtime, options = {}) {
   if (runtime.getIsRecalling()) {
-    runtime.abortRecallStageWithReason("旧Truy hồi已Hủy，正在启动新的Truy hồi");
+    runtime.abortRecallStageWithReason("Truy hồi cũ đã bị hủy, đang khởi động lượt truy hồi mới");
     const settle = await runtime.waitForActiveRecallToSettle();
     if (!settle.settled && runtime.getIsRecalling()) {
       runtime.setLastRecallStatus(
-        "Truy hồi忙",
-        "上一轮Truy hồi仍在清理，请稍后重试",
+        "Truy hồi đang bận",
+        "Lượt truy hồi trước vẫn đang dọn dẹp, vui lòng thử lại sau",
         "warning",
         {
           syncRuntime: true,
         },
       );
       return runtime.createRecallRunResult("skipped", {
-        reason: "上一轮Truy hồi仍在清理",
+        reason: "Lượt truy hồi trước vẫn đang dọn dẹp",
       });
     }
   }
@@ -429,14 +429,14 @@ export async function runRecallController(runtime, options = {}) {
   const hasGraph = !!runtime.getCurrentGraph();
   if (!hasGraph) {
     return runtime.createRecallRunResult("skipped", {
-      reason: "当前Khôngđồ thị",
+      reason: "hiện tạiKhôngđồ thị",
     });
   }
 
   const settings = runtime.getSettings();
   if (!settings.enabled || !settings.recallEnabled) {
     return runtime.createRecallRunResult("skipped", {
-      reason: "Truy hồi功能未Bật",
+      reason: "Chức năng truy hồi chưa bật",
     });
   }
   const isReadableForRecall =
@@ -445,7 +445,7 @@ export async function runRecallController(runtime, options = {}) {
       : runtime.isGraphReadable();
   if (!isReadableForRecall) {
     const reason = runtime.getGraphMutationBlockReason("Truy hồi");
-    runtime.setLastRecallStatus("Đang chờđồ thị加载", reason, "warning", {
+    runtime.setLastRecallStatus("Đang chờđồ thịtải", reason, "warning", {
       syncRuntime: true,
     });
     return runtime.createRecallRunResult("skipped", {
@@ -455,7 +455,7 @@ export async function runRecallController(runtime, options = {}) {
   if (runtime.isGraphMetadataWriteAllowed()) {
     if (!(await runtime.recoverHistoryIfNeeded("pre-recall"))) {
       return runtime.createRecallRunResult("skipped", {
-        reason: "历史Khôi phục未就绪",
+        reason: "Khôi phục lịch sử chưa sẵn sàng",
       });
     }
   }
@@ -464,7 +464,7 @@ export async function runRecallController(runtime, options = {}) {
   const chat = context.chat;
   if (!chat || chat.length === 0) {
     return runtime.createRecallRunResult("skipped", {
-      reason: "Chat hiện tại为空",
+      reason: "Chat hiện tạitrống",
     });
   }
 
@@ -477,7 +477,7 @@ export async function runRecallController(runtime, options = {}) {
     if (options.signal) {
       if (options.signal.aborted) {
         recallController.abort(
-          options.signal.reason || runtime.createAbortError("HostĐã chấm dứt生成"),
+          options.signal.reason || runtime.createAbortError("HostĐã chấm dứtsinh"),
         );
       } else {
         options.signal.addEventListener(
@@ -485,7 +485,7 @@ export async function runRecallController(runtime, options = {}) {
           () =>
             recallController.abort(
               options.signal.reason ||
-                runtime.createAbortError("HostĐã chấm dứt生成"),
+                runtime.createAbortError("HostĐã chấm dứtsinh"),
             ),
           { once: true },
         );
@@ -510,7 +510,7 @@ export async function runRecallController(runtime, options = {}) {
 
       if (!userMessage) {
         return runtime.createRecallRunResult("skipped", {
-          reason: "Hiện không có可用于Truy hồi的Người dùng输入",
+          reason: "Hiện không có đầu vào người dùng nào dùng được cho truy hồi",
         });
       }
 
@@ -518,7 +518,7 @@ export async function runRecallController(runtime, options = {}) {
       recallInput.deliveryMode =
         String(options.deliveryMode || "immediate").trim() || "immediate";
 
-      debugLog("[ST-BME] 开始Truy hồi", {
+      debugLog("[ST-BME] bắt đầuTruy hồi", {
         source: recallInput.source,
         sourceLabel: recallInput.sourceLabel,
         hookName: recallInput.hookName,
@@ -527,12 +527,12 @@ export async function runRecallController(runtime, options = {}) {
         runId,
       });
       runtime.setLastRecallStatus(
-        "Truy hồi中",
+        "Đang truy hồi",
         [
           runtime.getRecallHookLabel(recallInput.hookName),
           `Nguồn ${recallInput.sourceLabel}`,
-          `上下文 ${recentMessages.length} 条`,
-          `当前Người dùngtin nhắn长度 ${userMessage.length}`,
+          `Ngữ cảnh ${recentMessages.length} mục`,
+          `Độ dài tin nhắn người dùng hiện tại ${userMessage.length}`,
         ]
           .filter(Boolean)
           .join(" · "),
@@ -619,7 +619,7 @@ export async function runRecallController(runtime, options = {}) {
         const effectiveRecallInput = {
           ...recallInput,
           source: "persisted-user-floor",
-          sourceLabel: "复用Người dùngtầngTruy hồi",
+          sourceLabel: "dùng lạiNgười dùngtầngTruy hồi",
           reason: "persisted-user-floor-reuse",
           authoritativeInputUsed: Boolean(
             persistedReuse.record.authoritativeInputUsed ||
@@ -694,8 +694,8 @@ export async function runRecallController(runtime, options = {}) {
               ? "…" + previewText.slice(-60)
               : previewText || "";
           runtime.setLastRecallStatus(
-            "AI 生成中",
-            `${preview}  [${receivedChars}字]`,
+            "AI đang sinh",
+            `${preview}  [${receivedChars} ký tự]`,
             "running",
             { syncRuntime: true, noticeMarquee: true },
           );
@@ -738,7 +738,7 @@ export async function runRecallController(runtime, options = {}) {
       if (runtime.isAbortError(e)) {
         runtime.setLastRecallStatus(
           "Truy hồiĐã chấm dứt",
-          e?.message || "已Thủ công终止当前Truy hồi",
+          e?.message || "Đã thủ công chấm dứt lượt truy hồi hiện tại",
           "warning",
           {
             syncRuntime: true,

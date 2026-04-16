@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   getBmeHostAdapter,
@@ -62,7 +62,7 @@ try {
   assert.equal(
     resolveBmeHostProfile(noChatSelectedContext),
     "luker",
-    "未进入聊天时，Hồ sơ host仍应反映 Luker 环境，而不是退回 generic-st",
+    "",
   );
   assert.equal(resolveCurrentBmeChatStateTarget(noChatSelectedContext), null);
 
@@ -118,3 +118,4 @@ try {
 }
 
 console.log("luker-host-adapter tests passed");
+

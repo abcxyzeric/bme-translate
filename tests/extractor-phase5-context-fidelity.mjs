@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -133,14 +133,14 @@ const worldbooksByName = {
   "main-book": [
     createWorldbookEntry({
       uid: 1,
-      name: "主书常驻thiết lập",
-      content: "主世界书：Chìa khóa xanhManh mối。",
+      name: "Thiết lập thường trú của sách chính",
+      content: "World Info chính: manh mối về chìa khóa xanh.",
       order: 10,
     }),
     createWorldbookEntry({
       uid: 2,
-      name: "Chìa khóa xanh触发条目",
-      content: "主世界书命中：调查Chìa khóa xanh时应关注Khu phố cũ。",
+      name: "Chìa khóa xanhkích hoạtmục",
+      content: "World Info chính khớp: khi điều tra chìa khóa xanh cần chú ý Khu phố cũ.",
       keys: ["Chìa khóa xanh"],
       order: 20,
     }),
@@ -148,16 +148,16 @@ const worldbooksByName = {
   "persona-book": [
     createWorldbookEntry({
       uid: 3,
-      name: "人格thiết lập",
-      content: "人格世界书：保持谨慎，不要忽略路线细节。",
+      name: "nhân cáchthiết lập",
+      content: "World Info nhân cách: giữ sự cẩn trọng, đừng bỏ qua chi tiết lộ trình.",
       order: 10,
     }),
   ],
   "chat-book": [
     createWorldbookEntry({
       uid: 4,
-      name: "聊天绑定thiết lập",
-      content: "聊天世界书：当前会话已锁定Khu phố cũ雨夜调查。",
+      name: "chatgắnthiết lập",
+      content: "World Info chat: phiên hiện tại đã khóa vào cuộc điều tra đêm mưa ở Khu phố cũ.",
       order: 10,
     }),
   ],
@@ -167,21 +167,21 @@ const fidelityMessages = [
   {
     seq: 30,
     role: "assistant",
-    content: "<think>先推断</think><action>举灯</action>Ailin说：去调查Chìa khóa xanh。",
+    content: "<think>Phán đoán trước</think><action>Giơ đèn</action>Ailin nói: đi điều tra chìa khóa xanh.",
     name: "Ailin",
     speaker: "Ailin",
   },
   {
     seq: 31,
     role: "assistant",
-    content: "旁白补充：<status mood='tense'>雨夜</status>巷子很安静。",
-    name: "旁白",
-    speaker: "旁白",
+    content: "Bổ sung của lời dẫn: <status mood='tense'>Đêm mưa</status>con hẻm rất yên tĩnh.",
+    name: "lời dẫn",
+    speaker: "lời dẫn",
   },
   {
     seq: 32,
     role: "user",
-    content: "<plan>先记路线</plan>我会继续调查Chìa khóa xanh。",
+    content: "<plan>Ghi nhớ lộ trình trước</plan>Tôi sẽ tiếp tục điều tra chìa khóa xanh.",
     name: "người chơi",
     speaker: "người chơi",
   },
@@ -189,9 +189,9 @@ const fidelityMessages = [
 
 globalThis.__stBmeTestContext = {
   chat: [
-    { is_user: false, mes: "Ailin说：去调查Chìa khóa xanh。", name: "Ailin" },
-    { is_user: false, mes: "旁白补充：雨夜巷子很安静。", name: "旁白" },
-    { is_user: true, mes: "我会继续调查Chìa khóa xanh。", name: "người chơi" },
+    { is_user: false, mes: "Ailin nói: đi điều tra chìa khóa xanh.", name: "Ailin" },
+    { is_user: false, mes: "Bổ sung của lời dẫn: Đêm mưa, con hẻm rất yên tĩnh.", name: "lời dẫn" },
+    { is_user: true, mes: "Tôi sẽ tiếp tục điều tra chìa khóa xanh.", name: "người chơi" },
   ],
   chatMetadata: {
     world: "chat-book",
@@ -200,14 +200,14 @@ globalThis.__stBmeTestContext = {
     persona_description_lorebook: "persona-book",
   },
   powerUserSettings: {
-    persona_description: "Người dùngthiết lập：谨慎调查者",
+    persona_description: "Thiết lập người dùng: người điều tra thận trọng",
   },
   characters: {
     1: {
       name: "Ailin",
-      description: "Nhân vậtmô tả：夜巡调查员",
+      description: "Mô tả nhân vật: điều tra viên tuần đêm",
       data: {
-        description: "Nhân vậtmô tả：夜巡调查员",
+        description: "Mô tả nhân vật: điều tra viên tuần đêm",
         extensions: {
           world: "main-book",
         },
@@ -273,12 +273,12 @@ try {
       assert.ok(captured);
 
       const allContent = collectAllPromptContent(captured);
-      assert.match(allContent, /Nhân vậtmô tả：夜巡调查员/);
-      assert.match(allContent, /Người dùngthiết lập：谨慎调查者/);
-      assert.match(allContent, /主世界书：Chìa khóa xanhManh mối。/);
-      assert.match(allContent, /主世界书命中：调查Chìa khóa xanh时应关注Khu phố cũ。/);
-      assert.match(allContent, /人格世界书：保持谨慎，不要忽略路线细节。/);
-      assert.match(allContent, /聊天世界书：当前会话已锁定Khu phố cũ雨夜调查。/);
+      assert.match(allContent, /Mô tả nhân vật: điều tra viên tuần đêm/);
+      assert.match(allContent, /Thiết lập người dùng: người điều tra thận trọng/);
+      assert.match(allContent, /World Info chính: manh mối về chìa khóa xanh./);
+      assert.match(allContent, /World Info chính khớp: khi điều tra chìa khóa xanh cần chú ý Khu phố cũ./);
+      assert.match(allContent, /World Info nhân cách: giữ sự cẩn trọng, đừng bỏ qua chi tiết lộ trình./);
+      assert.match(allContent, /World Info chat: phiên hiện tại đã khóa vào cuộc điều tra đêm mưa ở Khu phố cũ./);
 
       const recentBlock = (Array.isArray(captured.promptMessages)
         ? captured.promptMessages
@@ -286,14 +286,14 @@ try {
       ).find((message) => message.sourceKey === "recentMessages");
       assert.ok(recentBlock, "recentMessages block should exist");
       const recentContent = String(recentBlock?.content || "");
-      assert.match(recentContent, /#30 \[assistant\]: Ailin说：去调查Chìa khóa xanh。/);
+      assert.match(recentContent, /#30 \[assistant\]: Ailin nói: đi điều tra chìa khóa xanh./);
       assert.match(
         recentContent,
-        /#31 \[assistant\|旁白\]: 旁白补充：<status mood='tense'>雨夜<\/status>巷子很安静。/,
+        /#31 \[assistant\|lời dẫn\]: Bổ sung của lời dẫn: <status mood='tense'>Đêm mưa<\/status>con hẻm rất yên tĩnh./,
       );
       assert.match(
         recentContent,
-        /#32 \[user\|người chơi\]: <plan>先记路线<\/plan>我会继续调查Chìa khóa xanh。/,
+        /#32 \[user\|người chơi\]: <plan>Ghi nhớ lộ trình trước<\/plan>Tôi sẽ tiếp tục điều tra chìa khóa xanh./,
       );
       assert.doesNotMatch(recentContent, /<think>|<action>/);
 
@@ -339,19 +339,19 @@ try {
       assert.ok(captured);
 
       const allContent = collectAllPromptContent(captured);
-      assert.match(allContent, /Nhân vậtmô tả：夜巡调查员/);
-      assert.match(allContent, /Người dùngthiết lập：谨慎调查者/);
-      assert.doesNotMatch(allContent, /主世界书：Chìa khóa xanhManh mối。/);
-      assert.doesNotMatch(allContent, /主世界书命中：调查Chìa khóa xanh时应关注Khu phố cũ。/);
-      assert.doesNotMatch(allContent, /人格世界书：保持谨慎，不要忽略路线细节。/);
-      assert.doesNotMatch(allContent, /聊天世界书：当前会话已锁定Khu phố cũ雨夜调查。/);
+      assert.match(allContent, /Mô tả nhân vật: điều tra viên tuần đêm/);
+      assert.match(allContent, /Thiết lập người dùng: người điều tra thận trọng/);
+      assert.doesNotMatch(allContent, /World Info chính: manh mối về chìa khóa xanh./);
+      assert.doesNotMatch(allContent, /World Info chính khớp: khi điều tra chìa khóa xanh cần chú ý Khu phố cũ./);
+      assert.doesNotMatch(allContent, /World Info nhân cách: giữ sự cẩn trọng, đừng bỏ qua chi tiết lộ trình./);
+      assert.doesNotMatch(allContent, /World Info chat: phiên hiện tại đã khóa vào cuộc điều tra đêm mưa ở Khu phố cũ./);
 
       const recentBlock = (Array.isArray(captured.promptMessages)
         ? captured.promptMessages
         : []
       ).find((message) => message.sourceKey === "recentMessages");
       assert.ok(recentBlock, "recentMessages block should still exist when worldbook is disabled");
-      assert.match(String(recentBlock?.content || ""), /#30 \[assistant\]: Ailin说：去调查Chìa khóa xanh。/);
+      assert.match(String(recentBlock?.content || ""), /#30 \[assistant\]: Ailin nói: đi điều tra chìa khóa xanh./);
     } finally {
       restore();
     }
@@ -385,3 +385,7 @@ try {
 }
 
 console.log("extractor-phase5-context-fidelity tests passed");
+
+
+
+

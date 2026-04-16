@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import {
   installResolveHooks,
@@ -180,7 +180,7 @@ try {
     };
     recallProfile.blocks.push({
       id: "mvu-final-custom",
-      name: "最终检查块",
+      name: "khối kiểm tra cuối cùng",
       type: "custom",
       enabled: true,
       role: "system",
@@ -192,13 +192,13 @@ try {
     });
     recallProfile.blocks.push({
       id: "mvu-chat-custom",
-      name: "聊天đối tượng检查",
+      name: "chatđối tượngkiểm tra",
       type: "custom",
       enabled: true,
       role: "system",
       sourceKey: "",
       sourceField: "",
-      content: "聊天đối tượng {{chatMessages}}",
+      content: "chatđối tượng {{chatMessages}}",
       injectionMode: "append",
       order: recallProfile.blocks.length,
     });
@@ -220,13 +220,13 @@ try {
   const promptBuild = await buildTaskPrompt(settings, "recall", {
     taskName: "recall",
     charDescription: "Nhân vậtthiết lập <StatusPlaceHolderImpl/> BAD_RECENT",
-    userPersona: "变量Cập nhậtQuy tắc:\ntype: state\n当前Thời gian: 12:00",
+    userPersona: "biếnCập nhậtQuy tắc:\ntype: state\nhiện tạiThời gian: 12:00",
     recentMessages:
       "Tin nhắn gần nhất <status_current_variable>hp=3</status_current_variable> BAD_RECENT",
     chatMessages: [
       {
         role: "assistant",
-        content: "聊天Nội dung BAD_RECENT",
+        content: "chatNội dung BAD_RECENT",
         variables: {
           0: {
             stat_data: { hp: [3, "Trạng tháiCập nhật"] },
@@ -238,15 +238,15 @@ try {
       },
     ],
     userMessage:
-      "Người dùng输入 <updatevariable>secret</updatevariable> {{get_message_variable::stat_data.hp}} BAD_USER",
+      "Người dùngđầu vào <updatevariable>secret</updatevariable> {{get_message_variable::stat_data.hp}} BAD_USER",
     candidateNodes: [
       {
         id: "node-1",
         summary: "Nút ứng viên BAD_CANDIDATE <StatusPlaceHolderImpl/>",
         variables: {
           0: {
-            stat_data: { Địa điểm: "学校" },
-            display_data: { Địa điểm: "教室" },
+            stat_data: { "Địa điểm": "trường học" },
+            display_data: { "Địa điểm": "lớp học" },
           },
         },
         note: "{{get_message_variable::stat_data.Địa điểm}} BAD_CANDIDATE",
@@ -304,7 +304,7 @@ try {
             role: "system",
             sourceKey: "",
             sourceField: "",
-            content: "系统块",
+            content: "khối hệ thống",
             injectionMode: "append",
             order: 0,
           },
@@ -340,7 +340,7 @@ try {
       privateTaskMessages: [
         {
           role: "user",
-          content: "来自 additionalMessages 的Cấu trúc化Người dùng块",
+          content: "khối người dùng có cấu trúc đến từ additionalMessages",
           source: "profile-block",
         },
       ],
@@ -360,7 +360,7 @@ try {
     [
       {
         role: "user",
-        content: "来自 additionalMessages 的Cấu trúc化Người dùng块",
+        content: "khối người dùng có cấu trúc đến từ additionalMessages",
       },
     ],
   );
@@ -369,18 +369,18 @@ try {
     createWorldbookEntry({
       uid: 101,
       name: "raw-trigger",
-      comment: "原始触发命中",
-      content: "世界书原始触发成功。",
+      comment: "nguyên gốckích hoạtkhớp trúng",
+      content: "World Infonguyên gốckích hoạtthành công。",
       strategyType: "selective",
-      keys: ["星火密令"],
+      keys: ["mật lệnh Tinh Hỏa"],
       order: 10,
     }),
     createWorldbookEntry({
       uid: 102,
       name: "raw-ejs",
-      comment: "原始 EJS 命中",
+      comment: "nguyên gốc EJS khớp trúng",
       content:
-        '<%= user_input.includes("星火密令") ? "EJS 看到了原始 MVU 信号。" : "EJS 丢失了原始 MVU 信号。" %>',
+        '<%= user_input.includes("mật lệnh Tinh Hỏa") ? "EJS đã nhìn thấy tín hiệu MVU nguyên gốc." : "EJS đã làm mất tín hiệu MVU nguyên gốc." %>',
       order: 20,
     }),
   ];
@@ -456,12 +456,12 @@ try {
     taskName: "recall",
     recentMessages: "Tin nhắn gần nhất",
     userMessage:
-      "继续 <status_current_variable>星火密令</status_current_variable>",
+      "tiếp tục <status_current_variable>mật lệnh Tinh Hỏa</status_current_variable>",
     chatMessages: [],
   });
 
-  assert.match(rawWorldInfoPromptBuild.systemPrompt, /世界书原始触发成功/);
-  assert.match(rawWorldInfoPromptBuild.systemPrompt, /EJS 看到了原始 MVU 信号/);
+  assert.match(rawWorldInfoPromptBuild.systemPrompt, /World Infonguyên gốckích hoạtthành công/);
+  assert.match(rawWorldInfoPromptBuild.systemPrompt, /EJS đã nhìn thấy tín hiệu MVU nguyên gốc/);
   assert.doesNotMatch(
     rawWorldInfoPromptBuild.systemPrompt,
     /status_current_variable/i,
@@ -639,3 +639,5 @@ try {
     globalThis.getCharWorldbookNames = originalGetCharWorldbookNames;
   }
 }
+
+

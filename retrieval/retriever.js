@@ -1,6 +1,6 @@
-// ST-BME: 三层混合检索编排
-// 融合Lọc trước bằng vector（PeroCore）+ Khuếch tán đồ thị（PeroCore PEDSA）+ 可选 Truy hồi chính xác bằng LLM
-// v2: + Ranh giới nhận thứcLọc(RoleRAG) + 双Ký ứcTruy xuất chéo(AriGraph) + 概率触发
+﻿// ST-BME: điều phối truy xuất trộn ba tầng
+// hòa trộnLọc trước bằng vector（PeroCore）+ Khuếch tán đồ thị（PeroCore PEDSA）+ tùy chọn Truy hồi chính xác bằng LLM
+// v2: + lọc biên nhận thức (RoleRAG) + truy xuất chéo hai lớp ký ức (AriGraph) + kích hoạt xác suất
 
 import { debugLog } from "../runtime/debug-logging.js";
 import { diffuseAndRank } from "./diffusion.js";
@@ -126,19 +126,19 @@ function buildRecallFallbackReason(llmResult) {
   const failureReason = String(llmResult?.failureReason || "").trim();
   switch (failureType) {
     case "timeout":
-      return "LLM 精排请求超时，已Lùi về到评分排序";
+      return "LLM xếp hạng tinhyêu cầuquá thời gian，Đã lùi vềđến bước chấm điểm và xếp hạng";
     case "empty-response":
-      return "LLM 精排返回空响应，已Lùi về到评分排序";
+      return "LLM xếp hạng tinh trả về phản hồi rỗng, đã lùi về bước chấm điểm và xếp hạng";
     case "truncated-json":
-      return "LLM 精排输出被截断，已Lùi về到评分排序";
+      return "Đầu ra của LLM xếp hạng tinh bị cắt ngắn, đã lùi về bước chấm điểm và xếp hạng";
     case "invalid-json":
-      return "LLM 精排未返回有效 JSON，已Lùi về到评分排序";
+      return "LLM xếp hạng tinhkhông trả vềhợp lệ JSON，Đã lùi vềđến bước chấm điểm và xếp hạng";
     case "provider-error":
       return failureReason
-        ? `LLM 精排Gọi thất bại（${failureReason}），已Lùi về到评分排序`
-        : "LLM 精排Gọi thất bại，已Lùi về到评分排序";
+        ? `LLM xếp hạng tinhGọi thất bại（${failureReason}），Đã lùi vềđến bước chấm điểm và xếp hạng`
+        : "LLM xếp hạng tinhGọi thất bại，Đã lùi vềđến bước chấm điểm và xếp hạng";
     default:
-      return failureReason || "LLM 精排未返回可用Kết quả，已Lùi về到评分排序";
+      return failureReason || "LLM xếp hạng tinhkhông trả vềdùng đượcKết quả，Đã lùi vềđến bước chấm điểm và xếp hạng";
   }
 }
 
@@ -232,7 +232,7 @@ function createRetrievalMeta(enableLLMRecall) {
     llm: {
       enabled: enableLLMRecall,
       status: enableLLMRecall ? "pending" : "disabled",
-      reason: enableLLMRecall ? "" : "LLM 精排已Tắt",
+      reason: enableLLMRecall ? "" : "LLM xếp hạng tinhĐã tắt",
       selectionProtocol: "",
       rawSelectedKeys: [],
       resolvedSelectedKeys: [],
@@ -745,7 +745,7 @@ function collectOwnerCandidatesFromText(
     addSceneOwnerCandidate(candidateMap, owner, {
       score,
       source,
-      reason: `文本直接点名 ${alias}`,
+      reason: `Văn bản trực tiếp gọi tên ${alias}`,
     });
   }
 
@@ -773,7 +773,7 @@ function collectOwnerCandidatesFromNodes(
         addSceneOwnerCandidate(candidateMap, resolvedOwner, {
           score: 1.0 + Math.min(0.8, baseScore / 8),
           source: "candidate-pov-owner",
-          reason: `候选 POV 命中 ${resolvedOwner.ownerName || resolvedOwner.ownerKey}`,
+          reason: `ứng viên POV khớp trúng ${resolvedOwner.ownerName || resolvedOwner.ownerKey}`,
         });
       }
       continue;
@@ -799,7 +799,7 @@ function collectOwnerCandidatesFromNodes(
       addSceneOwnerCandidate(candidateMap, owner, {
         score: owner.score,
         source: "objective-participant",
-        reason: owner.reasons?.[0] || "高分Khách quannút提到该Nhân vật",
+        reason: owner.reasons?.[0] || "Nút khách quan điểm cao có nhắc tới nhân vật này",
       });
     }
   }
@@ -824,7 +824,7 @@ function collectRecentActiveOwnerCandidates(
     ...owner,
     score: 0.35,
     sources: ["recent-active"],
-    reasons: ["近期活跃Nhân vật"],
+    reasons: ["Nhân vật hoạt động gần đây"],
   }));
 }
 
@@ -890,7 +890,7 @@ function getSceneOwnerNamesByKeys(sceneOwnerCandidates = [], ownerKeys = []) {
 function buildSceneOwnerCandidateText(sceneOwnerCandidates = []) {
   const candidates = Array.isArray(sceneOwnerCandidates) ? sceneOwnerCandidates : [];
   if (candidates.length === 0) {
-    return "(Hiện không có足够可靠的具体Nhân vật候选；如果Không法判断，请返回空数组)";
+    return "(Hiện không có ứng viên nhân vật cụ thể nào đủ tin cậy; nếu không thể phán định thì hãy trả về mảng rỗng)";
   }
   return candidates
     .map((candidate) => {
@@ -1011,12 +1011,12 @@ function augmentSelectedNodeIdsWithActiveOwnerPov(
 
 function buildRecallSceneOwnerAugmentPrompt(maxNodes, sceneOwnerCandidateText = "") {
   return [
-    "除了 selected_keys，你还需要同时判断这轮场景里真正参与当前回应的具体人物。",
-    `最多返回 ${Math.max(1, Math.min(4, Number(maxNodes) || 4))} 个 active_owner_keys；如果Không法可靠判断，可以返回空数组。`,
-    "active_owner_keys 必须从给出的 ownerKey 候选里选择，不要用Nhân vật卡名替代具体人物。",
-    "active_owner_scores 必须是数组，每项格式为 {\"ownerKey\":\"...\",\"score\":0.0,\"reason\":\"...\"}，score Phạm vi 0..1。",
-    "selected_keys 只能从当前候选短键里选；如果一个都不选，系统会Lùi về到评分Truy hồi。",
-    "如果某个Khách quan事实只被部分人物知道，也要保留这些具体人物的判断，不要把所有人混成一个总Nhân vật。",
+    "Ngoài selected_keys, bạn còn phải đồng thời phán định những nhân vật cụ thể thật sự tham gia vào phản hồi hiện tại của cảnh này.",
+    `Tối đa trả về ${Math.max(1, Math.min(4, Number(maxNodes) || 4))} active_owner_keys; nếu không thể phán định đáng tin cậy thì có thể trả về mảng rỗng.`,
+    "active_owner_keys bắt buộc phải chọn từ các ownerKey ứng viên đã cho, đừng dùng tên thẻ nhân vật để thay cho nhân vật cụ thể.",
+    "active_owner_scores bắt buộc phải là mảng, mỗi mục có định dạng {\"ownerKey\":\"...\",\"score\":0.0,\"reason\":\"...\"}, score nằm trong khoảng 0..1.",
+    "selected_keys chỉ được chọn từ các khóa ngắn ứng viên hiện tại; nếu không chọn mục nào thì hệ thống sẽ lùi về truy hồi theo điểm số.",
+    "Nếu một sự thật khách quan chỉ được một phần nhân vật biết thì vẫn phải giữ nguyên phán định của những nhân vật cụ thể đó, đừng trộn mọi người thành một nhân vật tổng quát.",
     "",
     "## Ứng viên nhân vật trong cảnh",
     sceneOwnerCandidateText || "(Không)",
@@ -1024,15 +1024,15 @@ function buildRecallSceneOwnerAugmentPrompt(maxNodes, sceneOwnerCandidateText = 
 }
 
 /**
- * 三层混合检索Pipeline
+ * Pipeline truy xuất trộn ba tầng
  *
  * @param {object} params
- * @param {object} params.graph - 当前图Trạng thái
- * @param {string} params.userMessage - Người dùng输入
- * @param {string[]} params.recentMessages - Gần nhất几轮对话Nội dung
+ * @param {object} params.graph - trạng thái đồ thị hiện tại
+ * @param {string} params.userMessage - Người dùngđầu vào
+ * @param {string[]} params.recentMessages - nội dung hội thoại của vài lượt gần nhất
  * @param {object} params.embeddingConfig - Embedding Cấu hình API
  * @param {object[]} params.schema - nútLoại Schema
- * @param {object} [params.options] - 检索选项
+ * @param {object} [params.options] - truy xuấttùy chọn
  * @returns {Promise<RetrievalResult>}
  */
 export async function retrieve({
@@ -1162,7 +1162,7 @@ export async function retrieve({
             ...legacyOwnerCandidate,
             score: 0.6,
             sources: ["legacy-unique-match"],
-            reasons: ["唯一映射到图内具体Nhân vật"],
+            reasons: ["Ánh xạ duy nhất tới nhân vật cụ thể trong đồ thị"],
           },
         ]
       : [],
@@ -1263,7 +1263,7 @@ export async function retrieve({
     ? "anchored-soft-visibility"
     : "disabled";
   debugLog(
-    `[ST-BME] 检索开始: ${nodeCount} 个Nút hoạt động${enableVisibility ? " (Ranh giới nhận thức已Bật)" : ""}`,
+    `[ST-BME] Bắt đầu truy xuất: ${nodeCount} nút hoạt động${enableVisibility ? " (Biên nhận thức đã bật)" : ""}`,
   );
 
   let vectorResults = [];
@@ -1279,7 +1279,7 @@ export async function retrieve({
         llm: {
           ...llmMeta,
           status: enableLLMRecall ? "skipped" : "disabled",
-          reason: "Hiện không có可参与Truy hồi的Nút hoạt động",
+          reason: "Hiện không có nút hoạt động nào có thể tham gia truy hồi",
         },
         timings: {
           total: roundMs(nowMs() - startedAt),
@@ -1436,7 +1436,7 @@ export async function retrieve({
 
   const diffusionStartedAt = nowMs();
   if (enableGraphDiffusion && (enableCrossRecall || residualResult.triggered)) {
-    debugLog("[ST-BME] 第2层: PEDSA Khuếch tán đồ thị");
+    debugLog("[ST-BME] Tầng 2: khuếch tán đồ thị PEDSA");
     const seeds = [
       ...vectorResults.map((v) => ({ id: v.nodeId, energy: v.score })),
       ...exactEntityAnchors.map((item) => ({ id: item.nodeId, energy: 2.0 })),
@@ -1496,7 +1496,7 @@ export async function retrieve({
     retrievalMeta.timings.diffusion = roundMs(nowMs() - diffusionStartedAt);
   }
 
-  debugLog("[ST-BME] 第3层: Chấm điểm hỗn hợp");
+  debugLog("[ST-BME] Tầng 3: chấm điểm hỗn hợp");
 
   const scoreMap = new Map();
 
@@ -1891,7 +1891,7 @@ export async function retrieve({
       ...retrievalMeta.llm,
       enabled: false,
       status: "disabled",
-      reason: "LLM 精排已Tắt，直接采用评分排序",
+      reason: "LLM xếp hạng tinh đã tắt, trực tiếp dùng xếp hạng theo điểm",
       candidatePool: 0,
       selectedSeedCount: selectedNodeIds.length,
     };
@@ -1918,7 +1918,7 @@ export async function retrieve({
     normalizedMaxRecallNodes,
   );
 
-  // Lượt truy cập强化
+  // Tăng cường truy cập
   const selectedNodes = selectedNodeIds
     .map((id) => getNode(graph, id))
     .filter(Boolean);
@@ -1995,7 +1995,7 @@ export async function retrieve({
 
   reinforceAccessBatch(selectedNodes);
 
-  debugLog(`[ST-BME] 检索Hoàn tất: 选中 ${selectedNodeIds.length}  nút`);
+  debugLog(`[ST-BME] Truy xuất hoàn tất: đã chọn ${selectedNodeIds.length} nút`);
 
   if (enableProbRecall && probRecallChance > 0) {
     const selectedSet = new Set(selectedNodeIds);
@@ -2014,7 +2014,7 @@ export async function retrieve({
       if (Math.random() < probability) {
         selectedNodeIds.push(c.id);
         debugLog(
-          `[ST-BME] 概率触发: ${c.fields?.name || c.fields?.summary || c.id}`,
+          `[ST-BME] Kích hoạt xác suất: ${c.fields?.name || c.fields?.summary || c.id}`,
         );
       }
     }
@@ -2201,7 +2201,7 @@ async function llmRecall(
       const candidateKey =
         nodeIdToCandidateKey[String(c?.nodeId || node?.id || "").trim()] ||
         `R${index + 1}`;
-      return `[${candidateKey}] Loại=${typeLabel}, Phạm vi tác dụng=${describeMemoryScope(node.scope)}, 时间=${storyTimeLabel || "未标注"}, 时间桶=${String(c.temporalBucket || STORY_TEMPORAL_BUCKETS.UNDATED)}, Truy hồi桶=${describeScopeBucket(c.scopeBucket)}, 认知=${String(c.knowledgeMode || "unknown")}, 可见性=${(Number(c.knowledgeVisibilityScore) || 0).toFixed(3)}, ${fieldsStr} (评分=${(c.weightedScore ?? c.finalScore).toFixed(3)})`;
+      return `[${candidateKey}] Loại=${typeLabel}, Phạm vi tác dụng=${describeMemoryScope(node.scope)}, thời gian=${storyTimeLabel || "chưa gắn nhãn"}, bucket thời gian=${String(c.temporalBucket || STORY_TEMPORAL_BUCKETS.UNDATED)}, bucket truy hồi=${describeScopeBucket(c.scopeBucket)}, nhận thức=${String(c.knowledgeMode || "unknown")}, mức thấy được=${(Number(c.knowledgeVisibilityScore) || 0).toFixed(3)}, ${fieldsStr} (điểm=${(c.weightedScore ?? c.finalScore).toFixed(3)})`;
     })
     .join("\n");
 
@@ -2222,16 +2222,16 @@ async function llmRecall(
     "recall",
     "finalPrompt",
     recallPromptBuild.systemPrompt || customPrompt || [
-      "你是一个Ký ứcTruy hồi分析器。",
-      "根据Người dùng最新输入和对话上下文，从候选Ký ứcnút中选择最相关的nút。",
-      "你还需要判断这轮真正参与当前回应的具体人物，并返回他们的 ownerKey。",
-      "优先维持剧情时间一致，不要把未来信息当成当前已经发生的Khách quan事实带入。",
-      "优先选择：(1) 直接相关的当前场景nút, (2) 因果关系连续性nút, (3) 有潜在影响的背景nút。",
-      `最多选择 ${maxNodes}  nút。`,
-      "Nút ứng viên使用短键标识（R1 / R2 / R3 ...），只能从给出的短键里选择。",
-      "如果你一个都不选，系统会Tự độngLùi về到评分Truy hồi。",
-      "输出严格的 JSON 格式：",
-      '{"selected_keys": ["R1", "R2"], "reason": "R1: 简要说明选择理由；R2: 简要说明选择理由", "active_owner_keys": ["character:alice"], "active_owner_scores": [{"ownerKey": "character:alice", "score": 0.92, "reason": "她在场并且 POV 最相关"}]}',
+      "Bạn là bộ phân tích truy hồi ký ức.",
+      "Hãy dựa trên đầu vào mới nhất của người dùng và ngữ cảnh hội thoại để chọn các nút liên quan nhất từ nhóm ứng viên ký ức.",
+      "Bạn cũng cần phán định những nhân vật cụ thể thật sự tham gia vào phản hồi hiện tại ở lượt này và trả về ownerKey của họ.",
+      "Ưu tiên giữ tính nhất quán của thời gian cốt truyện, đừng đưa thông tin tương lai vào như thể đó là sự thật khách quan đã xảy ra ở hiện tại.",
+      "Ưu tiên chọn: (1) nút trực tiếp liên quan tới cảnh hiện tại, (2) nút giữ tính liên tục nhân quả, (3) nút bối cảnh có ảnh hưởng tiềm tàng.",
+      `tối đachọn ${maxNodes}  nút。`,
+      "Nút ứng viên được nhận diện bằng khóa ngắn (R1 / R2 / R3 ...), chỉ được chọn từ các khóa ngắn đã cho.",
+      "Nếu bạn không chọn mục nào thì hệ thống sẽ tự động lùi về truy hồi theo điểm số.",
+      "Đầu ra phải là JSON nghiêm ngặt:",
+      '{"selected_keys": ["R1", "R2"], "reason": "R1: mô tả ngắn lý do chọn; R2: mô tả ngắn lý do chọn", "active_owner_keys": ["character:alice"], "active_owner_scores": [{"ownerKey": "character:alice", "score": 0.92, "reason": "Cô ấy có mặt và POV liên quan nhất"}]}',
     ].join("\n"),
     recallRegexInput,
     "system",
@@ -2239,21 +2239,21 @@ async function llmRecall(
 
   const userPrompt = [
     "## Thời gian cốt truyện hiện tại",
-    activeStoryTimeLabel || "(未确定)",
+    activeStoryTimeLabel || "(chưa xác định)",
     "",
-    "## Gần nhất对话上下文",
+    "## Gần nhấthội thoạingữ cảnh",
     sectionedContextStr || contextStr || "(Không)",
     "",
-    "## Người dùng最新输入",
+    "## Người dùngmới nhấtđầu vào",
     userMessage,
     "",
-    "## 候选Ký ứcnút",
+    "## ứng viênKý ứcnút",
     candidateDescriptions,
     "",
     "## Ứng viên nhân vật trong cảnh",
     sceneOwnerCandidateText,
     "",
-    "请选择最相关的nút，并同时返回这轮真正参与当前回应的具体人物 ownerKey。",
+    "Hãy chọn các nút liên quan nhất, đồng thời trả về ownerKey của những nhân vật cụ thể thật sự tham gia vào phản hồi hiện tại ở lượt này.",
   ].join("\n");
   const promptPayload = resolveTaskPromptPayload(recallPromptBuild, userPrompt);
   const additionalMessages = Array.isArray(promptPayload.additionalMessages)
@@ -2326,10 +2326,10 @@ async function llmRecall(
   if (hasSelectedKeysField) {
     if (!Array.isArray(result?.selected_keys)) {
       fallbackType = "invalid-candidate";
-      fallbackReason = "LLM 返回的 selected_keys Cấu trúcKhông效，已Lùi về到评分排序";
+      fallbackReason = "LLM trả về selected_keys có cấu trúc không hợp lệ, đã lùi về bước chấm điểm và xếp hạng";
     } else if (rawSelectedKeys.length === 0) {
       fallbackType = "empty-selection";
-      fallbackReason = "LLM 返回了空的 selected_keys，已Lùi về到评分排序";
+      fallbackReason = "LLM trả về selected_keys rỗng, đã lùi về bước chấm điểm và xếp hạng";
     } else {
       resolvedSelectedKeys = rawSelectedKeys
         .filter((key) => candidateKeyToNodeId[key])
@@ -2343,10 +2343,10 @@ async function llmRecall(
   } else if (hasSelectedIdsField) {
     if (!Array.isArray(result?.selected_ids)) {
       fallbackType = "invalid-candidate";
-      fallbackReason = "LLM 返回的 selected_ids Cấu trúcKhông效，已Lùi về到评分排序";
+      fallbackReason = "LLM trả về selected_ids có cấu trúc không hợp lệ, đã lùi về bước chấm điểm và xếp hạng";
     } else if (rawSelectedIds.length === 0) {
       fallbackType = "empty-selection";
-      fallbackReason = "LLM 返回了空的 selected_ids，已Lùi về到评分排序";
+      fallbackReason = "LLM trả về selected_ids rỗng, đã lùi về bước chấm điểm và xếp hạng";
     } else {
       resolvedSelectedNodeIds = uniqueNodeIds(
         rawSelectedIds.filter((id) => candidates.some((c) => c.nodeId === id)),
@@ -2358,7 +2358,7 @@ async function llmRecall(
     }
   } else if (llmResult?.ok) {
     fallbackType = "invalid-candidate";
-    fallbackReason = "LLM 返回了Không法识别的 JSON Cấu trúc，已Lùi về到评分排序";
+    fallbackReason = "LLM trả về cấu trúc JSON không thể nhận diện, đã lùi về bước chấm điểm và xếp hạng";
   }
 
   if (resolvedSelectedNodeIds.length > 0) {
@@ -2371,11 +2371,11 @@ async function llmRecall(
       reason:
         selectionProtocol === "legacy-selected-ids"
           ? resolvedSelectedNodeIds.length < rawSelectedIds.length
-            ? "LLM 返回了部分Không效或超限 selected_ids，已保留可解析Kết quả"
-            : "LLM 主导演选择Hoàn tất（legacy selected_ids）"
+            ? "LLM trả về selected_ids không hợp lệ hoặc vượt giới hạn ở một phần, đã giữ lại phần kết quả có thể phân tích"
+            : "LLM chọn lọc chính đã hoàn tất (legacy selected_ids)"
           : resolvedSelectedNodeIds.length < rawSelectedKeys.length
-            ? "LLM 返回了部分Không效或超限 selected_keys，已保留可解析Kết quả"
-            : "LLM 主导演选择Hoàn tất",
+            ? "LLM trả về selected_keys không hợp lệ hoặc vượt giới hạn ở một phần, đã giữ lại phần kết quả có thể phân tích"
+            : "LLM chọn lọc chính đã hoàn tất",
       selectionProtocol,
       rawSelectedKeys,
       resolvedSelectedKeys,
@@ -2387,11 +2387,11 @@ async function llmRecall(
     };
   }
 
-  // LLM Thất bại时Lùi về到纯评分排序
+  // Khi LLM thất bại thì lùi về xếp hạng thuần theo điểm
   fallbackReason ||= llmResult?.ok
     ? hasSelectedKeysField || hasSelectedIdsField
-      ? "LLM 返回的候选短键或候选 ID Không法映射到当前候选，已Lùi về到评分排序"
-      : "LLM 返回了Không法识别的 JSON Cấu trúc，已Lùi về到评分排序"
+      ? "Khóa ngắn ứng viên hoặc ID ứng viên mà LLM trả về không thể ánh xạ vào nhóm ứng viên hiện tại, đã lùi về bước chấm điểm và xếp hạng"
+      : "LLM trả về cấu trúc JSON không thể nhận diện, đã lùi về bước chấm điểm và xếp hạng"
     : buildRecallFallbackReason(llmResult);
   fallbackType ||= llmResult?.ok
     ? "invalid-candidate"
@@ -2415,13 +2415,13 @@ async function llmRecall(
   };
 }
 
-// ==================== v2 辅助函数 ====================
+// ==================== Hàm hỗ trợ v2 ====================
 
 /**
- * ⑥ Ranh giới nhận thứcLọc（RoleRAG 启发）
- * Lọc掉设置了 visibility 但不包含当前Nhân vật的nút
+ * ⑥ Lọc biên nhận thức (lấy cảm hứng từ RoleRAG)
+ * Lọc bỏ các nút đã cài visibility nhưng không bao gồm nhân vật hiện tại
  * @param {object[]} nodes
- * @param {string} characterName - 当前视角Tên nhân vật
+ * @param {string} characterName - hiện tạigóc nhìnTên nhân vật
  * @returns {object[]}
  */
 function filterByVisibility(nodes, characterName) {
@@ -2446,8 +2446,8 @@ function filterByVisibility(nodes, characterName) {
 }
 
 /**
- * 构建最终检索Kết quả
- * 分离常驻Tiêm（Core）和Truy hồiTiêm（Recall）
+ * xây dựngcuối cùngtruy xuấtKết quả
+ * Tách phần tiêm thường trú (Core) và phần tiêm truy hồi (Recall)
  */
 function buildResult(graph, selectedNodeIds, schema, meta = {}) {
   const coreNodes = [];
@@ -2460,7 +2460,7 @@ function buildResult(graph, selectedNodeIds, schema, meta = {}) {
       ? getActiveSummaryEntries(graph)
       : [];
 
-  // 常驻Tiêmnút（alwaysInject=true 的Loại）
+  // Các nút tiêm thường trú (loại có alwaysInject=true)
   const alwaysInjectTypes = new Set(
     schema.filter((s) => s.alwaysInject).map((s) => s.id),
   );
@@ -2789,3 +2789,4 @@ function groupRecallNodes(nodes) {
 function uniqueNodeIds(nodeIds) {
   return [...new Set(nodeIds)];
 }
+

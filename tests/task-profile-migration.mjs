@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   createDefaultTaskProfiles,
   ensureTaskProfiles,
@@ -10,8 +10,8 @@ import {
 } from "../prompting/prompt-profiles.js";
 
 const legacySettings = {
-  extractPrompt: "旧Trích xuất提示",
-  recallPrompt: "旧Truy hồi提示",
+  extractPrompt: "Nhắc trích xuất cũ",
+  recallPrompt: "Nhắc truy hồi cũ",
   compressPrompt: "",
   synopsisPrompt: "",
   reflectionPrompt: "",
@@ -39,9 +39,9 @@ assert.deepEqual(
   extractProfile.blocks.map((block) => block.name),
   [
     "Phần mở đầu",
-    "Nhân vậtđịnh nghĩa",
-    "Nhân vậtmô tả",
-    "Người dùngthiết lập",
+    "Định danh nhân vật",
+    "Mô tả nhân vật",
+    "Thiết lập người dùng",
     "Khối World Info phía trước",
     "Khối World Info phía sau",
     "Tin nhắn gần nhất",
@@ -51,7 +51,7 @@ assert.deepEqual(
     "Tóm tắt hoạt động",
     "Thời gian cốt truyện",
     "Định dạng đầu ra",
-    "Hành viQuy tắc",
+    "Quy tắc hành vi",
   ],
 );
 assert.deepEqual(
@@ -98,7 +98,7 @@ assert.equal(
 );
 assert.equal(
   extractProfile.metadata.legacyPromptSnapshot,
-  "旧Trích xuất提示",
+  "Nhắc trích xuất cũ",
 );
 
 const defaults = createDefaultTaskProfiles();
@@ -158,15 +158,15 @@ const upgradedLegacyDefault = getActiveTaskProfile(
             blocks: [
               {
                 id: "default-role",
-                name: "Nhân vậtđịnh nghĩa",
+                name: "Định danh nhân vật",
                 type: "custom",
                 role: "system",
-                content: "保留我自己的Nhân vậtđịnh nghĩa",
+                content: "giữ lại định danh nhân vật của riêng tôi",
                 order: 0,
               },
               {
                 id: "default-char-desc",
-                name: "Nhân vậtmô tả",
+                name: "Mô tả nhân vật",
                 type: "builtin",
                 role: "system",
                 sourceKey: "charDescription",
@@ -174,7 +174,7 @@ const upgradedLegacyDefault = getActiveTaskProfile(
               },
               {
                 id: "default-user-persona",
-                name: "Người dùngthiết lập",
+                name: "Thiết lập người dùng",
                 type: "builtin",
                 role: "system",
                 sourceKey: "userPersona",
@@ -201,15 +201,15 @@ const upgradedLegacyDefault = getActiveTaskProfile(
                 name: "Định dạng đầu ra",
                 type: "custom",
                 role: "system",
-                content: "保留我自己的Định dạng đầu ra",
+                content: "giữ lại định dạng đầu ra của riêng tôi",
                 order: 5,
               },
               {
                 id: "default-rules",
-                name: "Hành viQuy tắc",
+                name: "Quy tắc hành vi",
                 type: "custom",
                 role: "system",
-                content: "保留我自己的Hành viQuy tắc",
+                content: "giữ lại quy tắc hành vi của riêng tôi",
                 order: 6,
               },
             ],
@@ -222,12 +222,12 @@ const upgradedLegacyDefault = getActiveTaskProfile(
 );
 assert.equal(upgradedLegacyDefault.blocks.length, 14);
 assert.equal(upgradedLegacyDefault.blocks[0].name, "Phần mở đầu");
-assert.match(upgradedLegacyDefault.blocks[0].content, /虚拟的世界/);
+assert.match(upgradedLegacyDefault.blocks[0].content, /thế giới ảo/);
 assert.equal(upgradedLegacyDefault.blocks[0].role, "system");
 assert.equal(upgradedLegacyDefault.blocks[0].injectionMode, "relative");
-assert.equal(upgradedLegacyDefault.blocks[1].content, "保留我自己的Nhân vậtđịnh nghĩa");
-assert.equal(upgradedLegacyDefault.blocks[12].content, "保留我自己的Định dạng đầu ra");
-assert.equal(upgradedLegacyDefault.blocks[13].content, "保留我自己的Hành viQuy tắc");
+assert.equal(upgradedLegacyDefault.blocks[1].content, "giữ lại định danh nhân vật của riêng tôi");
+assert.equal(upgradedLegacyDefault.blocks[12].content, "giữ lại định dạng đầu ra của riêng tôi");
+assert.equal(upgradedLegacyDefault.blocks[13].content, "giữ lại quy tắc hành vi của riêng tôi");
 assert.equal(upgradedLegacyDefault.blocks[12].role, "user");
 assert.equal(upgradedLegacyDefault.blocks[13].role, "user");
 
@@ -245,7 +245,7 @@ const staleBuiltinDefaults = ensureTaskProfiles({
           updatedAt: "2000-01-01T00:00:00.000Z",
           blocks: currentDefaultExtract.blocks.map((block) =>
             block.id === "default-role"
-              ? { ...block, content: "这是过期的Mặc địnhNhân vậtđịnh nghĩa" }
+              ? { ...block, content: "đây là định danh nhân vật mặc định đã hết hạn" }
               : block,
           ),
           metadata: {
@@ -259,7 +259,7 @@ const staleBuiltinDefaults = ensureTaskProfiles({
           id: "extract-custom-1",
           taskType: "extract",
           builtin: false,
-          name: "我的自định nghĩa预设",
+          name: "preset tự định nghĩa của tôi",
           promptMode: "block-based",
           enabled: true,
           updatedAt: "2026-04-05T00:00:00.000Z",
@@ -272,7 +272,7 @@ const staleBuiltinDefaults = ensureTaskProfiles({
               role: "system",
               sourceKey: "",
               sourceField: "",
-              content: "保留我的自định nghĩaNội dung",
+              content: "giữ lại nội dung tự định nghĩa của tôi",
               injectionMode: "append",
               order: 0,
             },
@@ -320,7 +320,7 @@ assert.match(
 assert.ok(preservedCustomExtract);
 assert.equal(
   preservedCustomExtract.blocks[0].content,
-  "保留我的自định nghĩaNội dung",
+  "giữ lại nội dung tự định nghĩa của tôi",
 );
 
 const sameStampBuiltinDefault = ensureTaskProfiles({
@@ -333,7 +333,7 @@ const sameStampBuiltinDefault = ensureTaskProfiles({
           ...currentDefaultExtract,
           blocks: currentDefaultExtract.blocks.map((block) =>
             block.id === "default-role"
-              ? { ...block, content: "同版本下保留我的Preset mặc định修改" }
+              ? { ...block, content: "giữ lại chỉnh sửa preset mặc định của tôi trong cùng phiên bản" }
               : block,
           ),
           metadata: {
@@ -350,7 +350,7 @@ const sameStampDefaultExtract = sameStampBuiltinDefault.extract.profiles.find(
 assert.equal(
   sameStampDefaultExtract.blocks.find((block) => block.id === "default-role")
     ?.content,
-  "同版本下保留我的Preset mặc định修改",
+  "giữ lại chỉnh sửa preset mặc định của tôi trong cùng phiên bản",
 );
 
 const sameTimestampButChangedTemplateDefaults = ensureTaskProfiles({
@@ -363,7 +363,7 @@ const sameTimestampButChangedTemplateDefaults = ensureTaskProfiles({
           ...currentDefaultExtract,
           blocks: currentDefaultExtract.blocks.map((block) =>
             block.id === "default-role"
-              ? { ...block, content: "老模板Nội dung但时间戳没变" }
+              ? { ...block, content: "nội dung mẫu cũ nhưng dấu thời gian không đổi" }
               : block,
           ),
           metadata: {
@@ -408,7 +408,7 @@ legacyRegexSettings.taskProfiles.extract.profiles.push(
   normalizeTaskProfile("extract", {
     id: "extract-legacy-regex",
     taskType: "extract",
-    name: "旧Regexbản sao",
+    name: "Bản sao regex cũ",
     builtin: false,
     regex: {
       enabled: true,
@@ -416,7 +416,7 @@ legacyRegexSettings.taskProfiles.extract.profiles.push(
       localRules: [
         {
           id: "legacy-rule-1",
-          script_name: "隐藏Quy tắc",
+          script_name: "ẩnQuy tắc",
           enabled: true,
           find_regex: "/SECRET/g",
           replace_string: "MASK",
@@ -436,7 +436,7 @@ assert.deepEqual(
     "Làm sạch mặc định: UpdateVariable",
     "Làm sạch mặc định: status_current_variable",
     "Làm sạch mặc định: StatusPlaceHolderImpl",
-    "隐藏Quy tắc",
+    "ẩnQuy tắc",
   ],
 );
 assert.deepEqual(
@@ -463,7 +463,7 @@ const existingGlobalRegexSettings = {
     localRules: [
       {
         id: "existing-global-rule",
-        script_name: "现有通用Quy tắc",
+        script_name: "hiện có quy tắc dùng chung",
         enabled: true,
         find_regex: "/GLOBAL/g",
         replace_string: "KEEP",
@@ -476,13 +476,13 @@ existingGlobalRegexSettings.taskProfiles.extract.profiles.push(
   normalizeTaskProfile("extract", {
     id: "extract-legacy-extra",
     taskType: "extract",
-    name: "旧Quy tắc补充",
+    name: "Quy tắc bổ sung cũ",
     builtin: false,
     regex: {
       localRules: [
         {
           id: "legacy-extra-rule",
-          script_name: "额外旧Quy tắc",
+          script_name: "Quy tắc cũ bổ sung thêm",
           enabled: true,
           find_regex: "/EXTRA/g",
           replace_string: "ADD",
@@ -499,7 +499,7 @@ assert.deepEqual(
   migratedWithExistingGlobal.settings.globalTaskRegex.localRules.map(
     (rule) => rule.script_name,
   ),
-  ["现有通用Quy tắc", "额外旧Quy tắc"],
+  ["hiện có quy tắc dùng chung", "Quy tắc cũ bổ sung thêm"],
 );
 
 const importedLegacyProfileMigration = migrateLegacyProfileRegexToGlobal(
@@ -533,7 +533,7 @@ const importedLegacyProfileMigration = migrateLegacyProfileRegexToGlobal(
       localRules: [
         {
           id: "legacy-import-rule",
-          script_name: "旧NhậpQuy tắc",
+          script_name: "Quy tắc nhập cũ",
           enabled: true,
           find_regex: "/A/g",
           replace_string: "B",
@@ -563,7 +563,7 @@ assert.deepEqual(
   importedLegacyProfileMigration.globalTaskRegex.localRules.map(
     (rule) => rule.script_name,
   ),
-  ["旧NhậpQuy tắc"],
+  ["Quy tắc nhập cũ"],
 );
 assert.deepEqual(
   importedLegacyProfileMigration.profile?.regex || {},
@@ -571,3 +571,4 @@ assert.deepEqual(
 );
 
 console.log("task-profile-migration tests passed");
+

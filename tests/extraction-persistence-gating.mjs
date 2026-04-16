@@ -195,7 +195,7 @@ function createRuntime(persistResult) {
   });
   runtime.extractMemories = async () => ({
     success: false,
-    error: "Trích xuất LLM 未返回有效Thao tác",
+    error: "Trích xuất LLM không trả vềhợp lệThao tác",
     processedRange: [4, 4],
   });
   const result = await executeExtractionBatchController(runtime, {

@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { formatInjection } from "../retrieval/injector.js";
 import { DEFAULT_NODE_SCHEMA } from "../graph/schema.js";
 
@@ -10,7 +10,7 @@ const coreEvent = {
     regionPrimary: "Tháp chuông",
   },
   fields: {
-    summary: "Ailin在Tháp chuông发现了地下入口",
+    summary: "Ailin đã phát hiện ra lối vào dưới đất trong Tháp chuông",
     participants: "Ailin",
     status: "resolved",
   },
@@ -36,10 +36,10 @@ const recalledCharacter = {
     regionPrimary: "Tháp chuông",
   },
   fields: {
-    summary: "Ailin觉得地下室入口说明Tháp chuông里有人长期活动",
-    belief: "这里藏着失踪案Manh mối",
-    emotion: "警觉",
-    attitude: "必须立刻下去查看",
+    summary: "Ailin cảm thấy lối vào tầng hầm cho thấy bên trong Tháp chuông có người hoạt động lâu dài",
+    belief: "ở đây giấu manh mối về vụ mất tích",
+    emotion: "cảnh giác",
+    attitude: "bắt buộc phải xuống xem ngay",
   },
   storyTime: {
     segmentId: "tl-1",
@@ -62,10 +62,10 @@ const recalledReflection = {
     ownerName: "người chơi",
   },
   fields: {
-    summary: "người chơi已经把Tháp chuông和失踪案牢牢绑定起来了",
-    belief: "Tháp chuông地下室肯定有更深的秘密",
-    emotion: "紧张",
-    attitude: "希望Ailin谨慎推进",
+    summary: "người chơi đã gắn chặt Tháp chuông với vụ mất tích rồi",
+    belief: "tầng hầm Tháp chuông chắc chắn còn có bí mật sâu hơn",
+    emotion: "căng thẳng",
+    attitude: "hy vọng Ailin thúc đẩy một cách thận trọng",
   },
 };
 
@@ -76,7 +76,7 @@ const recalledSynopsis = {
     layer: "objective",
   },
   fields: {
-    summary: "昨夜冲突后，Ailin在Sáng sớm ngày thứ hai重新回到Tháp chuông，并发现地下入口与失踪案有直接联系。",
+    summary: "Sau xung đột đêm qua, Ailin đã quay lại Tháp chuông vào sáng sớm ngày thứ hai và phát hiện lối vào dưới đất có liên hệ trực tiếp với vụ mất tích.",
   },
   storyTimeSpan: {
     startSegmentId: "tl-0",
@@ -93,7 +93,7 @@ const activeSummaryEntry = {
   level: 0,
   kind: "small",
   status: "active",
-  text: "Ailin刚在Tháp chuông重新站稳脚跟，并Xác nhận地下入口和失踪案直接相关，局面从调查转向即将下探。",
+  text: "Ailin vừa đứng vững lại trong Tháp chuông, đồng thời xác nhận lối vào dưới đất có liên hệ trực tiếp với vụ mất tích, khiến cục diện chuyển từ điều tra sang chuẩn bị tiến xuống sâu hơn.",
   sourceTask: "synopsis",
   extractionRange: [1, 3],
   messageRange: [2, 7],
@@ -142,7 +142,7 @@ assert.match(text, /\[Memory - Character POV: Ailin\]/);
 assert.match(text, /\[Summary - Active Frontier\]/);
 assert.match(text, /\[Summary L0 \/ Tầng 2 ~ 7\]/);
 assert.match(text, /\[Memory - User POV \/ Not Character Facts\]/);
-assert.match(text, /不等于Nhân vật已知事实/);
+assert.match(text, /không đồng nghĩa vớiNhân vậtđã biếtsự thật/);
 assert.match(text, /\[Memory - Objective \/ Current Region\]/);
 assert.match(text, /pov_memory_table:/);
 assert.match(text, /\| owner \| story_time \| summary \| belief \| emotion \| attitude \|/);
@@ -155,3 +155,4 @@ assert.match(text, /story_time_span/);
 assert.match(text, /Sau xung đột đêm qua -> Sáng sớm ngày thứ hai/);
 
 console.log("injector-format tests passed");
+

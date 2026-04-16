@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   addNode,
@@ -26,7 +26,7 @@ addNode(
     type: "synopsis",
     seq: 12,
     fields: {
-      summary: "旧版概要nút：Tháp chuông调查从Manh mốiXác nhận推进到准备下探。",
+      summary: "Nút tóm lược bản cũ: cuộc điều tra Tháp chuông đã được thúc đẩy từ xác nhận manh mối sang chuẩn bị xuống sâu hơn.",
     },
   }),
 );
@@ -45,7 +45,7 @@ addNode(
     type: "synopsis",
     seq: 18,
     fields: {
-      summary: "旧概要不应在显式空 summaryState 下Tự động复活。",
+      summary: "Tóm lược cũ không nên tự động sống lại khi summaryState được để rỗng một cách tường minh.",
     },
   }),
 );
@@ -64,14 +64,14 @@ const graph = createEmptyGraph();
 const first = appendSummaryEntry(graph, {
   level: 0,
   kind: "small",
-  text: "第一条Tóm tắt ngắn",
+  text: "mục thứ nhấtTóm tắt ngắn",
   extractionRange: [1, 3],
   messageRange: [2, 7],
 });
 const second = appendSummaryEntry(graph, {
   level: 0,
   kind: "small",
-  text: "第二条Tóm tắt ngắn",
+  text: "mục thứ haiTóm tắt ngắn",
   extractionRange: [4, 6],
   messageRange: [8, 13],
 });
@@ -93,10 +93,11 @@ const restoredGraph = buildGraphFromSnapshot(snapshot, {
   chatId: "summary-chat",
 });
 assert.equal(getActiveSummaryEntries(restoredGraph).length, 1);
-assert.equal(getActiveSummaryEntries(restoredGraph)[0].text, "第二条Tóm tắt ngắn");
+assert.equal(getActiveSummaryEntries(restoredGraph)[0].text, "mục thứ haiTóm tắt ngắn");
 assert.equal(
   restoredGraph.summaryState.entries.some((entry) => entry.id === first.id && entry.status === "folded"),
   true,
 );
 
 console.log("summary-state tests passed");
+

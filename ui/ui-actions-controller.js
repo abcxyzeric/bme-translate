@@ -1,4 +1,4 @@
-function getTimerApi(runtime = {}) {
+﻿function getTimerApi(runtime = {}) {
   const rawSetTimeout =
     typeof runtime.setTimeout === "function"
       ? runtime.setTimeout
@@ -170,7 +170,7 @@ export async function onViewGraphController(runtime) {
     `Phân bố loại: ${
       Object.entries(stats.typeCounts)
         .map(([k, v]) => `${k}=${v}`)
-        .join(", ") || "(空)"
+        .join(", ") || "(rỗng)"
     }`,
   ].join("\n");
 
@@ -211,9 +211,9 @@ export async function onFetchMemoryLLMModelsController(runtime) {
   const result = await runtime.fetchMemoryLLMModels();
 
   if (result.success) {
-    runtime.toastr.success(`已拉取 ${result.models.length}  model LLM bộ nhớ`);
+    runtime.toastr.success(`Đã lấy ${result.models.length} model LLM bộ nhớ`);
   } else {
-    runtime.toastr.error(`拉取Thất bại: ${result.error}`);
+    runtime.toastr.error(`Lấy thất bại: ${result.error}`);
   }
 
   return result;
@@ -232,12 +232,12 @@ export async function onFetchEmbeddingModelsController(runtime, mode = null) {
   const result = await runtime.fetchAvailableEmbeddingModels(config);
 
   if (result.success) {
-    const modeLabel = targetMode === "backend" ? "Backend" : "直连";
+    const modeLabel = targetMode === "backend" ? "Backend" : "kết nối trực tiếp";
     runtime.toastr.success(
-      `已拉取 ${result.models.length}  model Embedding ${modeLabel}`,
+      `Đã lấy ${result.models.length} model Embedding ${modeLabel}`,
     );
   } else {
-    runtime.toastr.error(`拉取Thất bại: ${result.error}`);
+    runtime.toastr.error(`Lấy thất bại: ${result.error}`);
   }
 
   return result;
@@ -444,7 +444,7 @@ export async function onRebuildController(runtime) {
     if (runtime.getCurrentGraph().vectorIndexState?.lastWarning) {
       runtime.setRuntimeStatus(
         "Xây lại đồ thị hoàn tất",
-        `Đã phát lại ${replayedBatches} 批，但Vector仍待修复`,
+        `Đã phát lại ${replayedBatches} lô, nhưng vector vẫn đang chờ sửa`,
         "warning",
       );
       runtime.toastr.warning(
@@ -453,7 +453,7 @@ export async function onRebuildController(runtime) {
     } else {
       runtime.setRuntimeStatus(
         "Xây lại đồ thị hoàn tất",
-        `Đã phát lại ${replayedBatches} 批，đồ thị与Vector索引已刷新`,
+        `Đã phát lại ${replayedBatches} lô, đồ thị và chỉ mục vector đã được làm mới`,
         "success",
       );
       runtime.toastr.success("Đồ thị và chỉ mục vector đã được xây lại toàn lượng theo chat hiện tại");
@@ -713,7 +713,7 @@ export async function onManualSynopsisController(runtime) {
     }
     runtime.saveGraphToChat?.({ reason: "manual-small-summary" });
     runtime.refreshPanelLiveState?.();
-    updateManualActionUiState(runtime, "Tạo tóm tắt ngắn hoàn tất", "新的Tóm tắt ngắn已加入总结前沿", "success");
+    updateManualActionUiState(runtime, "Tạo tóm tắt ngắn hoàn tất", "Tóm tắt ngắn mới đã được đưa vào tuyến đầu tổng kết", "success");
     runtime.toastr.success("Tạo tóm tắt ngắn hoàn tất");
     return {
       handledToast: true,
@@ -736,7 +736,7 @@ export async function onManualSummaryRollupController(runtime) {
   const graph = runtime.getCurrentGraph();
   if (!graph) return;
   if (!runtime.ensureGraphMutationReady("Thực hiện gộp tóm tắt")) return;
-  updateManualActionUiState(runtime, "Đang gộp tóm tắt", "正在折叠当前Tiền tuyến tóm tắt hoạt động", "running");
+  updateManualActionUiState(runtime, "Đang gộp tóm tắt", "đanggộphiện tạiTiền tuyến tóm tắt hoạt động", "running");
 
   try {
     const result = await runtime.rollupSummaryFrontier({
@@ -747,7 +747,7 @@ export async function onManualSummaryRollupController(runtime) {
     if (!Number(result?.createdCount || 0)) {
       updateManualActionUiState(
         runtime,
-        "Gộp tóm tắt未执行",
+        "Gộp tóm tắt chưa thực thi",
         result?.reason || "Hiện không có tóm tắt hoạt động nào đạt ngưỡng gộp",
         "idle",
       );
@@ -764,11 +764,11 @@ export async function onManualSummaryRollupController(runtime) {
     updateManualActionUiState(
       runtime,
       "Gộp tóm tắt hoàn tất",
-      `Đã gộp ${result.foldedCount || 0} mục, số tóm tắt tạo ra ${result.createdCount || 0} 条`,
+      `Đã gộp ${result.foldedCount || 0} mục, số tóm tắt tạo ra ${result.createdCount || 0} mục`,
       "success",
     );
     runtime.toastr.success(
-      `Gộp tóm tắt hoàn tất：折叠 ${result.foldedCount || 0} 条，产出 ${result.createdCount || 0} 条`,
+      `Gộp tóm tắt hoàn tất: gộp ${result.foldedCount || 0} mục, tạo ra ${result.createdCount || 0} mục`,
     );
     return {
       handledToast: true,
@@ -798,7 +798,7 @@ export async function onRebuildSummaryStateController(runtime, options = {}) {
     runtime,
     "Đang xây lại tóm tắt",
     mode === "range"
-      ? `Đang xây theo phạm vi ${hasStart ? Number(options.startFloor) : "?"} ~ ${hasEnd ? Number(options.endFloor) : "最新"} để xây lại chuỗi tóm tắt`
+      ? `Đang xây theo phạm vi ${hasStart ? Number(options.startFloor) : "?"} ~ ${hasEnd ? Number(options.endFloor) : "mới nhất"} để xây lại chuỗi tóm tắt`
       : "Đang xây lại phạm vi liên quan đến tóm tắt hiện tại",
     "running",
   );
@@ -833,11 +833,11 @@ export async function onRebuildSummaryStateController(runtime, options = {}) {
     updateManualActionUiState(
       runtime,
       "Xây lại tóm tắt hoàn tất",
-      `Tóm tắt ngắn ${result.smallSummaryCount || 0} mục, tóm tắt gộp ${result.rollupCount || 0} 条`,
+      `Tóm tắt ngắn ${result.smallSummaryCount || 0} mục, tóm tắt gộp ${result.rollupCount || 0} mục`,
       "success",
     );
     runtime.toastr.success(
-      `Xây lại tóm tắt hoàn tất：Tóm tắt ngắn ${result.smallSummaryCount || 0} mục, tóm tắt gộp ${result.rollupCount || 0} 条`,
+      `Xây lại tóm tắt hoàn tất: tóm tắt ngắn ${result.smallSummaryCount || 0} mục, tóm tắt gộp ${result.rollupCount || 0} mục`,
     );
     return {
       handledToast: true,
@@ -977,7 +977,7 @@ export async function onManualEvolveController(runtime) {
     } else {
       updateManualActionUiState(
         runtime,
-        "Tiến hóa cưỡng bứcKhông变更",
+        "Tiến hóa cưỡng bức không tạo thay đổi",
         `Đã hoàn tất đánh giá hợp nhất, nhưng lượt này không có thay đổi đồ thị.${sourceLabel}。`,
         "idle",
       );
@@ -1032,7 +1032,7 @@ export async function onUndoLastMaintenanceController(runtime) {
       "success",
     );
     runtime.toastr.success(
-      `已Đã hoàn tác lần bảo trì gần nhất: ${result.entry?.summary || result.entry?.action || "Thao tác không rõ"}`,
+      `Đã hoàn tác lần bảo trì gần nhất: ${result.entry?.summary || result.entry?.action || "Thao tác không rõ"}`,
     );
     return {
       handledToast: true,
@@ -1052,10 +1052,10 @@ export async function onUndoLastMaintenanceController(runtime) {
 // ==================== Dọn dữ liệu ====================
 
 export async function onClearGraphController(runtime) {
-  if (!runtime.confirm("确定要Xóa đồ thị hiện tại？\n\n所有nút和边将被Xóa，Thao tác不可撤销。")) {
+  if (!runtime.confirm("Xác nhận xóa đồ thị hiện tại?\n\nTất cả nút và cạnh sẽ bị xóa, thao tác này không thể hoàn tác.")) {
     return { cancelled: true };
   }
-  if (!runtime.ensureGraphMutationReady("清空đồ thị")) return;
+  if (!runtime.ensureGraphMutationReady("xóa sạchđồ thị")) return;
   const chatId = runtime.getCurrentChatId?.();
 
   if (chatId && typeof runtime.clearCurrentChatRecoveryAnchors === "function") {
@@ -1075,7 +1075,7 @@ export async function onClearGraphController(runtime) {
   );
   runtime.setCurrentGraph(nextGraph);
   runtime.clearInjectionState();
-  runtime.markVectorStateDirty?.("清空đồ thị后需要Xây lại vector索引");
+  runtime.markVectorStateDirty?.("Sau khi xóa sạch đồ thị cần xây lại chỉ mục vector");
   runtime.setExtractionCount(0);
   runtime.setLastExtractedItems([]);
   runtime.saveGraphToChat({
@@ -1090,20 +1090,20 @@ export async function onClearGraphController(runtime) {
     String(runtime.getSettings?.()?.cloudStorageMode || "automatic") !== "manual";
   runtime.toastr.success(
     remoteSyncMayRestore
-      ? "đồ thị hiện tại已清空；若刷新后旧nút重新出现，请再Xóa dữ liệu đồng bộ máy chủ"
-      : "đồ thị hiện tại已清空",
+      ? "Đồ thị hiện tại đã bị xóa sạch; nếu làm mới xong mà nút cũ xuất hiện lại thì hãy xóa thêm dữ liệu đồng bộ máy chủ"
+      : "Đồ thị hiện tại đã bị xóa sạch",
   );
   return { handledToast: true };
 }
 
 export async function onClearGraphRangeController(runtime, startSeq, endSeq) {
   if (!Number.isFinite(startSeq) || !Number.isFinite(endSeq) || startSeq > endSeq) {
-    runtime.toastr.warning("请填写有效的起始和Tầng kết thúc");
+    runtime.toastr.warning("Hãy điền tầng bắt đầu và tầng kết thúc hợp lệ");
     return { handledToast: true };
   }
   if (
     !runtime.confirm(
-      `确定要Xóatầng ${startSeq} ~ ${endSeq} Phạm vi内的所有nút？\n\nThao tác不可撤销。`,
+      `Xác nhận xóa toàn bộ nút trong phạm vi tầng ${startSeq} ~ ${endSeq}?\n\nThao tác này không thể hoàn tác.`,
     )
   ) {
     return { cancelled: true };
@@ -1128,16 +1128,16 @@ export async function onClearGraphRangeController(runtime, startSeq, endSeq) {
   }
 
   if (removedCount > 0) {
-    runtime.markVectorStateDirty?.("Dọn theo phạm vi tầng后需要Xây lại vector索引");
+    runtime.markVectorStateDirty?.("Sau khi dọn theo phạm vi tầng cần xây lại chỉ mục vector");
     runtime.saveGraphToChat({ reason: "manual-clear-graph-range" });
   }
   runtime.refreshPanelLiveState();
-  runtime.toastr.success(`已Xóatầng ${startSeq}~${endSeq} Phạm vi内 ${removedCount}  nút`);
+  runtime.toastr.success(`Đã xóa ${removedCount} nút trong phạm vi tầng ${startSeq}~${endSeq}`);
   return { handledToast: true };
 }
 
 export async function onClearVectorCacheController(runtime) {
-  if (!runtime.confirm("确定要Xóa bộ đệm vector？\n\n清空后需要重新构建Vector索引。")) {
+  if (!runtime.confirm("Xác nhận xóa bộ đệm vector?\n\nSau khi xóa sạch cần xây lại chỉ mục vector.")) {
     return { cancelled: true };
   }
 
@@ -1152,17 +1152,17 @@ export async function onClearVectorCacheController(runtime) {
     graph.vectorIndexState.nodeToHash = {};
     graph.vectorIndexState.dirty = true;
     graph.vectorIndexState.dirtyReason = "manual-clear-vector-cache";
-    graph.vectorIndexState.lastWarning = "Vector缓存已Thủ công清空，需要重建索引";
+    graph.vectorIndexState.lastWarning = "Bộ đệm vector đã bị xóa thủ công, cần xây lại chỉ mục";
   }
 
   runtime.saveGraphToChat({ reason: "manual-clear-vector-cache" });
   runtime.refreshPanelLiveState();
-  runtime.toastr.success("Vector缓存已清空，请Xây lại vector索引");
+  runtime.toastr.success("Bộ đệm vector đã bị xóa sạch, hãy xây lại chỉ mục vector");
   return { handledToast: true };
 }
 
 export async function onClearBatchJournalController(runtime) {
-  if (!runtime.confirm("确定要Xóa lịch sử trích xuất？\n\nTrích xuất批lần记录和计数将被Đặt lại。")) {
+  if (!runtime.confirm("Xác nhận xóa lịch sử trích xuất?\n\nBản ghi và bộ đếm lô trích xuất sẽ bị đặt lại.")) {
     return { cancelled: true };
   }
 
@@ -1179,7 +1179,7 @@ export async function onClearBatchJournalController(runtime) {
   runtime.setExtractionCount(0);
   runtime.saveGraphToChat({ reason: "manual-clear-batch-journal" });
   runtime.refreshPanelLiveState();
-  runtime.toastr.success("Trích xuất历史已清空");
+  runtime.toastr.success("Lịch sử trích xuất đã bị xóa sạch");
   return { handledToast: true };
 }
 
@@ -1200,11 +1200,11 @@ export async function onDeleteCurrentIdbController(runtime) {
   const hostProfile = String(persistenceState.hostProfile || "generic-st");
   const localStoreLabel =
     hostProfile === "luker"
-      ? "Chat hiện tại的Bộ đệm cục bộ（IndexedDB / OPFS，不影响 Lưu trữ chính của sidecar Luker）"
-      : "Chat hiện tại的Cục bộđồ thị存储（IndexedDB / OPFS）";
+      ? "Bộ đệm cục bộ của chat hiện tại (IndexedDB / OPFS, không ảnh hưởng tới lưu trữ chính của sidecar Luker)"
+      : "Lưu trữ đồ thị cục bộ của chat hiện tại (IndexedDB / OPFS)";
   if (
     !runtime.confirm(
-      `确定要Xóa${localStoreLabel}？\n\n将尝试清理：\n- ${dbName}\n- OPFS Chat hiện tại目录\n- restore safety Cục bộbản sao\n\nThao tác不可撤销。`,
+      `Xác nhận xóa ${localStoreLabel}?\n\nSẽ thử dọn sạch:\n- ${dbName}\n- thư mục OPFS của chat hiện tại\n- bản sao an toàn cục bộ để khôi phục\n\nThao tác này không thể hoàn tác.`,
     )
   ) {
     return { cancelled: true };
@@ -1284,21 +1284,21 @@ export async function onDeleteCurrentIdbController(runtime) {
       Number(runtime.getGraphPersistenceState?.()?.lastSyncedRevision || 0) > 0 &&
       String(runtime.getSettings?.()?.cloudStorageMode || "automatic") !== "manual";
     runtime.toastr.success(
-      `已Xóa lưu trữ cục bộ của chat hiện tại：IndexedDB ${deletedIndexedDbCount > 0 ? "已Xử lý" : "Không"}，OPFS ${deletedOpfs ? "已Xử lý" : "Không"}${remoteSyncMayRestore ? "；若刷新后旧图Khôi phục，请再Xóa服务端Đồng bộDữ liệu" : ""}`,
+      `Đã xóa lưu trữ cục bộ của chat hiện tại: IndexedDB ${deletedIndexedDbCount > 0 ? "đã xử lý" : "không"}, OPFS ${deletedOpfs ? "đã xử lý" : "không"}${remoteSyncMayRestore ? "; nếu làm mới xong mà đồ thị cũ khôi phục lại thì hãy xóa thêm dữ liệu đồng bộ phía máy chủ" : ""}`,
     );
   } catch (error) {
-    runtime.toastr.error(`XóaThất bại: ${error?.message || error}`);
+    runtime.toastr.error(`Xóa thất bại: ${error?.message || error}`);
   }
   return { handledToast: true };
 }
 
 export async function onDeleteAllIdbController(runtime) {
   const userInput = runtime.prompt(
-    "此Thao tác会Xóa所有聊天的 BME Cục bộđồ thị存储（IndexedDB / OPFS），不影响 Lưu trữ chính của sidecar Luker。\n\n请输入 DELETE Xác nhận：",
+    "Thao tác này sẽ xóa lưu trữ đồ thị cục bộ BME của mọi chat (IndexedDB / OPFS), không ảnh hưởng tới lưu trữ chính của sidecar Luker.\n\nHãy nhập DELETE để xác nhận:",
   );
   if (userInput !== "DELETE") {
     if (userInput != null) {
-      runtime.toastr.warning("输入不匹配，Thao tác已Hủy");
+      runtime.toastr.warning("Nội dung nhập không khớp, thao tác đã bị hủy");
     }
     return { cancelled: true };
   }
@@ -1310,7 +1310,7 @@ export async function onDeleteAllIdbController(runtime) {
       String(db.name || "").startsWith("STBME_"),
     );
     if (bmeDbs.length === 0) {
-      runtime.toastr.info("没有找到 BME Bộ đệm cục bộDữ liệu库");
+      runtime.toastr.info("Không tìm thấy kho dữ liệu bộ đệm cục bộ BME");
       return { handledToast: true };
     }
 
@@ -1362,14 +1362,14 @@ export async function onDeleteAllIdbController(runtime) {
     }
     runtime.refreshPanelLiveState?.();
     if (bmeDbs.length === 0 && opfsResult?.deleted !== true) {
-      runtime.toastr.info("没有找到 BME Cục bộđồ thị存储");
+      runtime.toastr.info("không cótìm thấy BME Cục bộđồ thịlưu trữ");
       return { handledToast: true };
     }
     runtime.toastr.success(
-      `已清空 BME Cục bộđồ thị存储：IndexedDB ${deletedCount}/${bmeDbs.length}，OPFS ${opfsResult?.deleted ? "已Xử lý" : "Không"}`,
+      `Đã xóa sạch lưu trữ đồ thị cục bộ BME: IndexedDB ${deletedCount}/${bmeDbs.length}, OPFS ${opfsResult?.deleted ? "đã xử lý" : "không"}`,
     );
   } catch (error) {
-    runtime.toastr.error(`XóaThất bại: ${error?.message || error}`);
+    runtime.toastr.error(`Xóa thất bại: ${error?.message || error}`);
   }
   return { handledToast: true };
 }
@@ -1382,11 +1382,11 @@ export async function onDeleteServerSyncFileController(runtime) {
   }
 
   const userInput = runtime.prompt(
-    "此Thao tác会XóaChat hiện tại在服务端的Đồng bộDữ liệu。\n\n如果该聊天已经升级到远端 v2，Đồng bộ manifest 和 chunk 文件都会一起Xóa。\n\n请输入 DELETE Xác nhận：",
+    "Thao tác này sẽ xóa dữ liệu đồng bộ phía máy chủ của chat hiện tại.\n\nNếu chat này đã nâng cấp lên remote v2 thì manifest đồng bộ và các file chunk cũng sẽ bị xóa cùng nhau.\n\nHãy nhập DELETE để xác nhận:",
   );
   if (userInput !== "DELETE") {
     if (userInput != null) {
-      runtime.toastr.warning("输入不匹配，Thao tác已Hủy");
+      runtime.toastr.warning("Nội dung nhập không khớp, thao tác đã bị hủy");
     }
     return { cancelled: true };
   }
@@ -1394,16 +1394,17 @@ export async function onDeleteServerSyncFileController(runtime) {
   try {
     const result = await runtime.deleteRemoteSyncFile(chatId);
     if (result?.deleted) {
-      runtime.toastr.success(`已Xóa服务端Đồng bộDữ liệu: ${result.filename}`);
+      runtime.toastr.success(`Đã xóa dữ liệu đồng bộ phía máy chủ: ${result.filename}`);
     } else {
       runtime.toastr.info(
         result?.reason === "not-found"
-          ? "服务端没有找到Đồng bộDữ liệu"
-          : `Xóa未成功: ${result?.reason || "Không rõNguyên nhân"}`,
+          ? "phía máy chủkhông cótìm thấyĐồng bộDữ liệu"
+          : `Xóa chưa thành công: ${result?.reason || "Không rõ nguyên nhân"}`,
       );
     }
   } catch (error) {
-    runtime.toastr.error(`XóaThất bại: ${error?.message || error}`);
+    runtime.toastr.error(`Xóa thất bại: ${error?.message || error}`);
   }
   return { handledToast: true };
 }
+

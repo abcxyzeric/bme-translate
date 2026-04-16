@@ -1,26 +1,26 @@
-import { isSystemMessageForExtraction } from "./chat-history.js";
+﻿import { isSystemMessageForExtraction } from "./chat-history.js";
 
 export const DEFAULT_TRIGGER_KEYWORDS = [
-  "突然",
-  "没想到",
-  "原来",
-  "其实",
-  "发现",
-  "背叛",
-  "死亡",
-  "复活",
+  "đột nhiên",
+  "không ngờ",
+  "thì ra",
+  "thật ra",
+  "phát hiện ra",
+  "phản bội",
+  "cái chết",
+  "hồi sinh",
   "Khôi phụcKý ức",
-  "失忆",
-  "告白",
-  "暴露",
-  "秘密",
-  "计划",
+  "mất trí nhớ",
+  "tỏ tình",
+  "bại lộ",
+  "bí mật",
+  "kế hoạch",
   "Quy tắc",
-  "契约",
-  "位置",
+  "khế ước",
+  "vị trí",
   "Địa điểm",
-  "离开",
-  "来到",
+  "rời đi",
+  "đến nơi",
 ];
 
 export function getSmartTriggerDecision(
@@ -68,7 +68,7 @@ export function getSmartTriggerDecision(
   );
   if (keywordHits.length > 0) {
     score += Math.min(2, keywordHits.length);
-    reasons.push(`关键词: ${keywordHits.slice(0, 3).join(", ")}`);
+    reasons.push(`Từ khóa then chốt: ${keywordHits.slice(0, 3).join(", ")}`);
   }
 
   const customPatterns = String(settings?.triggerPatterns || "")
@@ -80,11 +80,11 @@ export function getSmartTriggerDecision(
       const regex = new RegExp(pattern, "i");
       if (regex.test(combinedText)) {
         score += 2;
-        reasons.push(`自định nghĩa触发: ${pattern}`);
+        reasons.push(`Kích hoạt tự định nghĩa: ${pattern}`);
         break;
       }
     } catch {
-      // 忽略Không效Regex，避免影响主流程
+      // Bỏ qua regex không hợp lệ để tránh ảnh hưởng luồng chính
     }
   }
 
@@ -94,22 +94,22 @@ export function getSmartTriggerDecision(
   }, 0);
   if (roleSwitchCount >= 2) {
     score += 1;
-    reasons.push("多轮往返互动");
+    reasons.push("Tương tác qua lại nhiều lượt");
   }
 
   const punctuationHits = (combinedText.match(/[!?！？]/g) || []).length;
   if (punctuationHits >= 2) {
     score += 1;
-    reasons.push("Cảm xúc/冲突波动");
+    reasons.push("Biến động cảm xúc/xung đột");
   }
 
   const entityLikeHits =
     combinedText.match(
-      /[A-Z][a-z]{2,}|[\u4e00-\u9fff]{2,6}(先生|小姐|王国|城|镇|村|学院|组织|公司|小队|军团)/g,
+      /[A-ZÀ-Ỹ][A-Za-zÀ-ỹ]{2,}|[A-Za-zÀ-ỹ]{2,20}(vương quốc|thành phố|thị trấn|ngôi làng|học viện|tổ chức|công ty|tiểu đội|quân đoàn)/g,
     ) || [];
   if (entityLikeHits.length > 0) {
     score += 1;
-    reasons.push("疑似新实体/新Địa điểm");
+    reasons.push("Nghi có thực thể mới/địa điểm mới");
   }
 
   const threshold = Math.max(1, settings?.smartTriggerThreshold || 2);
@@ -119,3 +119,4 @@ export function getSmartTriggerDecision(
     reasons,
   };
 }
+

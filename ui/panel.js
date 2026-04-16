@@ -1457,7 +1457,7 @@ function _resolvePipelineStatus(statusObj) {
   let color = "green";
   if (level === "warn") color = "amber";
   else if (level === "error") color = "red";
-  else if (text.toLowerCase().includes("running") || text.toLowerCase().includes("进行Trung bình") || text.includes("正在")) color = "cyan";
+  else if (text.toLowerCase().includes("running") || text.toLowerCase().includes("đang diễn raTrung bình") || text.includes("đang")) color = "cyan";
   return { label: text || "IDLE", color, detail: meta };
 }
 
@@ -2225,7 +2225,7 @@ function _refreshTaskPersistence() {
     ps.hostProfile === "luker" ? String(Number(ps.lukerManifestRevision || 0)) : "—";
   const journalStateLabel =
     ps.hostProfile === "luker"
-      ? `${Number(ps.lukerJournalDepth || 0)} 条 / ${Number(ps.lukerJournalBytes || 0)} B`
+      ? `${Number(ps.lukerJournalDepth || 0)} mục / ${Number(ps.lukerJournalBytes || 0)} B`
       : "—";
   const checkpointRevisionLabel =
     ps.hostProfile === "luker" ? String(Number(ps.lukerCheckpointRevision || 0)) : "—";
@@ -2308,7 +2308,7 @@ function _refreshTaskPersistence() {
     ["Trạng thái hiện tại", acceptedSummaryLabel],
     ["Trạng thái sức khỏe", healthLabel],
     ["Chat Target", compactTargetLabel],
-    ["主 durable", primaryTierLabel],
+    ["Durable chính", primaryTierLabel],
     ps.hostProfile === "luker"
       ? ["Luker Sidecar", sidecarSummaryLabel]
       : ["Engine cục bộ", localEngineLabel],
@@ -2323,7 +2323,7 @@ function _refreshTaskPersistence() {
     ["Nhật ký lô", String(journalCount)],
     ["Số lần trích xuất", extractionCountLabel],
     ["Tầng đã xử lý", processedFloorLabel],
-    ["Mục tóm tắt", `${summaryCount}（活跃 ${activeSummaryCount}）`],
+    ["Mục tóm tắt", `${summaryCount} (hoạt động ${activeSummaryCount}）`],
     ["Khu vực hiện tại", activeRegionLabel],
     ["Điểm bắt đầu vùng bẩn", dirtyFromLabel],
     ["Phiên bản chạy", String(rs.graphRevision ?? "—")],
@@ -2345,7 +2345,7 @@ function _refreshTaskPersistence() {
     ["Bỏ qua thay đổi", ps.lastIgnoredMutationEvent || "—"],
     ["Snapshot bóng", ps.shadowSnapshotUsed ? "Đã dùng" : "Chưa dùng"],
     ["Khóa ghi OPFS", opfsLockLabel],
-    ["OPFS WAL", `${Number(ps.opfsWalDepth || 0)} 条 / ${Number(ps.opfsPendingBytes || 0)} B`],
+    ["OPFS WAL", `${Number(ps.opfsWalDepth || 0)} mục / ${Number(ps.opfsPendingBytes || 0)} B`],
     ["Nén OPFS", opfsCompactionLabel],
     ["Định dạng đồng bộ từ xa", `v${Number(ps.remoteSyncFormatVersion || 0) || 1}`],
   ];
@@ -2734,7 +2734,7 @@ function _renderCogOwnerDetail(graph, loadInfo, canRender, targetEl) {
   );
 
   if (!selectedOwner) {
-    el.innerHTML = `<div class="bme-cog-monitor-empty">选择上方Nhân vật查看详情，或Đang chờTrích xuất产生认知Dữ liệu。</div>`;
+    el.innerHTML = `<div class="bme-cog-monitor-empty">Hãy chọn một nhân vật ở phía trên để xem chi tiết, hoặc chờ trích xuất tạo dữ liệu nhận thức.</div>`;
     return;
   }
 
@@ -2772,8 +2772,8 @@ function _renderCogOwnerDetail(graph, loadInfo, canRender, targetEl) {
           ? "mistaken"
           : "none"
     : "";
-  const stateLabels = { known: "Cưỡng chế đã biết", hidden: "Cưỡng chế ẩn", mistaken: "误解", none: "未覆盖" };
-  const selectedNodeStateLabel = stateLabels[selectedNodeState] || "未选Trung bìnhnút";
+  const stateLabels = { known: "Cưỡng chế đã biết", hidden: "Cưỡng chế ẩn", mistaken: "hiểu sai", none: "Chưa bao phủ" };
+  const selectedNodeStateLabel = stateLabels[selectedNodeState] || "Chưa chọn nút";
   const writeBlocked = _isGraphWriteBlocked(loadInfo);
   const suppressedCount = new Set([...(ownerState.manualHiddenNodeIds || []), ...(ownerState.mistakenNodeIds || [])]).size;
   const disabledAttr = !selectedNode || writeBlocked ? "disabled" : "";
@@ -2781,10 +2781,10 @@ function _renderCogOwnerDetail(graph, loadInfo, canRender, targetEl) {
 
   const visChips = strongVisibleNames.length
     ? strongVisibleNames.map((n) => `<span class="bme-cog-chip is-visible">${_escHtml(n)}</span>`).join("")
-    : '<span class="bme-cog-chip is-empty">暂Không</span>';
+    : '<span class="bme-cog-chip is-empty">Chưa có</span>';
   const supChips = suppressedNames.length
     ? suppressedNames.map((n) => `<span class="bme-cog-chip is-suppressed">${_escHtml(n)}</span>`).join("")
-    : '<span class="bme-cog-chip is-empty">暂Không</span>';
+    : '<span class="bme-cog-chip is-empty">Chưa có</span>';
 
   el.innerHTML = `
     <div class="bme-cog-detail-header">
@@ -2872,7 +2872,7 @@ function _renderCogSpaceTools(graph, loadInfo, canRender, targetEl) {
     <div class="bme-cog-space-row">
       <label>Khu vực hiện tại thủ công</label>
       <input class="bme-config-input" type="text" id="bme-cog-manual-region"
-             placeholder="输入地区Tên..." value="${_escHtml(regionState.manualActiveRegion || activeRegion || "")}" ${disabledAttr} />
+             placeholder="đầu vàokhu vựcTên..." value="${_escHtml(regionState.manualActiveRegion || activeRegion || "")}" ${disabledAttr} />
       <div class="bme-cog-space-btn-row">
         <button class="bme-cog-btn bme-cog-btn--known" type="button" id="bme-cog-region-apply" ${disabledAttr}>
           <i class="fa-solid fa-location-dot"></i> Đặt làm khu vực hiện tại
@@ -2885,7 +2885,7 @@ function _renderCogSpaceTools(graph, loadInfo, canRender, targetEl) {
     <div class="bme-cog-space-row">
       <label>Khu vực kề của khu vực hiện tại</label>
       <input class="bme-config-input" type="text" id="bme-cog-adjacency-input"
-             placeholder="例如：Nội đình, 港口, 花园" value="${_escHtml(adjacentRegions.join(", "))}" ${disabledAttr} />
+             placeholder="Ví dụ: Nội đình, Cảng, Vườn hoa" value="${_escHtml(adjacentRegions.join(", "))}" ${disabledAttr} />
       <div class="bme-config-help" style="font-size:10px;margin-top:2px">Dùng dấu "," để phân tách nhiều khu vực. Sau khi lưu sẽ cập nhật quan hệ kề của khu vực đó.</div>
       <button class="bme-cog-btn bme-cog-btn--known" type="button" id="bme-cog-adjacency-save" ${disabledAttr}>
         <i class="fa-solid fa-diagram-project"></i> Lưu khu vực kề hiện tại
@@ -2894,7 +2894,7 @@ function _renderCogSpaceTools(graph, loadInfo, canRender, targetEl) {
     <div class="bme-cog-space-row">
       <label>Thời gian cốt truyện hiện tại thủ công</label>
       <input class="bme-config-input" type="text" id="bme-cog-manual-story-time"
-             placeholder="例如：Sáng sớm ngày thứ hai / 昨夜之后 / 回忆里的童年" value="${_escHtml(manualStorySegmentId ? activeStoryTimeLabel : activeStoryTimeLabel || "")}" ${disabledAttr} />
+             placeholder="Ví dụ: Sáng sớm ngày thứ hai / Sau đêm qua / Tuổi thơ trong ký ức" value="${_escHtml(manualStorySegmentId ? activeStoryTimeLabel : activeStoryTimeLabel || "")}" ${disabledAttr} />
       <div class="bme-config-help" style="font-size:10px;margin-top:2px">Để trống nghĩa là quay về cơ chế tự động; tại đây chỉ duy trì thời gian cốt truyện hiện tại, không ghi đè mọi nút.</div>
       <div class="bme-cog-space-btn-row">
         <button class="bme-cog-btn bme-cog-btn--known" type="button" id="bme-cog-story-time-apply" ${disabledAttr}>
@@ -3422,7 +3422,7 @@ function _renderCognitionDetail(
   if (!selectedOwner) {
     detailEl.innerHTML = `
       <div class="bme-cognition-empty">
-        还没有可查看的Nhân vật认知。进入一段Bình thường对话并Hoàn tấtTrích xuất后，这里会出现Nhân vật列表和认知详情。
+        Vẫn chưa có nhận thức nhân vật để xem. Sau khi đi vào một đoạn hội thoại bình thường và hoàn tất trích xuất, danh sách nhân vật và chi tiết nhận thức sẽ xuất hiện ở đây.
       </div>
     `;
     return;
@@ -3467,9 +3467,9 @@ function _renderCognitionDetail(
       : ownerState.manualHiddenNodeIds?.includes(selectedNode.id)
         ? "Cưỡng chế ẩn"
         : ownerState.mistakenNodeIds?.includes(selectedNode.id)
-          ? "误解"
-          : "未覆盖"
-    : "未选Trung bìnhnút";
+          ? "hiểu sai"
+          : "Chưa bao phủ"
+    : "Chưa chọn nút";
   const writeBlocked = _isGraphWriteBlocked(loadInfo);
   const aliases = Array.isArray(ownerState.aliases) ? ownerState.aliases : [];
   const collisionIndex = _buildOwnerCollisionIndex(_getCognitionOwnerCollection(graph));
@@ -3527,7 +3527,7 @@ function _renderCognitionDetail(
 
       <div class="bme-cognition-line-list">
         <div class="bme-cognition-line">
-          <span>别名</span>
+          <span>Bí danh</span>
           <strong>${_escHtml(aliases.length ? aliases.join(" / ") : "—")}</strong>
         </div>
         <div class="bme-cognition-line">
@@ -3541,7 +3541,7 @@ function _renderCognitionDetail(
         <div class="bme-cognition-line">
           <span>Gần nhấtCập nhật</span>
           <strong>${_escHtml(
-            ownerState.updatedAt ? _formatTaskProfileTime(new Date(ownerState.updatedAt).toISOString()) : "暂Không",
+            ownerState.updatedAt ? _formatTaskProfileTime(new Date(ownerState.updatedAt).toISOString()) : "Chưa có",
           )}</strong>
         </div>
       </div>
@@ -3554,7 +3554,7 @@ function _renderCognitionDetail(
               ? strongVisibleNames
                   .map((name) => `<span class="bme-cognition-chip">${_escHtml(name)}</span>`)
                   .join("")
-              : '<span class="bme-cognition-chip is-empty">暂Không</span>'
+              : '<span class="bme-cognition-chip is-empty">Chưa có</span>'
           }
         </div>
       </div>
@@ -3567,7 +3567,7 @@ function _renderCognitionDetail(
               ? suppressedNames
                   .map((name) => `<span class="bme-cognition-chip is-muted">${_escHtml(name)}</span>`)
                   .join("")
-              : '<span class="bme-cognition-chip is-empty">暂Không</span>'
+              : '<span class="bme-cognition-chip is-empty">Chưa có</span>'
           }
         </div>
       </div>
@@ -3577,8 +3577,8 @@ function _renderCognitionDetail(
         <div class="bme-config-help">
           ${
             selectedNode
-              ? `Nút hiện tại: ${_escHtml(selectedNodeLabel)} · 该Nhân vậtTrạng thái hiện tại：${_escHtml(selectedNodeState)}`
-              : "先在đồ thị或Ký ức列表Trung bình点一 nút，再回来做Thủ công覆盖。"
+              ? `Nút hiện tại: ${_escHtml(selectedNodeLabel)} · Trạng thái hiện tại của nhân vật này: ${_escHtml(selectedNodeState)}`
+              : "Hãy chọn một nút trong đồ thị hoặc danh sách ký ức trước, rồi quay lại đặt bao phủ thủ công."
           }
         </div>
         <div class="bme-cognition-node-actions">
@@ -3782,7 +3782,7 @@ function _renderRecentList(elementId, items) {
   listEl.replaceChildren(fragment);
 }
 
-// ==================== Duyệt ký ức器 ====================
+// ==================== Trình duyệt ký ức ====================
 
 function _refreshMemoryBrowser() {
   const graph = _getGraph?.();
@@ -3855,7 +3855,7 @@ function _refreshMemoryBrowser() {
   });
 
   if (!nodes.length && loadInfo.loadState === "empty-confirmed") {
-    _renderStatefulListPlaceholder(listEl, "Chat hiện tại还没有đồ thị");
+    _renderStatefulListPlaceholder(listEl, "Chat hiện tại vẫn chưa có đồ thị");
     return;
   }
 
@@ -3910,7 +3910,7 @@ function _refreshMemoryBrowser() {
 
     const seqSpan = document.createElement("span");
     seqSpan.className = "bme-memory-stat-pill";
-    seqSpan.textContent = `序列 ${_formatMemoryInt(
+    seqSpan.textContent = `Chuỗi ${_formatMemoryInt(
       node.seqRange?.[1] ?? node.seq,
       0,
     )}`;
@@ -3973,7 +3973,7 @@ async function _refreshInjectionPreview() {
     const empty = document.createElement("div");
     empty.className = "bme-injection-preview";
     empty.style.color = "var(--bme-on-surface-dim)";
-    empty.textContent = "Tạm thời chưa có nội dung tiêm。先Hoàn tất一lầnTruy hồi或Bình thường生成后再查看。";
+    empty.textContent = "Tạm thời chưa có nội dung tiêm. Hãy hoàn tất một lần truy hồi hoặc sinh bình thường rồi quay lại xem.";
     container.replaceChildren(empty);
     if (tokenEl) tokenEl.textContent = "";
     return;
@@ -3989,7 +3989,7 @@ async function _refreshInjectionPreview() {
     const failure = document.createElement("div");
     failure.className = "bme-injection-preview";
     failure.style.color = "var(--bme-accent3)";
-    failure.textContent = `预览Sinh thất bại: ${error.message}`;
+    failure.textContent = `Xem trước phản hồi thất bại: ${error.message}`;
     container.replaceChildren(failure);
     if (tokenEl) tokenEl.textContent = "";
   }
@@ -4009,7 +4009,7 @@ function _buildInjectionPreviewNode(injectionText = "") {
 
   const hint = document.createElement("div");
   hint.className = "bme-injection-rich__hint";
-  hint.textContent = "这里是Cấu trúc化预览，便于阅读；实际发给Model的仍是原始Văn bản tiêm。";
+  hint.textContent = "Đây là bản xem trước đã cấu trúc để dễ đọc; phần thực sự gửi cho model vẫn là văn bản tiêm gốc.";
   root.appendChild(hint);
 
   for (const section of parsed.sections) {
@@ -4252,7 +4252,7 @@ function _getInjectionSectionFlavor(title = "") {
 
 // ==================== đồ thị ====================
 
-/** SillyTavern Người dùng显示名（name1），用于đồ thị分区：误标为Nhân vật的POV người dùng 强制归Người dùng区 */
+/** SillyTavern tên hiển thị người dùng（name1），dùng chophân vùng đồ thị：POV người dùng bị gắn nhầm là nhân vật sẽ bị ép trả về vùng người dùng */
 function _hostUserPovAliasHintsForGraph() {
   return getHostUserAliasHints();
 }
@@ -4273,7 +4273,7 @@ function _buildLegend() {
     userPov: "#7dff9b",
   };
   const layers = [
-    { key: "objective", label: "Khách quan层" },
+    { key: "objective", label: "Tầng khách quan" },
     { key: "characterPov", label: "POV nhân vật" },
     { key: "userPov", label: "POV người dùng" },
   ];
@@ -4283,7 +4283,7 @@ function _buildLegend() {
     { key: "location", label: "Địa điểm" },
     { key: "thread", label: "tuyến chính" },
     { key: "rule", label: "Quy tắc" },
-    { key: "synopsis", label: "Toàn cục概要（旧）" },
+    { key: "synopsis", label: "Tóm lược toàn cục (cũ)" },
     { key: "reflection", label: "Phản tư" },
     { key: "pov_memory", label: "Ký ức chủ quan" },
   ];
@@ -4417,19 +4417,19 @@ function _bindGraphControls() {
 // ==================== Chi tiết nút ====================
 
 const STORY_TIME_TENSE_OPTIONS = Object.freeze([
-  { value: "past", label: "过去" },
-  { value: "ongoing", label: "进行Trung bình" },
-  { value: "future", label: "未来" },
-  { value: "flashback", label: "闪回" },
-  { value: "hypothetical", label: "假设" },
+  { value: "past", label: "Quá khứ" },
+  { value: "ongoing", label: "đang diễn raTrung bình" },
+  { value: "future", label: "tương lai" },
+  { value: "flashback", label: "Hồi tưởng" },
+  { value: "hypothetical", label: "Giả định" },
   { value: "unknown", label: "Không rõ" },
 ]);
 
 const STORY_TIME_RELATION_OPTIONS = Object.freeze([
-  { value: "same", label: "同一时点" },
-  { value: "after", label: "在锚点之后" },
-  { value: "before", label: "在锚点之前" },
-  { value: "parallel", label: "与锚点并行" },
+  { value: "same", label: "Cùng thời điểm" },
+  { value: "after", label: "Sau mốc neo" },
+  { value: "before", label: "Trước mốc neo" },
+  { value: "parallel", label: "Song song với mốc neo" },
   { value: "unknown", label: "Không rõ" },
 ]);
 
@@ -4441,13 +4441,13 @@ const STORY_TIME_CONFIDENCE_OPTIONS = Object.freeze([
 
 const STORY_TIME_SOURCE_OPTIONS = Object.freeze([
   { value: "extract", label: "Trích xuất" },
-  { value: "derived", label: "推导" },
+  { value: "derived", label: "Suy diễn" },
   { value: "manual", label: "Thủ công" },
 ]);
 
 const STORY_TIME_MIXED_OPTIONS = Object.freeze([
-  { value: "false", label: "否" },
-  { value: "true", label: "是" },
+  { value: "false", label: "Không" },
+  { value: "true", label: "Có" },
 ]);
 
 function _resolveNodeDetailOptionLabel(options = [], value, fallback = "") {
@@ -4483,7 +4483,7 @@ function _describeStoryTimeDisplay(storyTime = {}) {
         : relationLabel,
     );
   } else if (normalized.anchorLabel) {
-    parts.push(`锚点 · ${normalized.anchorLabel}`);
+    parts.push(`mốc neo · ${normalized.anchorLabel}`);
   }
 
   return parts.join(" · ");
@@ -4499,9 +4499,9 @@ function _describeStoryTimeSpanDisplay(storyTimeSpan = {}) {
       : normalized.startLabel || normalized.endLabel || "";
 
   if (!label) {
-    return normalized.mixed ? "混合时间" : "";
+    return normalized.mixed ? "trộnthời gian" : "";
   }
-  return normalized.mixed ? `${label} · 混合` : label;
+  return normalized.mixed ? `${label} · trộn` : label;
 }
 
 function _describeNodeStoryTimeDisplay(node = {}) {
@@ -4640,20 +4640,20 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   _appendNodeDetailReadOnly(fragment, "ID", raw.id || "—");
   _appendNodeDetailReadOnly(
     fragment,
-    "序列号",
+    "Số thứ tự",
     raw.seqRange?.[1] ?? raw.seq ?? 0,
   );
 
   if (scope.layer === "pov") {
     _appendNodeDetailReadOnly(
       fragment,
-      "POV 归属",
+      "POV quy thuộc",
       `${scope.ownerType || "unknown"} / ${scope.ownerName || scope.ownerId || "—"}`,
     );
   }
   const regionLine = buildRegionLine(scope);
   if (regionLine) {
-    _appendNodeDetailReadOnly(fragment, "地区", regionLine);
+    _appendNodeDetailReadOnly(fragment, "khu vực", regionLine);
   }
   _appendNodeDetailTextInput(
     fragment,
@@ -4663,13 +4663,13 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   );
   _appendNodeDetailTextInput(
     fragment,
-    "地区路径 (用 / 分隔)",
+    "Đường đi khu vực (ngăn bằng /)",
     inputId("scope-region-path"),
     Array.isArray(scope.regionPath) ? scope.regionPath.join(" / ") : "",
   );
   _appendNodeDetailTextInput(
     fragment,
-    "Khu vực cấp phụ (用逗号或 / 分隔)",
+    "Khu vực cấp phụ (ngăn bằng dấu phẩy hoặc /)",
     inputId("scope-region-secondary"),
     Array.isArray(scope.regionSecondary)
       ? scope.regionSecondary.join(", ")
@@ -4678,28 +4678,28 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   if (Array.isArray(raw.seqRange)) {
     _appendNodeDetailReadOnly(
       fragment,
-      "序列Phạm vi",
+      "Phạm vi chuỗi",
       `${raw.seqRange[0]} ~ ${raw.seqRange[1]}`,
     );
   }
   const storyTimeSection = document.createElement("div");
   storyTimeSection.className = "bme-node-detail-section";
-  storyTimeSection.textContent = "剧情时间";
+  storyTimeSection.textContent = "thời gian cốt truyện";
   fragment.appendChild(storyTimeSection);
   _appendNodeDetailReadOnly(
     fragment,
-    "当前tóm tắt",
+    "hiện tạitóm tắt",
     _describeStoryTimeDisplay(storyTime) || "—",
   );
   _appendNodeDetailTextInput(
     fragment,
-    "时间标签",
+    "thời giannhãn",
     inputId("story-time-label"),
     storyTime.label,
   );
   _appendNodeDetailSelectInput(
     fragment,
-    "时态",
+    "Thì thời gian",
     inputId("story-time-tense"),
     storyTime.tense,
     STORY_TIME_TENSE_OPTIONS,
@@ -4708,24 +4708,24 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   const storyTimeAdvanced = document.createElement("details");
   storyTimeAdvanced.className = "bme-node-detail-collapse";
   const storyTimeAdvancedSummary = document.createElement("summary");
-  storyTimeAdvancedSummary.textContent = "Cao级";
+  storyTimeAdvancedSummary.textContent = "Nâng cao";
   storyTimeAdvanced.appendChild(storyTimeAdvancedSummary);
   _appendNodeDetailSelectInput(
     storyTimeAdvanced,
-    "Tương đối关系",
+    "Tương đốiquan hệ",
     inputId("story-time-relation"),
     storyTime.relation,
     STORY_TIME_RELATION_OPTIONS,
   );
   _appendNodeDetailTextInput(
     storyTimeAdvanced,
-    "锚点标签",
+    "mốc neonhãn",
     inputId("story-time-anchor-label"),
     storyTime.anchorLabel,
   );
   _appendNodeDetailSelectInput(
     storyTimeAdvanced,
-    "置信度",
+    "Độ tin cậy",
     inputId("story-time-confidence"),
     storyTime.confidence,
     STORY_TIME_CONFIDENCE_OPTIONS,
@@ -4739,7 +4739,7 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   );
   _appendNodeDetailTextInput(
     storyTimeAdvanced,
-    "段 ID",
+    "ID đoạn",
     inputId("story-time-segment-id"),
     storyTime.segmentId,
   );
@@ -4749,7 +4749,7 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   storyTimeSpanCollapse.className = "bme-node-detail-collapse";
   const storyTimeSpanSummaryEl = document.createElement("summary");
   storyTimeSpanSummaryEl.className = "bme-node-detail-section";
-  storyTimeSpanSummaryEl.textContent = "剧情时间Phạm vi";
+  storyTimeSpanSummaryEl.textContent = "thời gian cốt truyệnPhạm vi";
   storyTimeSpanCollapse.appendChild(storyTimeSpanSummaryEl);
   _appendNodeDetailReadOnly(
     storyTimeSpanCollapse,
@@ -4758,19 +4758,19 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   );
   _appendNodeDetailTextInput(
     storyTimeSpanCollapse,
-    "起点标签",
+    "điểm bắt đầunhãn",
     inputId("story-time-span-start-label"),
     storyTimeSpan.startLabel,
   );
   _appendNodeDetailTextInput(
     storyTimeSpanCollapse,
-    "终点标签",
+    "Nhãn điểm cuối",
     inputId("story-time-span-end-label"),
     storyTimeSpan.endLabel,
   );
   _appendNodeDetailSelectInput(
     storyTimeSpanCollapse,
-    "混合时间",
+    "trộnthời gian",
     inputId("story-time-span-mixed"),
     storyTimeSpan.mixed ? "true" : "false",
     STORY_TIME_MIXED_OPTIONS,
@@ -4784,13 +4784,13 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   );
   _appendNodeDetailTextInput(
     storyTimeSpanCollapse,
-    "起点段 ID",
+    "ID đoạn điểm bắt đầu",
     inputId("story-time-span-start-segment-id"),
     storyTimeSpan.startSegmentId,
   );
   _appendNodeDetailTextInput(
     storyTimeSpanCollapse,
-    "终点段 ID",
+    "ID đoạn điểm cuối",
     inputId("story-time-span-end-segment-id"),
     storyTimeSpan.endSegmentId,
   );
@@ -4805,7 +4805,7 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
   );
   _appendNodeDetailNumberInput(
     fragment,
-    "Lượt truy cậplần数",
+    "Số lần truy cập",
     inputId("accesscount"),
     raw.accessCount ?? 0,
     { min: 0, step: 1 },
@@ -4816,14 +4816,14 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
     : "";
   _appendNodeDetailTextInput(
     fragment,
-    "聚类标签 (逗号分隔)",
+    "Nhãn cụm (ngăn bằng dấu phẩy)",
     inputId("clusters"),
     clustersStr,
   );
 
   const section = document.createElement("div");
   section.className = "bme-node-detail-section";
-  section.textContent = "Ký ức字段";
+  section.textContent = "Trường ký ức";
   fragment.appendChild(section);
 
   for (const [key, value] of Object.entries(fields)) {
@@ -4845,7 +4845,7 @@ function _buildNodeDetailEditorFragment(raw, { idPrefix = "bme-detail" } = {}) {
 
 function _collectNodeDetailEditorUpdates(bodyEl, { idPrefix = "bme-detail" } = {}) {
   if (!bodyEl) {
-    return { ok: false, errorMessage: "未找到可Chỉnh sửa表单" };
+    return { ok: false, errorMessage: "Không tìm thấy biểu mẫu có thể chỉnh sửa" };
   }
 
   const findInput = (suffix) =>
@@ -4953,7 +4953,7 @@ function _collectNodeDetailEditorUpdates(bodyEl, { idPrefix = "bme-detail" } = {
       } catch {
         return {
           ok: false,
-          errorMessage: `字段「${key}」须为合法 JSON`,
+          errorMessage: `Trường "${key}" phải là JSON hợp lệ`,
         };
       }
     } else {
@@ -4967,7 +4967,7 @@ function _collectNodeDetailEditorUpdates(bodyEl, { idPrefix = "bme-detail" } = {
 function _persistNodeDetailEdits(nodeId, updates, { afterSuccess } = {}) {
   if (!nodeId) return false;
   if (_isGraphWriteBlocked()) {
-    toastr.error("đồ thị hiện tại不可写入，Vui lòng thử lại sau", "ST-BME");
+    toastr.error("đồ thị hiện tạikhông thểghi vào，Vui lòng thử lại sau", "ST-BME");
     return false;
   }
 
@@ -4978,7 +4978,7 @@ function _persistNodeDetailEdits(nodeId, updates, { afterSuccess } = {}) {
   if (!result?.ok) {
     toastr.error(
       result?.error === "node-not-found"
-        ? "nút已不存在，请Tắt后重试"
+        ? "Nút không còn tồn tại, vui lòng đóng rồi thử lại"
         : "Lưu thất bại",
       "ST-BME",
     );
@@ -4986,11 +4986,11 @@ function _persistNodeDetailEdits(nodeId, updates, { afterSuccess } = {}) {
   }
   if (result.persistBlocked) {
     toastr.warning(
-      "Nội dungĐã cập nhật，但写回聊天Metadata可能被拦截，请查看đồ thịTrạng thái",
+      "Nội dung đã cập nhật, nhưng việc ghi ngược vào chat metadata có thể bị chặn; vui lòng xem trạng thái đồ thị",
       "ST-BME",
     );
   } else {
-    toastr.success("nút已Lưu", "ST-BME");
+    toastr.success("Đã lưu nút", "ST-BME");
   }
 
   afterSuccess?.();
@@ -5001,7 +5001,7 @@ function _persistNodeDetailEdits(nodeId, updates, { afterSuccess } = {}) {
 function _deleteGraphNodeById(nodeId, { afterSuccess } = {}) {
   if (!nodeId) return false;
   if (_isGraphWriteBlocked()) {
-    toastr.error("đồ thị hiện tại不可写入，Vui lòng thử lại sau", "ST-BME");
+    toastr.error("đồ thị hiện tạikhông thểghi vào，Vui lòng thử lại sau", "ST-BME");
     return false;
   }
 
@@ -5010,7 +5010,7 @@ function _deleteGraphNodeById(nodeId, { afterSuccess } = {}) {
   const label = node ? getNodeDisplayName(node) : nodeId;
   if (
     !confirm(
-      `确定Xóa nút「${label}」？\n\n若该nút有层级子nút，将一并Xóa。此Thao tác不可在本面板内撤销。`,
+      `Xác nhận xóa nút "${label}"?\n\nNếu nút này có nút con phân tầng thì chúng cũng sẽ bị xóa theo. Thao tác này không thể hoàn tác ngay trong bảng này.`,
     )
   ) {
     return false;
@@ -5019,18 +5019,18 @@ function _deleteGraphNodeById(nodeId, { afterSuccess } = {}) {
   const result = _actionHandlers.deleteGraphNode?.({ nodeId });
   if (!result?.ok) {
     toastr.error(
-      result?.error === "node-not-found" ? "nút已不存在" : "XóaThất bại",
+      result?.error === "node-not-found" ? "Nút không còn tồn tại" : "Xóa thất bại",
       "ST-BME",
     );
     return false;
   }
   if (result.persistBlocked) {
     toastr.warning(
-      "nútĐã từ图Trung bình移除，但写回可能被拦截，请查看đồ thịTrạng thái",
+      "Nút đã bị loại khỏi đồ thị, nhưng việc ghi ngược có thể bị chặn; vui lòng xem trạng thái đồ thị",
       "ST-BME",
     );
   } else {
-    toastr.success("nút已Xóa", "ST-BME");
+    toastr.success("Đã xóa nút", "ST-BME");
   }
 
   afterSuccess?.();
@@ -5261,11 +5261,11 @@ async function _runCognitionNodeOverrideAction(mode = "") {
   const selectedNode = _getSelectedGraphNode(graph);
 
   if (!ownerEntry) {
-    toastr.info("先选择一个Nhân vật，再设置认知覆盖", "ST-BME");
+    toastr.info("Hãy chọn một nhân vật trước, rồi mới cài đặt bao phủ nhận thức", "ST-BME");
     return;
   }
   if (!selectedNode?.id) {
-    toastr.info("先在đồ thị或Ký ức列表里点一 nút", "ST-BME");
+    toastr.info("Hãy chọn một nút trong đồ thị hoặc danh sách ký ức trước", "ST-BME");
     return;
   }
 
@@ -5289,27 +5289,27 @@ async function _runCognitionNodeOverrideAction(mode = "") {
 
   if (!result?.ok) {
     const messageMap = {
-      "graph-write-blocked": "đồ thị hiện tại还在保护写入阶段，Vui lòng thử lại sau",
-      "node-not-found": "这 nút已经不存在了，请重新选择",
-      "owner-not-found": "没有找到这个Nhân vật的认知Trạng thái，请先让她参与一轮Trích xuất",
+      "graph-write-blocked": "Đồ thị hiện tại vẫn đang trong giai đoạn bảo vệ ghi, vui lòng thử lại sau",
+      "node-not-found": "Nút này không còn tồn tại nữa, vui lòng chọn lại",
+      "owner-not-found": "Không tìm thấy trạng thái nhận thức của nhân vật này, hãy để cô ấy tham gia một vòng trích xuất trước",
     };
-    toastr.error(messageMap[result?.error] || "认知覆盖Thất bại", "ST-BME");
+    toastr.error(messageMap[result?.error] || "nhận thứcbao phủThất bại", "ST-BME");
     return;
   }
 
   const successMap = {
-    known: "已标记为Cưỡng chế đã biết",
-    hidden: "已标记为Cưỡng chế ẩn",
-    mistaken: "已标记为误解",
-    clear: "已清除该nút的Thủ công覆盖",
+    known: "Đã đánh dấu là Cưỡng chế đã biết",
+    hidden: "Đã đánh dấu là Cưỡng chế ẩn",
+    mistaken: "Đã đánh dấu là Hiểu sai",
+    clear: "Đã xóa bao phủ thủ công của nút này",
   };
   if (result.persistBlocked) {
     toastr.warning(
-      `${successMap[mode] || "认知覆盖Đã cập nhật"}，但正式写回可能仍在Đang chờđồ thị就绪`,
+      `${successMap[mode] || "Bao phủ nhận thức đã cập nhật"}, nhưng việc ghi ngược chính thức có thể vẫn đang chờ đồ thị sẵn sàng`,
       "ST-BME",
     );
   } else {
-    toastr.success(successMap[mode] || "认知覆盖Đã cập nhật", "ST-BME");
+    toastr.success(successMap[mode] || "Bao phủ nhận thức đã cập nhật", "ST-BME");
   }
   _refreshDashboard();
 }
@@ -5320,8 +5320,8 @@ async function _applyManualActiveRegionFromDashboard(clear = false) {
   const result = await _actionHandlers.setActiveRegion?.({ region });
   if (!result?.ok) {
     const messageMap = {
-      "graph-write-blocked": "đồ thị还在保护写入阶段，暂时不能改地区",
-      "missing-graph": "Hiện không có可用đồ thị",
+      "graph-write-blocked": "Đồ thị vẫn đang ở giai đoạn bảo vệ ghi, tạm thời không thể sửa khu vực",
+      "missing-graph": "Hiện không códùng đượcđồ thị",
     };
     toastr.error(messageMap[result?.error] || "Cập nhậtKhu vực hiện tạiThất bại", "ST-BME");
     return;
@@ -5329,11 +5329,11 @@ async function _applyManualActiveRegionFromDashboard(clear = false) {
 
   if (result.persistBlocked) {
     toastr.warning(
-      clear ? "已Khôi phụcTự động地区，但正式写回还在Đang chờđồ thị就绪" : "Khu vực hiện tạiĐã cập nhật，但正式写回还在Đang chờđồ thị就绪",
+      clear ? "Đã khôi phục khu vực tự động, nhưng ghi ngược chính thức vẫn đang chờ đồ thị sẵn sàng" : "Khu vực hiện tại đã cập nhật, nhưng ghi ngược chính thức vẫn đang chờ đồ thị sẵn sàng",
       "ST-BME",
     );
   } else {
-    toastr.success(clear ? "已Khôi phụcTự động地区判断" : "Khu vực hiện tạiĐã cập nhật", "ST-BME");
+    toastr.success(clear ? "Đã khôi phục phán định khu vực tự động" : "Khu vực hiện tạiĐã cập nhật", "ST-BME");
   }
   _refreshDashboard();
 }
@@ -5355,7 +5355,7 @@ async function _saveRegionAdjacencyFromDashboard() {
     .filter(Boolean);
 
   if (!region) {
-    toastr.info("先填一个Khu vực hiện tại，再Lưu邻接关系", "ST-BME");
+    toastr.info("Hãy điền khu vực hiện tại trước, rồi lưu quan hệ kề cận", "ST-BME");
     return;
   }
 
@@ -5365,17 +5365,17 @@ async function _saveRegionAdjacencyFromDashboard() {
   });
   if (!result?.ok) {
     const messageMap = {
-      "graph-write-blocked": "đồ thị还在保护写入阶段，暂时不能改邻接关系",
-      "missing-region": "缺少地区名，Không法Lưu邻接",
+      "graph-write-blocked": "Đồ thị vẫn đang trong giai đoạn bảo vệ ghi, tạm thời không thể sửa quan hệ kề cận",
+      "missing-region": "Thiếu tên khu vực, không thể lưu quan hệ kề cận",
     };
-    toastr.error(messageMap[result?.error] || "Lưu地区邻接Thất bại", "ST-BME");
+    toastr.error(messageMap[result?.error] || "Lưukhu vựckề cậnThất bại", "ST-BME");
     return;
   }
 
   if (result.persistBlocked) {
-    toastr.warning("邻接关系Đã cập nhật，但正式写回还在Đang chờđồ thị就绪", "ST-BME");
+    toastr.warning("Quan hệ kề cận đã cập nhật, nhưng ghi ngược chính thức vẫn đang chờ đồ thị sẵn sàng", "ST-BME");
   } else {
-    toastr.success("Khu vực kề của khu vực hiện tại已Lưu", "ST-BME");
+    toastr.success("Đã lưu khu vực kề của khu vực hiện tại", "ST-BME");
   }
   _refreshDashboard();
 }
@@ -5431,7 +5431,7 @@ function _bindDashboardControls() {
   }
 }
 
-// ==================== Thao tác绑定 ====================
+// ==================== Thao tácgắn ====================
 
 function _bindActions() {
   const bindings = {
@@ -5481,11 +5481,11 @@ function _bindActions() {
     undoMaintenance: "Hoàn tác lần bảo trì gần nhất",
     rebuildVectorIndex: "Xây lại vector",
     reembedDirect: "Nhúng lại trực tiếp",
-    clearGraph: "清空đồ thị",
+    clearGraph: "xóa sạchđồ thị",
     clearVectorCache: "Xóa bộ đệm vector",
     clearBatchJournal: "Xóa lịch sử trích xuất",
-    deleteCurrentIdb: "清空当前Cục bộ存储",
-    deleteAllIdb: "清空Tất cảCục bộ存储",
+    deleteCurrentIdb: "xóa sạchhiện tạiCục bộlưu trữ",
+    deleteAllIdb: "xóa sạchTất cảCục bộlưu trữ",
     deleteServerSyncFile: "Xóa dữ liệu đồng bộ máy chủ",
     backupToCloud: "\u5907\u4efd\u5230\u4e91\u7aef",
     restoreFromCloud: "\u4ece\u4e91\u7aef\u83b7\u53d6\u5907\u4efd",
@@ -5496,12 +5496,12 @@ function _bindActions() {
   const manualCloudFabBehaviors = {
     backupToCloud: {
       successStatus: "cloud-success",
-      successTooltip: "备份云端Hoàn tất",
+      successTooltip: "Sao lưu đám mây hoàn tất",
       errorTooltip: "Sao lưu lên đám mâyThất bại",
     },
     restoreFromCloud: {
       successStatus: "cloud-success",
-      successTooltip: "云端备份已Trích xuất",
+      successTooltip: "Đã lấy bản sao lưu từ đám mây",
       errorTooltip: "Lấy bản sao lưu từ đám mâyThất bại",
     },
     manageServerBackups: {
@@ -5509,7 +5509,7 @@ function _bindActions() {
     },
     rollbackLastRestore: {
       successStatus: "cloud-success",
-      successTooltip: "回滚Hoàn tất",
+      successTooltip: "hoàn tácHoàn tất",
       errorTooltip: "Hoàn tác lần khôi phục trướcThất bại",
     },
   };
@@ -5529,7 +5529,7 @@ function _bindActions() {
       const fabBehavior = manualCloudFabBehaviors[actionKey] || null;
       const suppressFab = fabBehavior?.suppressFab === true;
 
-      // 防止重复点击
+      // Ngăn nhấn trùng lặp
       if (btn.disabled) return;
       btn.disabled = true;
       btn.style.opacity = "0.5";
@@ -5538,7 +5538,7 @@ function _bindActions() {
       if (suppressFab) {
         _syncFloatingBallWithRuntimeStatus();
       }
-      toastr.info(`${label} 进行Trung bình…`, "ST-BME", { timeOut: 2000 });
+      toastr.info(`${label} đang diễn raTrung bình…`, "ST-BME", { timeOut: 2000 });
 
       try {
         const result = await handler();
@@ -5609,12 +5609,12 @@ function _bindActions() {
       );
       const desc =
         mode === "pending"
-          ? "Trích xuấtHiện chưaXử lý的Nội dung"
+          ? "Trích xuất nội dung chưa xử lý"
           : Number.isFinite(startFloor) || Number.isFinite(endFloor)
-            ? `重提Phạm vi ${Number.isFinite(startFloor) ? startFloor : "当前"} ~ ${Number.isFinite(endFloor) ? endFloor : "最新"}`
-            : "当前重提";
+            ? `trích xuất lạiPhạm vi ${Number.isFinite(startFloor) ? startFloor : "hiện tại"} ~ ${Number.isFinite(endFloor) ? endFloor : "mới nhất"}`
+            : "hiện tạitrích xuất lại";
 
-      if (!confirm(`Xác nhận要执行吗？\n\n${desc}`)) {
+      if (!confirm(`Xác nhận thực thi chứ?\n\n${desc}`)) {
         return;
       }
 
@@ -5656,7 +5656,7 @@ function _bindActions() {
       }
 
       _showActionProgressUi("Xây lại theo phạm vi");
-      toastr.info("Xây lại theo phạm vi 进行Trung bình…", "ST-BME", { timeOut: 2000 });
+      toastr.info("Xây lại theo phạm vi đang diễn raTrung bình…", "ST-BME", { timeOut: 2000 });
 
       try {
         const start = _parseOptionalInt(
@@ -5697,8 +5697,8 @@ function _bindActions() {
         document.getElementById("bme-extract-end-floor")?.value,
       );
       const desc = Number.isFinite(startFloor) || Number.isFinite(endFloor)
-        ? `按Phạm vi ${Number.isFinite(startFloor) ? startFloor : "当前"} ~ ${Number.isFinite(endFloor) ? endFloor : "最新"} Xây lại trạng thái tóm tắt`
-        : "按当前总结相关Phạm viXây lại trạng thái tóm tắt";
+        ? `Xây lại trạng thái tóm tắt theo phạm vi ${Number.isFinite(startFloor) ? startFloor : "hiện tại"} ~ ${Number.isFinite(endFloor) ? endFloor : "mới nhất"}`
+        : "Xây lại trạng thái tóm tắt theo phạm vi liên quan tới phần tóm tắt hiện tại";
 
       if (btn) {
         btn.disabled = true;
@@ -5764,7 +5764,7 @@ function _bindActions() {
       }
     });
 
-  // ==================== AI Monitor Trace 折叠 ====================
+  // ==================== AI Monitor Trace gộp ====================
 
   document.addEventListener("click", (e) => {
     const toggle = e.target.closest(".bme-ai-monitor-entry__toggle");
@@ -5782,23 +5782,23 @@ function _bindActions() {
     if (entry) entry.classList.toggle("is-collapsed");
   });
 
-  // ==================== Chế độ nhận thức绑定 ====================
+  // ==================== Chế độ nhận thứcgắn ====================
 
-  // đồ thị/Chế độ nhận thức tab 切换
+  // đồ thị/Chế độ nhận thức tab chuyển đổi
   panelEl?.querySelectorAll(".bme-graph-view-tab").forEach((tab) => {
     tab.addEventListener("click", () => {
       _switchGraphView(tab.dataset.graphView);
     });
   });
 
-  // 移动端đồ thị子 Chuyển Tab
+  // Chuyển tab con của đồ thị trên thiết bị di động
   document.querySelectorAll(".bme-graph-subtab").forEach((tab) => {
     tab.addEventListener("click", () => {
       _switchMobileGraphSubView(tab.dataset.mobileGraphView);
     });
   });
 
-  // 移动端đồ thị浮动控件
+  // Điều khiển nổi của đồ thị trên thiết bị di động
   document.getElementById("bme-mobile-render-toggle")?.addEventListener("click", () => {
     _toggleGraphRenderingEnabled();
   });
@@ -5815,10 +5815,10 @@ function _bindActions() {
     r?.resetView?.();
   });
 
-  // 全屏đồ thị
+  // Đồ thị toàn màn hình
   document.getElementById("bme-fs-close")?.addEventListener("click", _closeFullscreenGraph);
 
-  // Chế độ nhận thứcNhân vật列表点击（桌面端）
+  // Nhấn danh sách nhân vật trong chế độ nhận thức (bản desktop)
   document.getElementById("bme-cog-owner-list")?.addEventListener("click", (e) => {
     const card = e.target.closest("[data-owner-key]");
     if (!card) return;
@@ -5826,7 +5826,7 @@ function _bindActions() {
     _refreshCognitionWorkspace();
   });
 
-  // Chế độ nhận thứcNhân vật列表点击（移动端）
+  // Chế độ nhận thứcNhân vậtdanh sáchnhấn（thiết bị di động）
   document.getElementById("bme-mobile-cog-owner-list")?.addEventListener("click", (e) => {
     const card = e.target.closest("[data-owner-key]");
     if (!card) return;
@@ -5834,13 +5834,13 @@ function _bindActions() {
     _refreshMobileCognitionFull();
   });
 
-  // Dashboard 跳转Chế độ nhận thức
+  // Dashboard chuyển sang chế độ nhận thức
   document.getElementById("bme-cognition-jump-to-view")?.addEventListener("click", () => {
     _switchTab("dashboard");
     _switchGraphView("cognition");
   });
 
-  // Chế độ nhận thức空间工具 (delegate)
+  // Công cụ không gian của chế độ nhận thức (delegate)
   document.getElementById("bme-cognition-workspace")?.addEventListener("click", (e) => {
     const regionApply = e.target.closest("#bme-cog-region-apply");
     const regionClear = e.target.closest("#bme-cog-region-clear");
@@ -5872,7 +5872,7 @@ function _bindActions() {
       _callAction("clearActiveStoryTime", {});
     }
 
-    // Thủ công覆盖按钮
+    // Nút bao phủ thủ công
     const actionBtn = e.target.closest("[data-bme-cognition-node-action]");
     if (actionBtn) {
       const mode = actionBtn.dataset.bmeCognitionNodeAction;
@@ -6809,7 +6809,7 @@ function _bindConfigControls() {
         _patchSettings({ llmActivePreset: "" }, { refreshTaskWorkspace: true });
         _populateLlmPresetSelect(settings.llmPresets || {}, "");
         _syncLlmPresetControls("");
-        toastr.warning("选Trung bình的模板不存在，已切回Thủ công模式", "ST-BME");
+        toastr.warning("Mẫu đã chọn không tồn tại, đã chuyển về chế độ thủ công", "ST-BME");
         return;
       }
 
@@ -6846,7 +6846,7 @@ function _bindConfigControls() {
       _patchSettings({ llmPresets: nextPresets }, { refreshTaskWorkspace: true });
       _populateLlmPresetSelect(nextPresets, activePreset);
       _syncLlmPresetControls(activePreset);
-      toastr.success("当前模板已Lưu", "ST-BME");
+      toastr.success("Đã lưu mẫu hiện tại", "ST-BME");
     });
     llmPresetSaveBtn.dataset.bmeBound = "true";
   }
@@ -6858,17 +6858,17 @@ function _bindConfigControls() {
       const activePreset = String(settings.llmActivePreset || "");
       const suggestedName = activePreset
         ? `${activePreset} bản sao`
-        : "新模板";
-      const nextName = window.prompt("请输入新模板Tên", suggestedName);
+        : "Mẫu mới";
+      const nextName = window.prompt("Vui lòng nhập tên mẫu mới", suggestedName);
       if (nextName == null) return;
 
       const trimmedName = String(nextName).trim();
       if (!trimmedName) {
-        toastr.info("模板Tên不能为空", "ST-BME");
+        toastr.info("mẫuTênkhông thểtrống", "ST-BME");
         return;
       }
       if (trimmedName in (settings.llmPresets || {})) {
-        toastr.info("模板Tên已存在，请换一个", "ST-BME");
+        toastr.info("Tên mẫu đã tồn tại, vui lòng đổi tên khác", "ST-BME");
         return;
       }
 
@@ -6882,7 +6882,7 @@ function _bindConfigControls() {
       }, { refreshTaskWorkspace: true });
       _populateLlmPresetSelect(nextPresets, trimmedName);
       _syncLlmPresetControls(trimmedName);
-      toastr.success("已Lưu thành mẫu mới", "ST-BME");
+      toastr.success("Đã lưu thành mẫu mới", "ST-BME");
     });
     llmPresetSaveAsBtn.dataset.bmeBound = "true";
   }
@@ -6893,12 +6893,12 @@ function _bindConfigControls() {
       const settings = _normalizeLlmPresetSettings(_getSettings?.() || {});
       const activePreset = String(settings.llmActivePreset || "");
       if (!activePreset) {
-        toastr.info("当前处于Thủ công模式，没有可Xóa的模板", "ST-BME");
+        toastr.info("Hiện đang ở chế độ thủ công, không có mẫu nào để xóa", "ST-BME");
         return;
       }
 
       const confirmed = window.confirm(
-        `确定要Xóa模板“${activePreset}”吗？当前输入框里的值会保留。`,
+        `Xác nhận xóa preset "${activePreset}"? Giá trị hiện đang nằm trong ô nhập sẽ được giữ lại.`,
       );
       if (!confirmed) return;
 
@@ -6910,7 +6910,7 @@ function _bindConfigControls() {
       }, { refreshTaskWorkspace: true });
       _populateLlmPresetSelect(nextPresets, "");
       _syncLlmPresetControls("");
-      toastr.success("模板已Xóa", "ST-BME");
+      toastr.success("Đã xóa mẫu", "ST-BME");
     });
     llmPresetDeleteBtn.dataset.bmeBound = "true";
   }
@@ -7041,7 +7041,7 @@ function _bindConfigControls() {
         toastr.error(result.error, "ST-BME");
         return;
       }
-      toastr.success("Chat hiện tại的隐藏设置已重新应用", "ST-BME");
+      toastr.success("Đã áp dụng lại cài đặt ẩn của chat hiện tại", "ST-BME");
     });
   document
     .getElementById("bme-clear-hide-settings")
@@ -7051,7 +7051,7 @@ function _bindConfigControls() {
         toastr.error(result.error, "ST-BME");
         return;
       }
-      toastr.info("已HủyChat hiện tại里由 ST-BME 应用的隐藏", "ST-BME");
+      toastr.info("Đã hủy phần ẩn do ST-BME áp dụng trong chat hiện tại", "ST-BME");
     });
   document
     .getElementById("bme-test-llm")
@@ -7386,13 +7386,13 @@ function _bindTaskProfileWorkspace() {
           importedGlobalMerge.mergedRuleCount + legacyRuleMerge.mergedRuleCount;
         toastr.success(
           mergedRuleCount > 0
-            ? `预设Nhập成功，${mergedRuleCount} 条RegexQuy tắc已合并到通用RegexQuy tắc`
-            : "预设Nhập成功",
+            ? `Nhập preset thành công, ${mergedRuleCount} quy tắc regex đã được hợp nhất vào quy tắc regex dùng chung`
+            : "presetNhậpthành công",
           "ST-BME",
         );
       } catch (error) {
         console.error("[ST-BME] NhậpPreset tác vụThất bại:", error);
-        toastr.error(`预设Nhập thất bại: ${error?.message || error}`, "ST-BME");
+        toastr.error(`presetNhập thất bại: ${error?.message || error}`, "ST-BME");
       } finally {
         importInput.value = "";
       }
@@ -7409,7 +7409,7 @@ function _bindTaskProfileWorkspace() {
         const text = await file.text();
         const parsed = JSON.parse(text);
         if (parsed?.format !== "st-bme-all-task-profiles" || !parsed?.profiles) {
-          throw new Error("文件格式不正确，请选择「XuấtTất cả」生成的文件");
+          throw new Error("Định dạng tệp không đúng, vui lòng chọn tệp được tạo từ "Xuất tất cả"");
         }
         const settings = _getSettings?.() || {};
         let mergedProfiles = settings.taskProfiles || {};
@@ -7465,7 +7465,7 @@ function _bindTaskProfileWorkspace() {
           }
         }
         if (importedCount === 0) {
-          toastr.warning("没有成功Nhập任何预设", "ST-BME");
+          toastr.warning("Không nhập thành công preset nào", "ST-BME");
           return;
         }
         _patchSettings(
@@ -7482,18 +7482,18 @@ function _bindTaskProfileWorkspace() {
           importedGlobalMerge.mergedRuleCount + mergedLegacyRuleCount;
         if (skippedLegacyConfigCount > 0) {
           console.warn(
-            `[ST-BME] NhậpTất cả旧版预设时检测到 ${skippedLegacyConfigCount} 份额外Tác vụ级RegexCấu hình冲突，已保留第一份迁移到通用Regex的Cấu hình，其余仅合并Quy tắc。`,
+            `[ST-BME] Khi nhập toàn bộ preset bản cũ đã phát hiện ${skippedLegacyConfigCount} cấu hình regex cấp tác vụ bổ sung bị xung đột. Hệ thống đã giữ lại mục đầu tiên và chuyển nó vào cấu hình regex dùng chung, các mục còn lại chỉ hợp nhất quy tắc.`,
           );
         }
         toastr.success(
           mergedRuleCount > 0
-            ? `Đã nhập ${importedCount} 个Preset tác vụ，并Hợp nhất ${mergedRuleCount} 条通用RegexQuy tắc`
-            : `Đã nhập ${importedCount} 个Preset tác vụ`,
+            ? `Đã nhập ${importedCount} preset tác vụ và hợp nhất ${mergedRuleCount} quy tắc regex dùng chung`
+            : `Đã nhập ${importedCount} preset tác vụ`,
           "ST-BME",
         );
       } catch (error) {
-        console.error("[ST-BME] NhậpTất cả预设Thất bại:", error);
-        toastr.error(`NhậpTất cả预设Thất bại: ${error?.message || error}`, "ST-BME");
+        console.error("[ST-BME] NhậpTất cảpresetThất bại:", error);
+        toastr.error(`NhậpTất cảpresetThất bại: ${error?.message || error}`, "ST-BME");
       } finally {
         importAllInput.value = "";
       }
@@ -7513,7 +7513,7 @@ function _handleTaskProfileWorkspaceInput(event) {
   }
 
   if (target.matches("[data-generation-key]")) {
-    // 滑动条 ↔ 数字输入 Đồng bộ
+    // Đồng bộ thanh trượt ↔ ô nhập số
     const group = target.closest(".bme-range-group");
     if (group) {
       const key = target.dataset.generationKey;
@@ -7521,7 +7521,7 @@ function _handleTaskProfileWorkspaceInput(event) {
         target.type === "range" ? `.bme-range-number` : `.bme-range-input`,
       );
       if (sibling) sibling.value = target.value;
-      // Cập nhật label 上的值显示
+      // Cập nhật giá trị hiển thị trên nhãn
       const row = target.closest(".bme-config-row");
       const badge = row?.querySelector(".bme-range-value");
       if (badge) badge.textContent = target.value || "Mặc định";
@@ -7811,16 +7811,16 @@ function _renderMessageTraceRecallCard(state) {
     injectionSnapshot && !triggeredUserMessage
       ? `
         <div class="bme-config-help">
-          这lần没有可靠捕获到主 AI 那边的Người dùngtin nhắn，因此这里只展示真实记录到的Ký ứcVăn bản tiêm，不再用 recall Model请求去反推，避免误导排查。
+          Lần này không bắt được đáng tin cậy tin nhắn người dùng từ phía AI chính, vì vậy ở đây chỉ hiển thị văn bản tiêm ký ức đã được ghi nhận thực tế, không còn dùng yêu cầu recall model để suy ngược lại nữa nhằm tránh gây hiểu lầm khi kiểm tra.
         </div>
       `
       : "";
 
   if (!injectionSnapshot) {
     return `
-      <div class="bme-config-card-title">最后Tiêm给主 AI 的Nội dung</div>
+      <div class="bme-config-card-title">Nội dung cuối cùng được tiêm cho AI chính</div>
       <div class="bme-config-help">
-        还没有可用的Truy hồiTiêmsnapshot。先Bình thường发一 tin nhắn，让插件跑完一轮Truy hồi即可。
+        Vẫn chưa có snapshot tiêm truy hồi dùng được. Hãy gửi một tin nhắn bình thường để plugin chạy xong một vòng truy hồi.
       </div>
     `;
   }
@@ -7828,15 +7828,15 @@ function _renderMessageTraceRecallCard(state) {
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">最后Tiêm给主 AI 的Nội dung</div>
+        <div class="bme-config-card-title">Nội dung cuối cùng được tiêm cho AI chính</div>
       </div>
       <span class="bme-task-pill">${_escHtml(_formatTaskProfileTime(injectionSnapshot.updatedAt))}</span>
     </div>
     ${missingUserMessageNotice}
     ${_renderMessageTraceTextBlock(
-      "发送给主 AI 的Nội dung",
+      "Nội dung gửi cho AI chính",
       hostPayloadText,
-      "这lần没有捕获到主 AI 侧的TiêmNội dung。",
+      "Lần này không bắt được nội dung tiêm ở phía AI chính.",
     )}
   `;
 }
@@ -7851,9 +7851,9 @@ function _renderMessageTraceExtractCard(state) {
 
   if (!extractLlmRequest && !extractPromptBuild) {
     return `
-      <div class="bme-config-card-title">最后送去Trích xuấtModel的Nội dung</div>
+      <div class="bme-config-card-title">Nội dung cuối cùng gửi cho model trích xuất</div>
       <div class="bme-config-help">
-        还没有可用的Trích xuất请求snapshot。等 assistant Bình thường回完一轮，Tự độngTrích xuất跑过后这里就会出现。
+        Vẫn chưa có snapshot yêu cầu trích xuất dùng được. Chờ assistant trả lời xong một vòng bình thường và trích xuất tự động chạy qua thì nội dung sẽ hiện ở đây.
       </div>
     `;
   }
@@ -7861,16 +7861,16 @@ function _renderMessageTraceExtractCard(state) {
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">最后送去Trích xuấtModel的Nội dung</div>
+        <div class="bme-config-card-title">Nội dung cuối cùng gửi cho model trích xuất</div>
       </div>
       <span class="bme-task-pill">${_escHtml(
         _formatTaskProfileTime(extractLlmRequest?.updatedAt || extractPromptBuild?.updatedAt),
       )}</span>
     </div>
     ${_renderMessageTraceTextBlock(
-      "发送去Trích xuấtModel的Nội dung",
+      "Nội dung gửi tới model trích xuất",
       extractPayloadText,
-      "这lần没有捕获到Trích xuất请求Nội dung。",
+      "Lần này không bắt được nội dung yêu cầu trích xuất.",
     )}
   `;
 }
@@ -7892,10 +7892,10 @@ function _getMonitorTaskTypeLabel(taskType = "") {
     synopsis: "Tóm tắt ngắn",
     summary_rollup: "Gộp tóm tắt",
     reflection: "Phản tư",
-    sleep: "遗忘",
-    evolve: "进化",
+    sleep: "Lãng quên",
+    evolve: "tiến hóa",
     embed: "Vector",
-    rebuild: "重建",
+    rebuild: "xây lại",
   };
   return labels[normalized] || String(taskType || "Không rõTác vụ");
 }
@@ -7904,19 +7904,19 @@ function _getMonitorStatusLabel(status = "") {
   const normalized = String(status || "").trim().toLowerCase();
   if (!normalized) return "Không rõTrạng thái";
   if (normalized.includes("error") || normalized.includes("fail")) return "Thất bại";
-  if (normalized.includes("run")) return "运行Trung bình";
+  if (normalized.includes("run")) return "Đang chạy";
   if (normalized.includes("queue")) return "Đang xếp hàng";
   if (normalized.includes("pending")) return "Đang chờTrung bình";
   if (normalized.includes("skip")) return "Đã bỏ qua";
-  if (normalized.includes("fallback")) return "已Lùi về";
-  if (normalized.includes("disable")) return "已Tắt";
+  if (normalized.includes("fallback")) return "Đã lùi về";
+  if (normalized.includes("disable")) return "Đã tắt";
   if (
     normalized.includes("success") ||
     normalized.includes("complete") ||
     normalized.includes("done") ||
     normalized === "ok"
   ) {
-    return "成功";
+    return "thành công";
   }
   return String(status || "Không rõTrạng thái");
 }
@@ -7924,10 +7924,10 @@ function _getMonitorStatusLabel(status = "") {
 function _getMonitorRoleLabel(role = "") {
   const normalized = String(role || "").trim().toLowerCase();
   const labels = {
-    system: "系统",
+    system: "hệ thống",
     user: "Người dùng",
     assistant: "trợ lý",
-    tool: "工具",
+    tool: "Công cụ",
   };
   return labels[normalized] || String(role || "Không rõ");
 }
@@ -7936,15 +7936,15 @@ function _getMonitorRouteLabel(value = "") {
   const normalized = String(value || "").trim();
   if (!normalized) return "";
   const labels = {
-    "dedicated-openai-compatible": "专用 OpenAI 兼容Giao diện",
+    "dedicated-openai-compatible": "dành riêng OpenAI tương thíchGiao diện",
     "dedicated-anthropic-claude": "Anthropic Claude Giao diện",
     "dedicated-google-ai-studio": "Google AI Studio / Gemini Giao diện",
-    "sillytavern-current-model": "酒馆当前Model",
-    "dedicated-memory-llm": "专用Ký ứcModel",
-    global: "跟随当前 API",
-    "task-preset": "Tác vụ专用模板",
-    "global-fallback-missing-task-preset": "Tác vụ模板缺失，已Lùi về当前 API",
-    "global-fallback-invalid-task-preset": "Tác vụ模板不完整，已Lùi về当前 API",
+    "sillytavern-current-model": "SillyTavernhiện tạiModel",
+    "dedicated-memory-llm": "dành riêngKý ứcModel",
+    global: "Đi theo API hiện tại",
+    "task-preset": "Tác vụdành riêngmẫu",
+    "global-fallback-missing-task-preset": "Thiếu preset tác vụ, đã lùi về API hiện tại",
+    "global-fallback-invalid-task-preset": "Preset tác vụ không đầy đủ, đã lùi về API hiện tại",
   };
   return labels[normalized] || normalized;
 }
@@ -7953,18 +7953,18 @@ function _getMonitorStageLabel(stage = "") {
   const normalized = String(stage || "").trim();
   if (!normalized) return "—";
   const labels = {
-    "input.userMessage": "输入阶段: 当前Người dùngtin nhắn",
-    "input.recentMessages": "输入阶段: Tin nhắn gần nhất",
-    "input.candidateText": "输入阶段: Văn bản ứng viên",
-    "input.finalPrompt": "输入阶段: 最终提示词",
-    "output.rawResponse": "输出阶段: 原始响应",
-    "output.beforeParse": "输出阶段: 解析前",
-    "world-info-rendered": "世界书渲染后",
-    "final-injection-safe": "TiêmNội dung最终清洗",
-    "host:user_input": "HostTiêm: Người dùng输入",
-    "host:ai_output": "HostTiêm: AI 输出",
-    "host:world_info": "HostTiêm: 世界书",
-    "host:reasoning": "HostTiêm: 思维链/推理",
+    "input.userMessage": "đầu vàogiai đoạn: hiện tạiTin nhắn người dùng",
+    "input.recentMessages": "đầu vàogiai đoạn: Tin nhắn gần nhất",
+    "input.candidateText": "đầu vàogiai đoạn: Văn bản ứng viên",
+    "input.finalPrompt": "đầu vàogiai đoạn: cuối cùngprompt",
+    "output.rawResponse": "đầu ragiai đoạn: nguyên gốcphản hồi",
+    "output.beforeParse": "Đầu ra: trước khi phân tích",
+    "world-info-rendered": "Sau khi World Info kết xuất",
+    "final-injection-safe": "TiêmNội dungcuối cùnglàm sạch",
+    "host:user_input": "HostTiêm: Người dùngđầu vào",
+    "host:ai_output": "HostTiêm: AI đầu ra",
+    "host:world_info": "HostTiêm: World Info",
+    "host:reasoning": "Tiêm từ host: chuỗi suy nghĩ/suy luận",
   };
   return labels[normalized] || normalized;
 }
@@ -7981,8 +7981,8 @@ function _getMonitorEjsStatusLabel(status = "") {
   const normalized = String(status || "").trim().toLowerCase();
   if (!normalized) return "";
   const labels = {
-    primary: "主运行时",
-    fallback: "Lùi về运行时",
+    primary: "Runtime chính",
+    fallback: "Lùi vềruntime",
     failed: "Không khả dụng",
   };
   return labels[normalized] || String(status || "");
@@ -8015,7 +8015,7 @@ function _summarizeMonitorGovernance(entry = {}) {
 
   if (worldInfo) {
     lines.push(
-      `世界书: ${worldInfo.hit ? "命Trung bình" : "未命Trung bình"} · Đặt trước ${Number(worldInfo.beforeCount || 0)} · 后置 ${Number(worldInfo.afterCount || 0)} · 深度 ${Number(worldInfo.atDepthCount || 0)}`,
+      `World Info: ${worldInfo.hit ? "trúng" : "không trúng"} · Đặt trước ${Number(worldInfo.beforeCount || 0)} · đặt sau ${Number(worldInfo.afterCount || 0)} · độ sâu ${Number(worldInfo.atDepthCount || 0)}`,
     );
   }
   if (promptExecution?.ejsRuntimeStatus) {
@@ -8026,16 +8026,16 @@ function _summarizeMonitorGovernance(entry = {}) {
       (sum, item) => sum + Number(item?.appliedRules?.length || 0),
       0,
     );
-    lines.push(`输入治理: ${regexInput.length} 段 · 命Trung bình ${appliedRuleCount} 条Quy tắc`);
+    lines.push(`Điều phối đầu vào: ${regexInput.length} đoạn · khớp ${appliedRuleCount} quy tắc`);
   }
   if (requestCleaning) {
     lines.push(
-      `发送前清洗: ${requestCleaning.changed ? "有改动" : "Không改动"} · 阶段 ${_formatMonitorStageList(requestCleaning.stages)}`,
+      `trước khi gửilàm sạch: ${requestCleaning.changed ? "Có thay đổi" : "Không thay đổi"} · giai đoạn ${_formatMonitorStageList(requestCleaning.stages)}`,
     );
   }
   if (responseCleaning) {
     lines.push(
-      `响应清洗: ${responseCleaning.changed ? "有改动" : "Không改动"} · 阶段 ${_formatMonitorStageList(responseCleaning.stages)}`,
+      `phản hồilàm sạch: ${responseCleaning.changed ? "Có thay đổi" : "Không thay đổi"} · giai đoạn ${_formatMonitorStageList(responseCleaning.stages)}`,
     );
   }
   if (entry?.jsonFailure?.failureReason) {
@@ -8053,7 +8053,7 @@ function _buildMonitorMessagesPreview(messages = []) {
   const text = _stringifyTraceMessages(messages);
   if (!text) return "";
   if (text.length <= 1800) return text;
-  return `${text.slice(0, 1800)}\n\n...（已截断）`;
+  return `${text.slice(0, 1800)}\n\n...(đã cắt ngắn)`;
 }
 
 function _renderAiMonitorTraceCard(state) {
@@ -8062,7 +8062,7 @@ function _renderAiMonitorTraceCard(state) {
     return `
       <div class="bme-config-card-title">Giám sát tác vụDòng thời gian</div>
       <div class="bme-config-help">
-        Giám sát tác vụ当前已Tắt。打开后，这里会保留Gần nhất的Trích xuất / Truy hồi / 维护Tác vụsnapshot，便于排查到底发了什么、用了哪套Model、做了哪些清洗。
+        Giám sát tác vụ hiện đã tắt. Sau khi bật, nơi này sẽ giữ lại các snapshot gần nhất của tác vụ trích xuất / truy hồi / bảo trì để tiện điều tra đã gửi gì, dùng model nào và đã làm sạch những gì.
       </div>
     `;
   }
@@ -8071,7 +8071,7 @@ function _renderAiMonitorTraceCard(state) {
     return `
       <div class="bme-config-card-title">Giám sát tác vụDòng thời gian</div>
       <div class="bme-config-help">
-        还没有Dòng thời gian tác vụ。等Trích xuất、Truy hồi或维护Tác vụ跑过一轮后，这里就会出现Gần nhất记录。
+        Vẫn chưa có dòng thời gian tác vụ. Sau khi trích xuất, truy hồi hoặc tác vụ bảo trì chạy xong một vòng, bản ghi gần nhất sẽ xuất hiện ở đây.
       </div>
     `;
   }
@@ -8100,14 +8100,14 @@ function _renderAiMonitorTraceCard(state) {
       // Governance tags
       const govTags = [];
       const pe = entry?.promptExecution || {};
-      if (pe.worldInfo?.hit) govTags.push({ cls: "tag-worldinfo", label: `世界书 ${Number(pe.worldInfo.beforeCount || 0) + Number(pe.worldInfo.afterCount || 0) + Number(pe.worldInfo.atDepthCount || 0)}条` });
+      if (pe.worldInfo?.hit) govTags.push({ cls: "tag-worldinfo", label: `World Info ${Number(pe.worldInfo.beforeCount || 0) + Number(pe.worldInfo.afterCount || 0) + Number(pe.worldInfo.atDepthCount || 0)} mục` });
       if (pe.ejsRuntimeStatus) govTags.push({ cls: "tag-ejs", label: "EJS" });
       if (Array.isArray(pe.regexInput) && pe.regexInput.length) {
         const ruleCount = pe.regexInput.reduce((s, i) => s + Number(i?.appliedRules?.length || 0), 0);
-        govTags.push({ cls: "tag-regex", label: `Regex ${ruleCount}条` });
+        govTags.push({ cls: "tag-regex", label: `Regex ${ruleCount} mục` });
       }
-      if (entry?.requestCleaning?.changed) govTags.push({ cls: "tag-cleaning", label: "发送清洗" });
-      if (entry?.responseCleaning?.changed) govTags.push({ cls: "tag-cleaning", label: "响应清洗" });
+      if (entry?.requestCleaning?.changed) govTags.push({ cls: "tag-cleaning", label: "gửilàm sạch" });
+      if (entry?.responseCleaning?.changed) govTags.push({ cls: "tag-cleaning", label: "phản hồilàm sạch" });
       if (entry?.jsonFailure?.failureReason) govTags.push({ cls: "tag-error", label: "JSONThất bại" });
 
       const govTagsHtml = govTags.length
@@ -8136,7 +8136,7 @@ function _renderAiMonitorTraceCard(state) {
               </div>
             </div>
             <span class="bme-task-pill">${_escHtml(modelLabel)}</span>
-            <button class="bme-ai-monitor-entry__toggle" type="button" title="展开/折叠">
+            <button class="bme-ai-monitor-entry__toggle" type="button" title="Mở rộng/gập lại">
               <i class="fa-solid fa-chevron-down"></i>
             </button>
           </div>
@@ -8151,9 +8151,9 @@ function _renderAiMonitorTraceCard(state) {
                 : ""
             }
             ${_renderMessageTraceTextBlock(
-              "最终发送tin nhắn预览",
+              "Xem trước tin nhắn cuối cùng đã gửi",
               previewText,
-              "这条Tác vụ没有捕获到完整的tin nhắn预览。",
+              "Tác vụ này không bắt được bản xem trước tin nhắn đầy đủ.",
             )}
           </div>
         </div>
@@ -8167,10 +8167,10 @@ function _renderAiMonitorTraceCard(state) {
       <div>
         <div class="bme-config-card-title">Giám sát tác vụDòng thời gian</div>
         <div class="bme-config-card-subtitle">
-          Gần nhất ${Math.min(timeline.length, 8)} 条Tác vụsnapshot · 点击展开查看详情
+          Gần nhất ${Math.min(timeline.length, 8)} snapshot tác vụ · nhấn để mở chi tiết
         </div>
       </div>
-      <span class="bme-task-pill">${_escHtml(String(timeline.length))} 条</span>
+      <span class="bme-task-pill">${_escHtml(String(timeline.length))} mục</span>
     </div>
     <div class="bme-ai-monitor-stack">
       ${cards}
@@ -8198,9 +8198,9 @@ function _renderAiMonitorCognitionCard(state) {
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">Nhận thức / không gian运行snapshot</div>
+        <div class="bme-config-card-title">Snapshot chạy của nhận thức / không gian</div>
         <div class="bme-config-card-subtitle">
-          这里展示Chat hiện tại最新落地的认知锚点和空间上下文，不再靠前端临时猜。
+          Nơi này hiển thị mốc neo nhận thức và ngữ cảnh không gian mới nhất đã thực sự được lưu xuống của chat hiện tại, không còn dựa vào phỏng đoán tạm thời từ frontend.
         </div>
       </div>
     </div>
@@ -8214,7 +8214,7 @@ function _renderAiMonitorCognitionCard(state) {
         )}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>兼容旧锚点</span>
+        <span>Mốc neo cũ tương thích</span>
         <strong>${_escHtml(
           Array.isArray(historyState.recentRecallOwnerKeys) &&
             historyState.recentRecallOwnerKeys.length
@@ -8243,7 +8243,7 @@ function _renderAiMonitorCognitionCard(state) {
         <strong>${_escHtml(String(owners.length || 0))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>最后Trích xuất地区</span>
+        <span>Khu vực trích xuất gần nhất</span>
         <strong>${_escHtml(String(historyState.lastExtractedRegion || "—"))}</strong>
       </div>
     </div>
@@ -8254,9 +8254,9 @@ function _renderGraphLayoutTraceCard(state) {
   const layout = state.graphLayout || null;
   if (!layout) {
     return `
-      <div class="bme-config-card-title">图布局 / Native 诊断</div>
+      <div class="bme-config-card-title">bố cục đồ thị / Native chẩn đoán</div>
       <div class="bme-config-help">
-        还没有图布局诊断snapshot。打开đồ thị页并触发一lần布局后，这里会显示实际执行路径、耗时和 native 模块Nguồn。
+        Vẫn chưa có snapshot chẩn đoán bố cục đồ thị. Sau khi mở trang đồ thị và kích hoạt một lần bố cục, nơi này sẽ hiển thị đường đi thực thi, thời gian tiêu tốn và nguồn của mô-đun native.
       </div>
     `;
   }
@@ -8269,32 +8269,32 @@ function _renderGraphLayoutTraceCard(state) {
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">图布局 / Native 诊断</div>
+        <div class="bme-config-card-title">bố cục đồ thị / Native chẩn đoán</div>
         <div class="bme-config-card-subtitle">
-          记录lần gần nhất图布局走了哪条路径，以及 native 模块是 wasm-pack 产物还是 fallback loader。
+          Bản ghi này cho biết lần bố cục đồ thị gần nhất đã đi theo đường nào, và mô-đun native là bản wasm-pack hay bộ nạp fallback.
         </div>
       </div>
       <span class="bme-task-pill">${_escHtml(_formatTaskProfileTime(layout.updatedAt || layout.at))}</span>
     </div>
     <div class="bme-ai-monitor-kv">
       <div class="bme-ai-monitor-kv__row">
-        <span>布局路径</span>
+        <span>Đường đi bố cục</span>
         <strong>${_escHtml(mode)}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>nút / 边</span>
+        <span>nút / cạnh</span>
         <strong>${_escHtml(`${Number(layout.nodeCount || 0)} / ${Number(layout.edgeCount || 0)}`)}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>总耗时</span>
+        <span>Tổng thời gian</span>
         <strong>${_escHtml(_formatDurationMs(layout.totalMs))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>求解耗时</span>
+        <span>Thời gian giải</span>
         <strong>${_escHtml(_formatDurationMs(layout.solveMs || layout.workerSolveMs))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>迭代lần数</span>
+        <span>Số vòng lặp</span>
         <strong>${_escHtml(String(layout.iterations || '—'))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
@@ -8316,9 +8316,9 @@ function _renderGraphLayoutTraceCard(state) {
 
 function _formatPersistDeltaGateReasonText(reasons = []) {
   const labels = {
-    "below-record-threshold": "记录数不足",
-    "below-structural-delta-threshold": "Cấu trúc变化不足",
-    "below-serialized-chars-threshold": "序列化体积不足",
+    "below-record-threshold": "Số bản ghi không đủ",
+    "below-structural-delta-threshold": "Mức thay đổi cấu trúc không đủ",
+    "below-serialized-chars-threshold": "Dung lượng tuần tự hóa không đủ",
   };
   const normalized = Array.isArray(reasons)
     ? reasons
@@ -8331,19 +8331,19 @@ function _formatPersistDeltaGateReasonText(reasons = []) {
 
 function _formatPersistDeltaGateText(diagnostics = null) {
   if (!diagnostics || typeof diagnostics !== "object") return "—";
-  if (diagnostics.requestedNative !== true) return "未请求 native";
-  if (diagnostics.nativeForceDisabled === true) return "已强制Tắt";
-  if (diagnostics.gateAllowed === true) return "通过";
-  return `已拦截 · ${_formatPersistDeltaGateReasonText(diagnostics.gateReasons)}`;
+  if (diagnostics.requestedNative !== true) return "Chưa yêu cầu native";
+  if (diagnostics.nativeForceDisabled === true) return "Đã cưỡng chế tắt";
+  if (diagnostics.gateAllowed === true) return "thông qua";
+  return `Đã chặn · ${_formatPersistDeltaGateReasonText(diagnostics.gateReasons)}`;
 }
 
 function _renderPersistDeltaTraceCard(state) {
   const diagnostics = state.persistDelta || null;
   if (!diagnostics) {
     return `
-      <div class="bme-config-card-title">Persist Delta / Native 诊断</div>
+      <div class="bme-config-card-title">Persist Delta / Native chẩn đoán</div>
       <div class="bme-config-help">
-        还没有 persist delta 诊断snapshot。等đồ thịHoàn tất一lần IndexedDB 写回后，这里会显示 gate、执行路径、耗时和 fallback Nguyên nhân。
+        Vẫn chưa có snapshot chẩn đoán persist delta. Sau khi đồ thị hoàn tất một lần ghi IndexedDB, nơi này sẽ hiển thị gate, đường đi thực thi, thời gian tiêu tốn và nguyên nhân fallback.
       </div>
     `;
   }
@@ -8366,20 +8366,20 @@ function _renderPersistDeltaTraceCard(state) {
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">Persist Delta / Native 诊断</div>
+        <div class="bme-config-card-title">Persist Delta / Native chẩn đoán</div>
         <div class="bme-config-card-subtitle">
-          记录lần gần nhấtđồ thị增量写回的 gate 判定、真实执行路径，以及 native preload / fallback 情况。
+          Bản ghi này cho biết gate của lần ghi tăng lượng gần nhất vào đồ thị, đường đi thực thi thật sự và cả tình trạng native preload / fallback.
         </div>
       </div>
       <span class="bme-task-pill">${_escHtml(_formatTaskProfileTime(diagnostics.updatedAt))}</span>
     </div>
     <div class="bme-ai-monitor-kv">
       <div class="bme-ai-monitor-kv__row">
-        <span>执行路径</span>
+        <span>thực thiđường đi</span>
         <strong>${_escHtml(String(diagnostics.path || "—"))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>Bridge 模式</span>
+        <span>Bridge chế độ</span>
         <strong>${_escHtml(
           `${String(diagnostics.requestedBridgeMode || "none")} → ${String(diagnostics.preparedBridgeMode || "none")}`,
         )}</strong>
@@ -8389,11 +8389,11 @@ function _renderPersistDeltaTraceCard(state) {
         <strong>${_escHtml(_formatPersistDeltaGateText(diagnostics))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>snapshot记录数</span>
+        <span>Số bản ghi snapshot</span>
         <strong>${_escHtml(`${Number(diagnostics.beforeRecordCount || 0)} → ${Number(diagnostics.afterRecordCount || 0)}`)}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>Cấu trúc变化量</span>
+        <span>Lượng thay đổi cấu trúc</span>
         <strong>${_escHtml(String(diagnostics.structuralDelta ?? "—"))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
@@ -8401,11 +8401,11 @@ function _renderPersistDeltaTraceCard(state) {
         <strong>${_escHtml(payloadCharsText)}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>总耗时</span>
+        <span>Tổng thời gian</span>
         <strong>${_escHtml(_formatDurationMs(diagnostics.totalMs || diagnostics.buildMs))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>构建耗时</span>
+        <span>Thời gian xây dựng</span>
         <strong>${_escHtml(_formatDurationMs(diagnostics.buildMs))}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
@@ -8439,7 +8439,7 @@ function _renderPersistDeltaTraceCard(state) {
         <strong>${_escHtml(moduleSource)}</strong>
       </div>
       <div class="bme-ai-monitor-kv__row">
-        <span>增量规模</span>
+        <span>Quy mô tăng lượng</span>
         <strong>${_escHtml(
           `${Number(diagnostics.upsertNodeCount || 0)}N / ${Number(diagnostics.upsertEdgeCount || 0)}E / ${Number(diagnostics.deleteNodeCount || 0)}DN / ${Number(diagnostics.deleteEdgeCount || 0)}DE`,
         )}</strong>
@@ -8448,7 +8448,7 @@ function _renderPersistDeltaTraceCard(state) {
     ${_renderMessageTraceTextBlock(
       "Fallback reason",
       fallbackReason,
-      "这lần没有发生 native fallback。",
+      "Lần này không xảy ra native fallback.",
     )}
     ${_renderMessageTraceTextBlock(
       "Preload / native error",
@@ -8458,7 +8458,7 @@ function _renderPersistDeltaTraceCard(state) {
   `;
 }
 
-function _renderMessageTraceTextBlock(title, text, emptyText = "暂KhôngNội dung") {
+function _renderMessageTraceTextBlock(title, text, emptyText = "Chưa có nội dung") {
   const normalized = String(text || "").trim();
   return `
     <div class="bme-task-section-label">${_escHtml(title)}</div>
@@ -8660,7 +8660,7 @@ async function _handleTaskProfileWorkspaceClick(event) {
       const select = document.getElementById("bme-task-builtin-select");
       const sourceKey = String(select?.value || "").trim();
       if (!sourceKey) {
-        toastr.info("先选择一个Khối tích hợpNguồn", "ST-BME");
+        toastr.info("Hãy chọn một khối nguồn tích hợp trước", "ST-BME");
         return;
       }
       _updateCurrentTaskProfile((draft, context) => {
@@ -8703,30 +8703,30 @@ async function _handleTaskProfileWorkspaceClick(event) {
       return;
     case "save-profile":
       _patchTaskProfiles(state.taskProfiles, {}, { refresh: true });
-      toastr.success("当前预设已Lưu", "ST-BME");
+      toastr.success("Preset hiện tại đã được lưu", "ST-BME");
       return;
     case "rename-profile": {
       const current = String(selectedProfile?.name || "").trim();
-      const nextName = window.prompt("请输入预设Tên", current);
+      const nextName = window.prompt("Hãy nhập tên preset", current);
       if (nextName == null) return;
       const trimmed = String(nextName).trim();
       if (!trimmed) {
-        toastr.info("预设Tên不能为空", "ST-BME");
+        toastr.info("presetTênkhông thểtrống", "ST-BME");
         return;
       }
       _updateCurrentTaskProfile((draft) => {
         draft.name = trimmed;
       });
-      toastr.success("预设TênĐã cập nhật", "ST-BME");
+      toastr.success("presetTênĐã cập nhật", "ST-BME");
       return;
     }
     case "save-as-profile": {
-      const suggestedName = `${selectedProfile.name || "预设"} bản sao`;
-      const nextName = window.prompt("请输入新预设Tên", suggestedName);
+      const suggestedName = `${selectedProfile.name || "preset"} bản sao`;
+      const nextName = window.prompt("Hãy nhập tên preset mới", suggestedName);
       if (nextName == null) return;
       const trimmedName = String(nextName).trim();
       if (!trimmedName) {
-        toastr.info("预设Tên不能为空", "ST-BME");
+        toastr.info("presetTênkhông thểtrống", "ST-BME");
         return;
       }
       const nextProfile = cloneTaskProfile(selectedProfile, {
@@ -8742,7 +8742,7 @@ async function _handleTaskProfileWorkspaceClick(event) {
         { setActive: true },
       );
       _patchTaskProfiles(nextTaskProfiles);
-      toastr.success("已Lưu thành新预设", "ST-BME");
+      toastr.success("Đã lưu thành preset mới", "ST-BME");
       return;
     }
     case "export-profile":
@@ -8764,7 +8764,7 @@ async function _handleTaskProfileWorkspaceClick(event) {
       return;
     case "restore-all-profiles": {
       const confirmed = window.confirm(
-        "这会将Tất cả 6 个Tác vụ的Preset mặc địnhKhôi phục为出厂Trạng thái。已Lưu的自định nghĩa预设不受影响，通用RegexQuy tắc也不受影响。是否继续？",
+        "Thao tác này sẽ khôi phục preset mặc định của cả 6 tác vụ về trạng thái xuất xưởng. Các preset tự định nghĩa đã lưu và quy tắc regex dùng chung sẽ không bị ảnh hưởng. Có tiếp tục không?",
       );
       if (!confirmed) return;
       const taskTypes = getTaskTypeOptions().map((t) => t.id);
@@ -8778,12 +8778,12 @@ async function _handleTaskProfileWorkspaceClick(event) {
       currentTaskProfileBlockId = "";
       currentTaskProfileRuleId = "";
       _patchTaskProfiles(restored, extraPatch);
-      toastr.success(`已Khôi phụcTất cả ${taskTypes.length} 个Tác vụ的Preset mặc định`, "ST-BME");
+      toastr.success(`Đã khôi phục preset mặc định của toàn bộ ${taskTypes.length} tác vụ`, "ST-BME");
       return;
     }
     case "restore-default-profile": {
       const confirmed = window.confirm(
-        "这会重建当前Tác vụ的Preset mặc định，并切换到Preset mặc định。是否继续？",
+        "Thao tác này sẽ xây lại preset mặc định của tác vụ hiện tại và chuyển sang preset mặc định. Có tiếp tục không?",
       );
       if (!confirmed) return;
       const nextTaskProfiles = restoreDefaultTaskProfile(
@@ -8797,7 +8797,7 @@ async function _handleTaskProfileWorkspaceClick(event) {
         nextTaskProfiles,
         legacyField ? { [legacyField]: "" } : {},
       );
-      toastr.success("Preset mặc định已Khôi phục", "ST-BME");
+      toastr.success("Preset mặc định đã được khôi phục", "ST-BME");
       return;
     }
     case "add-regex-rule":
@@ -8822,7 +8822,7 @@ async function _handleTaskProfileWorkspaceClick(event) {
       _updateGlobalTaskRegex((draft) => {
         const localRules = Array.isArray(draft.localRules) ? draft.localRules : [];
         const nextRule = createLocalRegexRule("global", {
-          script_name: `通用Quy tắc ${localRules.length + 1}`,
+          script_name: `dùng chungQuy tắc ${localRules.length + 1}`,
         });
         draft.localRules = [...localRules, nextRule];
         return { selectRuleId: nextRule.id };
@@ -8837,12 +8837,12 @@ async function _handleTaskProfileWorkspaceClick(event) {
       return;
     case "restore-global-regex-defaults": {
       const confirmed = window.confirm(
-        "这会将通用RegexQuy tắcKhôi phục为Mặc địnhCấu hình。是否继续？",
+        "Thao tác này sẽ khôi phục quy tắc regex dùng chung về cấu hình mặc định. Có tiếp tục không?",
       );
       if (!confirmed) return;
       currentGlobalRegexRuleId = "";
       _patchGlobalTaskRegex(createDefaultGlobalTaskRegex(), { refresh: true });
-      toastr.success("通用RegexQuy tắc已Khôi phụcMặc định", "ST-BME");
+      toastr.success("Quy tắc regex dùng chung đã được khôi phục về mặc định", "ST-BME");
       return;
     }
     default:
@@ -8855,7 +8855,7 @@ function _renderTaskProfileWorkspace(state) {
     return `
       <div class="bme-config-card">
         <div class="bme-config-card-title">Preset tác vụKhông khả dụng</div>
-        <div class="bme-config-help">Hiện không có可Chỉnh sửa的Preset tác vụDữ liệu。</div>
+        <div class="bme-config-help">Hiện không có dữ liệu preset tác vụ nào có thể chỉnh sửa.</div>
       </div>
     `;
   }
@@ -8889,18 +8889,18 @@ function _renderTaskProfileWorkspace(state) {
               data-task-action="switch-global-regex"
               type="button"
             >
-              通用Regex
+              dùng chungRegex
             </button>
           </div>
         </div>
         <div class="bme-task-action-bar-right">
-          <button class="bme-config-secondary-btn bme-bulk-profile-btn bme-task-btn-danger" data-task-action="restore-all-profiles" type="button" title="Khôi phụcTất cả 6 个Tác vụ的Preset mặc định">
+          <button class="bme-config-secondary-btn bme-bulk-profile-btn bme-task-btn-danger" data-task-action="restore-all-profiles" type="button" title="Khôi phục preset mặc định của cả 6 tác vụ">
             <i class="fa-solid fa-arrows-rotate"></i><span>Khôi phụcTất cả</span>
           </button>
-          <button class="bme-config-secondary-btn bme-bulk-profile-btn" data-task-action="export-all-profiles" type="button" title="XuấtTất cả 6 个Preset tác vụ">
+          <button class="bme-config-secondary-btn bme-bulk-profile-btn" data-task-action="export-all-profiles" type="button" title="XuấtTất cả 6 preset tác vụ">
             <i class="fa-solid fa-file-export"></i><span>XuấtTất cả</span>
           </button>
-          <button class="bme-config-secondary-btn bme-bulk-profile-btn" data-task-action="import-all-profiles" type="button" title="NhậpTất cả预设（覆盖当前）">
+          <button class="bme-config-secondary-btn bme-bulk-profile-btn" data-task-action="import-all-profiles" type="button" title="NhậpTất cảpreset（bao phủhiện tại）">
             <i class="fa-solid fa-file-import"></i><span>NhậpTất cả</span>
           </button>
         </div>
@@ -8914,8 +8914,8 @@ function _renderTaskProfileWorkspace(state) {
           <div class="bme-task-editor-header">
             <div class="bme-task-editor-kicker">${_escHtml(taskMeta?.label || state.taskType)}</div>
             <div class="bme-task-editor-title-row">
-              <label class="bme-visually-hidden" for="bme-task-profile-select">当前预设</label>
-              <select id="bme-task-profile-select" class="bme-config-input bme-task-editor-preset-select" title="切换预设">
+              <label class="bme-visually-hidden" for="bme-task-profile-select">hiện tạipreset</label>
+              <select id="bme-task-profile-select" class="bme-config-input bme-task-editor-preset-select" title="chuyển đổipreset">
                 ${state.bucket.profiles
                   .map(
                     (profile) => `
@@ -8923,7 +8923,7 @@ function _renderTaskProfileWorkspace(state) {
                     value="${_escAttr(profile.id)}"
                     ${profile.id === state.profile.id ? "selected" : ""}
                   >
-                    ${_escHtml(profile.name)}${profile.builtin ? "（内置）" : ""}
+                    ${_escHtml(profile.name)}${profile.builtin ? "（tích hợp sẵn）" : ""}
                   </option>
                 `,
                   )
@@ -8931,14 +8931,14 @@ function _renderTaskProfileWorkspace(state) {
               </select>
               <div class="bme-task-profile-badges">
                 <span class="bme-task-pill ${state.profile.builtin ? "is-builtin" : ""}">
-                  ${state.profile.builtin ? "内置" : "自định nghĩa"}
+                  ${state.profile.builtin ? "tích hợp sẵn" : "tự định nghĩa"}
                 </span>
-                <span class="bme-task-pill">Cập nhật于 ${_escHtml(profileUpdatedAt)}</span>
+                <span class="bme-task-pill">Cập nhật lúc ${_escHtml(profileUpdatedAt)}</span>
               </div>
             </div>
             <div class="bme-task-editor-actions">
               <button class="bme-config-secondary-btn" data-task-action="save-profile" type="button"><i class="fa-solid fa-floppy-disk"></i><span>Lưu</span></button>
-              <button class="bme-config-secondary-btn" data-task-action="rename-profile" type="button"><i class="fa-solid fa-pen"></i><span>重命名</span></button>
+              <button class="bme-config-secondary-btn" data-task-action="rename-profile" type="button"><i class="fa-solid fa-pen"></i><span>Đổi tên</span></button>
               <button class="bme-config-secondary-btn" data-task-action="save-as-profile" type="button"><i class="fa-solid fa-copy"></i><span>Lưu thành</span></button>
               <button class="bme-config-secondary-btn" data-task-action="import-profile" type="button"><i class="fa-solid fa-file-import"></i><span>Nhập</span></button>
               <button class="bme-config-secondary-btn" data-task-action="export-profile" type="button"><i class="fa-solid fa-file-export"></i><span>Xuất</span></button>
@@ -8999,7 +8999,7 @@ function _renderTaskPromptTab(state) {
           + Khối tích hợp
         </button>
       </div>
-      <span class="bme-task-block-count">${state.blocks.length} 个块</span>
+      <span class="bme-task-block-count">${state.blocks.length} khối</span>
     </div>
 
     <div class="bme-task-block-rows">
@@ -9009,7 +9009,7 @@ function _renderTaskPromptTab(state) {
             .join("")
         : `
             <div class="bme-task-empty">
-              当前预设还没有块。可以先新增一个Khối tùy chỉnh或Khối tích hợp。
+              Preset hiện tại vẫn chưa có khối nào. Bạn có thể thêm một khối tùy chỉnh hoặc khối tích hợp trước.
             </div>
           `}
     </div>
@@ -9027,7 +9027,7 @@ function _renderTaskGenerationTab(state) {
               <div>
                 <div class="bme-config-card-title">${_escHtml(group.title)}</div>
                 <div class="bme-config-card-subtitle">
-                  留空表示不强制下发，由Model或 provider Mặc định值决定。
+                  Để trống nghĩa là không cưỡng chế gửi xuống, sẽ do model hoặc giá trị mặc định của provider quyết định.
                 </div>
               </div>
             </div>
@@ -9053,7 +9053,7 @@ function _renderTaskGenerationTab(state) {
                 <div>
                   <div class="bme-config-card-title">${_escHtml(group.title)}</div>
                   <div class="bme-config-card-subtitle">
-                    这里Cấu hìnhTác vụ自带的输入收集Quy tắc，不跟随Toàn cụcTrích xuất上下文。
+                    Cấu hình tại đây là quy tắc thu thập đầu vào đi kèm theo tác vụ, không đi theo phần trích xuất ngữ cảnh toàn cục.
                   </div>
                 </div>
               </div>
@@ -9072,7 +9072,7 @@ function _renderTaskGenerationTab(state) {
         )
         .join("")}
       <div class="bme-task-note">
-        <strong>运行时说明</strong> — 这里Cấu hình的是完整版 generation options。实际请求发送前，仍会根据Model能力做Lọc，避免把不支持的字段直接下发给 provider。
+        <strong>Mô tả runtime</strong> — cấu hình ở đây có bộ generation options đầy đủ. Trước khi gửi yêu cầu thật, hệ thống vẫn sẽ lọc theo năng lực của model để tránh gửi thẳng các trường không được hỗ trợ cho provider.
       </div>
     </div>
   `;
@@ -9088,24 +9088,24 @@ function _renderTaskRegexTab(state, options = {}) {
   const normalizedStages = normalizeTaskRegexStages(regex.stages || {});
   const deleteAction = options.deleteAction || "delete-regex-rule";
   const addAction = options.addAction || "add-regex-rule";
-  const addButtonLabel = options.addButtonLabel || "+ 新增Quy tắc";
+  const addButtonLabel = options.addButtonLabel || "+ Thêm quy tắc";
   const wrapperClassName = options.wrapperClassName
     ? ` ${options.wrapperClassName}`
     : "";
-  const sectionTitle = options.sectionTitle || "复用与阶段";
+  const sectionTitle = options.sectionTitle || "Tái sử dụng và giai đoạn";
   const sectionSubtitle =
     options.sectionSubtitle ||
-    "Preset tác vụ可复用酒馆Regex，并叠加当前Tác vụ自己的附加Quy tắc。";
-  const rulesTitle = options.rulesTitle || "Cục bộ附加Quy tắc";
+    "Preset tác vụ có thể tái sử dụng regex của SillyTavern và chồng thêm các quy tắc bổ sung của chính tác vụ hiện tại.";
+  const rulesTitle = options.rulesTitle || "Quy tắc bổ sung cục bộ";
   const rulesSubtitle =
     options.rulesSubtitle ||
-    "Cục bộQuy tắc只作用于当前Preset tác vụ，不会污染Host酒馆Cấu hình。";
-  const emptyText = options.emptyText || "当前预设还没有Cục bộRegexQuy tắc。";
+    "Quy tắc cục bộ chỉ dùng cho preset tác vụ hiện tại, sẽ không làm bẩn cấu hình host SillyTavern.";
+  const emptyText = options.emptyText || "Preset hiện tại vẫn chưa có quy tắc regex cục bộ nào.";
   const defaultNamePrefix = options.defaultNamePrefix || "Cục bộQuy tắc";
   const headerExtraActions = options.extraHeaderActions || "";
   const enableToggleTitle = options.enableToggleTitle || "BậtTác vụRegex";
   const enableToggleDesc =
-    options.enableToggleDesc || "Tắt后当前Cấu hình不执行任何Tác vụ级Regex。";
+    options.enableToggleDesc || "Sau khi tắt, cấu hình hiện tại sẽ không thực thi bất kỳ regex cấp tác vụ nào.";
   const editorState = {
     ...state,
     selectedRule,
@@ -9124,7 +9124,7 @@ function _renderTaskRegexTab(state, options = {}) {
             </div>
             <div class="bme-task-inline-actions">
               <button class="bme-config-secondary-btn" data-task-action="inspect-tavern-regex" type="button">
-                查看当前复用Quy tắc
+                xemhiện tạidùng lạiQuy tắc
               </button>
               ${headerExtraActions}
             </div>
@@ -9145,7 +9145,7 @@ function _renderTaskRegexTab(state, options = {}) {
 
             <label class="bme-toggle-item">
               <span class="bme-toggle-copy">
-                <span class="bme-toggle-title">复用酒馆Regex</span>
+                <span class="bme-toggle-title">dùng lạiSillyTavernRegex</span>
                 <span class="bme-toggle-desc">Đọc global / preset / character RegexNguồn。</span>
               </span>
               <input
@@ -9158,19 +9158,19 @@ function _renderTaskRegexTab(state, options = {}) {
         </div>
 
         <div class="bme-config-card bme-regex-settings-card">
-          <div class="bme-task-section-label">复用Nguồn</div>
+          <div class="bme-task-section-label">dùng lạiNguồn</div>
           <div class="bme-task-toggle-list">
             ${[
               ["global", "Toàn cục"],
-              ["preset", "当前预设"],
-              ["character", "Nhân vật卡"],
+              ["preset", "hiện tạipreset"],
+              ["character", "Thẻ nhân vật"],
             ]
               .map(
                 ([key, label]) => `
                   <label class="bme-toggle-item">
                     <span class="bme-toggle-copy">
                       <span class="bme-toggle-title">${label}</span>
-                      <span class="bme-toggle-desc">Bật ${label} Nguồn的 Tavern Regex。</span>
+                      <span class="bme-toggle-desc">Bật nguồn Tavern Regex cho ${label}.</span>
                     </span>
                     <input
                       type="checkbox"
@@ -9185,7 +9185,7 @@ function _renderTaskRegexTab(state, options = {}) {
         </div>
 
         <div class="bme-config-card bme-regex-settings-card">
-          <div class="bme-task-section-label">执行阶段</div>
+          <div class="bme-task-section-label">thực thigiai đoạn</div>
           <div class="bme-task-toggle-list">
             ${TASK_PROFILE_REGEX_STAGES.map(
               (stage) => `
@@ -9253,16 +9253,16 @@ function _renderGlobalRegexPanel(state) {
       addAction: "add-global-regex-rule",
       selectAction: "select-global-regex-rule",
       deleteAction: "delete-global-regex-rule",
-      addButtonLabel: "+ 新增通用Quy tắc",
+      addButtonLabel: "+ Thêm quy tắc dùng chung",
       wrapperClassName: "bme-global-regex-panel",
-      sectionTitle: "通用Regex设置",
-      sectionSubtitle: "所有Tác vụ共享同一套Tác vụRegex开关、复用Nguồn、执行阶段与附加Quy tắc。",
-      enableToggleTitle: "Bật通用Regex",
-      enableToggleDesc: "Tắt后所有Tác vụ都不执行任何共享RegexCấu hình。",
-      rulesTitle: "通用附加Quy tắc",
-      rulesSubtitle: "这里维护所有Tác vụ共享的附加Quy tắc。",
-      emptyText: "Hiện vẫn chưa có通用RegexQuy tắc。",
-      defaultNamePrefix: "通用Quy tắc",
+      sectionTitle: "dùng chungRegexcài đặt",
+      sectionSubtitle: "Tất cả tác vụ cùng dùng chung một bộ công tắc regex tác vụ, nguồn tái sử dụng, giai đoạn thực thi và quy tắc bổ sung.",
+      enableToggleTitle: "Bậtdùng chungRegex",
+      enableToggleDesc: "Sau khi tắt, mọi tác vụ sẽ không thực thi bất kỳ cấu hình regex dùng chung nào.",
+      rulesTitle: "Quy tắc bổ sung dùng chung",
+      rulesSubtitle: "Tại đây quản lý các quy tắc bổ sung dùng chung cho toàn bộ tác vụ.",
+      emptyText: "Hiện vẫn chưa códùng chungRegexQuy tắc。",
+      defaultNamePrefix: "dùng chungQuy tắc",
       extraHeaderActions: `
         <button class="bme-config-secondary-btn bme-task-btn-danger" data-task-action="restore-global-regex-defaults" type="button">
           Khôi phụcMặc định
@@ -9273,13 +9273,13 @@ function _renderGlobalRegexPanel(state) {
 }
 function _formatRegexReuseSourceState(source = {}) {
   const states = [];
-  states.push(source.enabled ? "已Bật" : "已Tắt");
-  states.push(source.allowed === false ? "未获酒馆允许" : "允许参与");
+  states.push(source.enabled ? "Đã bật" : "Đã tắt");
+  states.push(source.allowed === false ? "Chưa được SillyTavern cho phép" : "Được phép tham gia");
   states.push(
     source.resolvedVia === "bridge"
-      ? "通过桥接Đọc"
+      ? "thông quacầu nốiĐọc"
       : source.resolvedVia === "fallback"
-        ? "通过 fallback Đọc"
+        ? "thông qua fallback Đọc"
         : "NguồnKhông rõ",
   );
   return states.join(" · ");
@@ -9287,18 +9287,18 @@ function _formatRegexReuseSourceState(source = {}) {
 
 function _formatRegexReuseSourceLabel(sourceType = "") {
   if (sourceType === "global") return "Toàn cục";
-  if (sourceType === "preset") return "预设";
-  if (sourceType === "character") return "Nhân vật卡";
+  if (sourceType === "preset") return "preset";
+  if (sourceType === "character") return "Thẻ nhân vật";
   if (sourceType === "local") return "Tác vụCục bộ";
   return sourceType ? String(sourceType) : "Không rõ";
 }
 
 function _formatRegexReuseReplaceText(rule = {}) {
   if (rule.promptStageMode === "display-only") {
-    return "（仅显示类Quy tắc，不进入 Memory LLM 请求）";
+    return "（Quy tắc chỉ hiển thị, không đi vào yêu cầu Memory LLM）";
   }
   if (rule.promptStageMode === "fallback-skip-beautify") {
-    return "（美化型替换，fallback 模式下不会进入 Prompt）";
+    return "（Thay thế làm đẹp, ở chế độ fallback sẽ không đi vào prompt）";
   }
   if (typeof rule.effectivePromptReplaceString === "string" && rule.effectivePromptReplaceString.length > 0) {
     return rule.effectivePromptReplaceString;
@@ -9306,7 +9306,7 @@ function _formatRegexReuseReplaceText(rule = {}) {
   if (typeof rule.replaceString === "string" && rule.replaceString.length > 0) {
     return rule.replaceString;
   }
-  return "（空 - Xóa匹配Nội dung）";
+  return "（Rỗng - Xóa nội dung khớp）";
 }
 
 function _renderRegexReuseBadges(rule = {}) {
@@ -9314,37 +9314,37 @@ function _renderRegexReuseBadges(rule = {}) {
   if (rule.promptStageMode === "display-only") {
     badges.push({
       className: "is-clear",
-      text: "仅显示",
+      text: "Chỉ hiển thị",
     });
   } else if (rule.promptStageMode === "host-real") {
     badges.push({
       className: "is-transform",
-      text: "Host真实执行",
+      text: "Host thực thi thật",
     });
   } else if (rule.promptStageMode === "host-helper") {
     badges.push({
       className: "is-prompt",
-      text: "Helper 兼容执行",
+      text: "Helper tương thíchthực thi",
     });
   } else if (rule.promptStageMode === "host-fallback") {
     badges.push({
       className: "is-prompt",
-      text: "插件兼容执行",
+      text: "plugintương thíchthực thi",
     });
   } else if (rule.promptStageMode === "fallback-skip-beautify") {
     badges.push({
       className: "is-skip",
-      text: "fallback Bỏ qua美化",
+      text: "Fallback bỏ qua làm đẹp",
     });
   } else if (rule.promptStageMode === "replace") {
     badges.push({
       className: "is-transform",
-      text: "Cục bộ最终Regex",
+      text: "Cục bộcuối cùngRegex",
     });
   } else {
     badges.push({
       className: "is-skip",
-      text: "当前不执行",
+      text: "Hiện tại không thực thi",
     });
   }
   if (rule.markdownOnly) {
@@ -9356,7 +9356,7 @@ function _renderRegexReuseBadges(rule = {}) {
   if (rule.promptOnly) {
     badges.push({
       className: "is-prompt",
-      text: "仅 Prompt",
+      text: "Chỉ prompt",
     });
   }
   if (
@@ -9366,7 +9366,7 @@ function _renderRegexReuseBadges(rule = {}) {
   ) {
     badges.push({
       className: "is-skip",
-      text: "当前Tác vụ未Bật",
+      text: "Tác vụ hiện tại chưa bật",
     });
   }
   return badges
@@ -9392,7 +9392,7 @@ function _renderRegexReuseRuleList(rules = [], emptyText = "Không", options = {
     .map((rule, index) => {
       const placementText = Array.isArray(rule.placementLabels) && rule.placementLabels.length
         ? rule.placementLabels.join("，")
-        : "未声明Phạm vi tác dụng";
+        : "Chưa khai báo phạm vi tác dụng";
       const sourceLabel = _formatRegexReuseSourceLabel(rule.sourceType || "");
       const metaBits = [];
       if (showSource) {
@@ -9406,7 +9406,7 @@ function _renderRegexReuseRuleList(rules = [], emptyText = "Không", options = {
           <div class="bme-regex-preview-item__head">
             <div class="bme-regex-preview-item__title-group">
               <span class="bme-regex-preview-item__index">#${startIndex + index + 1}</span>
-              <span class="bme-regex-preview-item__name">${_escHtml(rule.name || rule.id || "未命名Quy tắc")}</span>
+              <span class="bme-regex-preview-item__name">${_escHtml(rule.name || rule.id || "Quy tắc chưa đặt tên")}</span>
             </div>
             <div class="bme-regex-preview-item__badges">
               ${_renderRegexReuseBadges(rule)}
@@ -9414,11 +9414,11 @@ function _renderRegexReuseRuleList(rules = [], emptyText = "Không", options = {
           </div>
           <div class="bme-regex-preview-item__details">
             <div class="bme-regex-preview-item__row">
-              <span class="bme-regex-preview-item__label">查找</span>
-              <code>${_escHtml(rule.findRegex || "(空 findRegex)")}</code>
+              <span class="bme-regex-preview-item__label">tìm</span>
+              <code>${_escHtml(rule.findRegex || "(findRegex rỗng)")}</code>
             </div>
             <div class="bme-regex-preview-item__row">
-              <span class="bme-regex-preview-item__label">替换</span>
+              <span class="bme-regex-preview-item__label">Thay thế</span>
               <code>${_escHtml(_formatRegexReuseReplaceText(rule))}</code>
             </div>
             <div class="bme-regex-preview-item__row">
@@ -9452,9 +9452,9 @@ function _buildRegexReusePopupContent(snapshot = {}) {
     ? snapshot.sourceConfig
     : {};
   const sourceSummaryText = [
-    `global=${sourceConfig.global === false ? "关" : "开"}`,
-    `preset=${sourceConfig.preset === false ? "关" : "开"}`,
-    `character=${sourceConfig.character === false ? "关" : "开"}`,
+    `global=${sourceConfig.global === false ? "tắt" : "bật"}`,
+    `preset=${sourceConfig.preset === false ? "tắt" : "bật"}`,
+    `character=${sourceConfig.character === false ? "tắt" : "bật"}`,
   ].join(" / ");
   const stageSummaryText =
     Object.entries(stageConfig)
@@ -9464,9 +9464,9 @@ function _buildRegexReusePopupContent(snapshot = {}) {
   container.innerHTML = `
     <div class="bme-task-tab-body bme-regex-preview-screen">
         <div class="bme-regex-preview-hero">
-        <div class="bme-regex-preview-hero__title">当前Regex脚本一览</div>
+        <div class="bme-regex-preview-hero__title">Tổng quan script regex hiện tại</div>
         <div class="bme-regex-preview-hero__subtitle">
-          这里展示的是当前Preset tác vụ下，ST-BME 对HostTiêmNội dung会复用哪些 Tavern Regex，以及最终发送前还会执行哪些Cục bộTác vụRegex。
+          Tại đây hiển thị những Tavern Regex nào sẽ được ST-BME tái sử dụng để xử lý nội dung tiêm cho host trong preset tác vụ hiện tại, cùng với những regex tác vụ cục bộ nào sẽ được thực thi ở bước cuối trước khi gửi.
         </div>
         <div class="bme-regex-preview-summary">
           <div class="bme-regex-preview-summary__item">
@@ -9474,23 +9474,23 @@ function _buildRegexReusePopupContent(snapshot = {}) {
             <span class="bme-regex-preview-summary__value">${_escHtml(snapshot.taskType || "—")}</span>
           </div>
           <div class="bme-regex-preview-summary__item">
-            <span class="bme-regex-preview-summary__label">预设</span>
+            <span class="bme-regex-preview-summary__label">preset</span>
             <span class="bme-regex-preview-summary__value">${_escHtml(snapshot.profileName || snapshot.profileId || "—")}</span>
           </div>
           <div class="bme-regex-preview-summary__item">
             <span class="bme-regex-preview-summary__label">Tác vụRegex</span>
-            <span class="bme-regex-preview-summary__value">${snapshot.regexEnabled ? "已Bật" : "已Tắt"}</span>
+            <span class="bme-regex-preview-summary__value">${snapshot.regexEnabled ? "Đã bật" : "Đã tắt"}</span>
           </div>
           <div class="bme-regex-preview-summary__item">
-            <span class="bme-regex-preview-summary__label">复用 Tavern</span>
-            <span class="bme-regex-preview-summary__value">${snapshot.inheritStRegex ? "已Bật" : "已Tắt"}</span>
+            <span class="bme-regex-preview-summary__label">dùng lại Tavern</span>
+            <span class="bme-regex-preview-summary__value">${snapshot.inheritStRegex ? "Đã bật" : "Đã tắt"}</span>
           </div>
           <div class="bme-regex-preview-summary__item">
-            <span class="bme-regex-preview-summary__label">已收集Quy tắc</span>
+            <span class="bme-regex-preview-summary__label">Quy tắc đã thu thập</span>
             <span class="bme-regex-preview-summary__value">${Number(snapshot.activeRuleCount || activeRules.length || 0)}</span>
           </div>
           <div class="bme-regex-preview-summary__item">
-            <span class="bme-regex-preview-summary__label">桥接模式</span>
+            <span class="bme-regex-preview-summary__label">cầu nốichế độ</span>
             <span class="bme-regex-preview-summary__value">${_escHtml(snapshot.host?.sourceLabel || "unknown")} · ${_escHtml(snapshot.host?.executionMode || snapshot.host?.capabilityStatus?.mode || snapshot.host?.mode || "unknown")}${snapshot.host?.bridgeTier ? ` · ${_escHtml(snapshot.host.bridgeTier)}` : ""}${snapshot.host?.formatterAvailable ? " · formatter" : ""}${snapshot.host?.fallback ? " · fallback" : ""}</span>
           </div>
         </div>
@@ -9499,16 +9499,16 @@ function _buildRegexReusePopupContent(snapshot = {}) {
       <div class="bme-regex-preview-panel">
         <div class="bme-regex-preview-panel__head">
           <div>
-            <div class="bme-regex-preview-panel__title">HostTiêm复用Quy tắc</div>
-            <div class="bme-regex-preview-panel__subtitle">这里只显示会参与“HostVăn bản tiêm”Xử lý的 Tavern Quy tắc；仅显示类Quy tắc会明确标注出来。</div>
+            <div class="bme-regex-preview-panel__title">HostTiêmdùng lạiQuy tắc</div>
+            <div class="bme-regex-preview-panel__subtitle">Tại đây chỉ hiển thị các quy tắc Tavern sẽ tham gia xử lý "Văn bản tiêm cho host"; các quy tắc chỉ hiển thị sẽ được đánh dấu rõ ràng.</div>
           </div>
         </div>
         <div class="bme-task-note">
-          Nguồn开关：${_escHtml(sourceSummaryText)}<br>
-          阶段开关：${_escHtml(stageSummaryText)}
+          Nguồncông tắc：${_escHtml(sourceSummaryText)}<br>
+          giai đoạncông tắc：${_escHtml(stageSummaryText)}
         </div>
         <div class="bme-regex-preview-list">
-          ${_renderRegexReuseRuleList(activeRules, "Hiện không có复用到任何酒馆Regex", {
+          ${_renderRegexReuseRuleList(activeRules, "Hiện không tái sử dụng bất kỳ SillyTavern Regex nào", {
             showSource: true,
           })}
         </div>
@@ -9517,19 +9517,19 @@ function _buildRegexReusePopupContent(snapshot = {}) {
       <div class="bme-regex-preview-panel">
         <div class="bme-regex-preview-panel__head">
           <div>
-            <div class="bme-regex-preview-panel__title">Tác vụCục bộ最终Regex</div>
-            <div class="bme-regex-preview-panel__subtitle">这一组只在最终请求发送前的 <code>input.finalPrompt</code> 阶段执行，不参与HostTiêm清洗。</div>
+            <div class="bme-regex-preview-panel__title">Tác vụCục bộcuối cùngRegex</div>
+            <div class="bme-regex-preview-panel__subtitle">Nhóm này chỉ được thực thi ở giai đoạn <code>input.finalPrompt</code> cuối cùng trước khi gửi, không tham gia làm sạch phần tiêm cho host.</div>
           </div>
         </div>
         <div class="bme-regex-preview-list">
-          ${_renderRegexReuseRuleList(snapshot.localRules, "Hiện không cóTác vụCục bộ最终Regex", {
+          ${_renderRegexReuseRuleList(snapshot.localRules, "Hiện không cóTác vụCục bộcuối cùngRegex", {
             showSource: false,
           })}
         </div>
       </div>
 
       <details class="bme-debug-details bme-regex-preview-details">
-        <summary>Nguồn与排除明细</summary>
+        <summary>Chi tiết nguồn và loại trừ</summary>
         <div class="bme-regex-preview-details__body">
         ${
           sources.length
@@ -9543,20 +9543,20 @@ function _buildRegexReusePopupContent(snapshot = {}) {
                     raw=${Number(source.rawRuleCount || 0)} / active=${Number(source.activeRuleCount || 0)}
                     ${source.reason ? `<br>${_escHtml(source.reason)}` : ""}
                   </div>
-                  <div class="bme-task-section-label">本NguồnQuy tắcTổng quan</div>
+                  <div class="bme-task-section-label">Tổng quan quy tắc của nguồn này</div>
                   <div class="bme-regex-preview-list">
-                    ${_renderRegexReuseRuleList(source.previewRules || source.rules, "该NguồnHiện không có可展示的Quy tắc")}
+                    ${_renderRegexReuseRuleList(source.previewRules || source.rules, "Nguồn này hiện không có quy tắc nào để hiển thị")}
                   </div>
-                  <div class="bme-task-section-label">未纳入最终Tác vụ链</div>
+                  <div class="bme-task-section-label">Chưa được đưa vào chuỗi tác vụ cuối cùng</div>
                   <div class="bme-regex-preview-list">
-                    ${_renderRegexReuseRuleList(source.ignoredRules, "没有额外被排除的Quy tắc", {
+                    ${_renderRegexReuseRuleList(source.ignoredRules, "Không có quy tắc bổ sung nào bị loại trừ", {
                       showReason: true,
                       muted: true,
                     })}
                   </div>
                 </div>
               `).join("")
-            : `<div class="bme-task-empty">Hiện không có可展示的酒馆RegexNguồn。</div>`
+            : `<div class="bme-task-empty">Hiện không có nguồn SillyTavern Regex nào để hiển thị.</div>`
         }
         </div>
       </details>
@@ -9568,7 +9568,7 @@ function _buildRegexReusePopupContent(snapshot = {}) {
 
 async function _openRegexReuseInspector(taskType) {
   if (typeof _actionHandlers.inspectTaskRegexReuse !== "function") {
-    toastr.info("当前运行时没有接入Regex复用诊断入口", "ST-BME");
+    toastr.info("Runtime hiện tại chưa nối vào lối chẩn đoán tái sử dụng regex", "ST-BME");
     return;
   }
 
@@ -9583,8 +9583,8 @@ async function _openRegexReuseInspector(taskType) {
       allowVerticalScrolling: true,
     });
   } catch (error) {
-    console.error("[ST-BME] 打开Regex复用检查弹窗Thất bại:", error);
-    toastr.error("打开Regex复用检查弹窗Thất bại", "ST-BME");
+    console.error("[ST-BME] Mở hộp kiểm tra tái sử dụng regex thất bại:", error);
+    toastr.error("Mở hộp kiểm tra tái sử dụng regex thất bại", "ST-BME");
   }
 }
 
@@ -9601,10 +9601,10 @@ function _renderTaskDebugTab(state) {
     <div class="bme-task-tab-body">
       <div class="bme-task-toolbar-row">
         <div class="bme-task-note">
-          这里展示的是lần gần nhất真实运行留下的调试snapshot，不是静态Cấu hình推演。没有Dữ liệu时，先跑一lần对应Tác vụ即可。
+          Tại đây hiển thị snapshot gỡ lỗi do lần chạy thực tế gần nhất để lại, không phải suy diễn cấu hình tĩnh. Nếu chưa có dữ liệu thì chỉ cần chạy tác vụ tương ứng một lần trước.
         </div>
         <button class="bme-config-secondary-btn" data-task-action="refresh-task-debug" type="button">
-          刷新Trạng thái
+          làm mớiTrạng thái
         </button>
       </div>
 
@@ -9638,23 +9638,23 @@ function _renderTaskDebugMaintenanceCard(maintenanceDebug) {
 
   if (!lastAction && !lastUndoResult) {
     return `
-      <div class="bme-config-card-title">维护账本Trạng thái</div>
-      <div class="bme-config-help">Hiện vẫn chưa cóGần nhất维护或撤销snapshot。</div>
+      <div class="bme-config-card-title">bảo trìsổ cáiTrạng thái</div>
+      <div class="bme-config-help">Hiện vẫn chưa có snapshot bảo trì hoặc hoàn tác gần nhất.</div>
     `;
   }
 
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">维护账本Trạng thái</div>
+        <div class="bme-config-card-title">bảo trìsổ cáiTrạng thái</div>
         <div class="bme-config-card-subtitle">
-          lần gần nhất维护记录和lần gần nhất撤销Kết quả。
+          Bản ghi bảo trì gần nhất và kết quả hoàn tác gần nhất.
         </div>
       </div>
       <span class="bme-task-pill">${_escHtml(lastAction?.action || lastUndoResult?.action || "maintenance")}</span>
     </div>
-    ${_renderDebugDetails("Gần nhất维护", lastAction)}
-    ${_renderDebugDetails("Gần nhất撤销", lastUndoResult)}
+    ${_renderDebugDetails("Gần nhấtbảo trì", lastAction)}
+    ${_renderDebugDetails("Gần nhấthoàn tác", lastUndoResult)}
   `;
 }
 
@@ -9662,7 +9662,7 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
   if (!graphPersistence) {
     return `
       <div class="bme-config-card-title">đồ thịTrạng thái lưu bền</div>
-      <div class="bme-config-help">Hiện vẫn chưa cóđồ thị加载/Lưu bềnsnapshot。</div>
+      <div class="bme-config-help">Hiện vẫn chưa cóđồ thịtải/Lưu bềnsnapshot。</div>
     `;
   }
 
@@ -9673,14 +9673,14 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
       <div>
         <div class="bme-config-card-title">đồ thịTrạng thái lưu bền</div>
         <div class="bme-config-card-subtitle">
-          lần gần nhấtđồ thị加载与写回协调Kết quả。
+          Kết quả điều phối tải và ghi ngược đồ thị gần nhất.
         </div>
       </div>
       <span class="bme-task-pill">${_escHtml(graphPersistence.loadState || "unknown")}</span>
     </div>
     <div class="bme-debug-kv-list">
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">聊天</span>
+        <span class="bme-debug-kv-key">chat</span>
         <span class="bme-debug-kv-value">${_escHtml(graphPersistence.chatId || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -9688,19 +9688,19 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
         <span class="bme-debug-kv-value">${_escHtml(graphPersistence.reason || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">尝试lần数</span>
+        <span class="bme-debug-kv-key">Số lần thử</span>
         <span class="bme-debug-kv-value">${_escHtml(String(graphPersistence.attemptIndex ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">当前 revision</span>
+        <span class="bme-debug-kv-key">hiện tại revision</span>
         <span class="bme-debug-kv-value">${_escHtml(String(graphPersistence.graphRevision ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Gần nhất已Lưu bền revision</span>
+        <span class="bme-debug-kv-key">Revision lưu bền gần nhất</span>
         <span class="bme-debug-kv-value">${_escHtml(String(graphPersistence.lastPersistedRevision ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Gần nhất已接受 revision</span>
+        <span class="bme-debug-kv-key">Revision đã được chấp nhận gần nhất</span>
         <span class="bme-debug-kv-value">${_escHtml(String(graphPersistence.lastAcceptedRevision ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -9708,7 +9708,7 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
         <span class="bme-debug-kv-value">${_escHtml(String(graphPersistence.hostProfile || "generic-st"))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">主 durable</span>
+        <span class="bme-debug-kv-key">Durable chính</span>
         <span class="bme-debug-kv-value">${_escHtml(String(graphPersistence.primaryStorageTier || "none"))}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -9735,25 +9735,25 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
         <span class="bme-debug-kv-key">Journal / Cache Lag</span>
         <span class="bme-debug-kv-value">${_escHtml(
           graphPersistence.hostProfile === "luker"
-            ? `${Number(graphPersistence.lukerJournalDepth || 0)} 条 / lag ${Number(graphPersistence.cacheLag || 0)}`
+            ? `${Number(graphPersistence.lukerJournalDepth || 0)} mục / lag ${Number(graphPersistence.cacheLag || 0)}`
             : "—",
         )}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Đang xếp hàng的 revision</span>
+        <span class="bme-debug-kv-key">Revision đang xếp hàng</span>
         <span class="bme-debug-kv-value">${_escHtml(String(graphPersistence.queuedPersistRevision ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Chờ xác nhận写入</span>
-        <span class="bme-debug-kv-value">${_escHtml(graphPersistence.pendingPersist ? "是" : "否")}</span>
+        <span class="bme-debug-kv-key">Chờ xác nhậnghi vào</span>
+        <span class="bme-debug-kv-value">${_escHtml(graphPersistence.pendingPersist ? "Có" : "Không")}</span>
       </div>
       <div class="bme-debug-kv-item">
         <span class="bme-debug-kv-key">Snapshot bóng</span>
-        <span class="bme-debug-kv-value">${_escHtml(graphPersistence.shadowSnapshotUsed ? "已接管" : "Chưa dùng")}</span>
+        <span class="bme-debug-kv-value">${_escHtml(graphPersistence.shadowSnapshotUsed ? "Đã tiếp quản" : "Chưa dùng")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">写保护</span>
-        <span class="bme-debug-kv-value">${_escHtml(graphPersistence.writesBlocked ? "已Bật" : "未Bật")}</span>
+        <span class="bme-debug-kv-key">Bảo vệ ghi</span>
+        <span class="bme-debug-kv-value">${_escHtml(graphPersistence.writesBlocked ? "Đã bật" : "Chưa bật")}</span>
       </div>
       <div class="bme-debug-kv-item">
         <span class="bme-debug-kv-key">Bất thường nhất quán</span>
@@ -9774,7 +9774,7 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
         )}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Persist Delta 路径</span>
+        <span class="bme-debug-kv-key">Persist Delta đường đi</span>
         <span class="bme-debug-kv-value">${_escHtml(String(persistDelta?.path || "—"))}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -9782,7 +9782,7 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
         <span class="bme-debug-kv-value">${_escHtml(_formatPersistDeltaGateText(persistDelta))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Persist Delta 耗时</span>
+        <span class="bme-debug-kv-key">Thời gian Persist Delta</span>
         <span class="bme-debug-kv-value">${_escHtml(_formatDurationMs(persistDelta?.totalMs || persistDelta?.buildMs))}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -9790,15 +9790,15 @@ function _renderTaskDebugGraphPersistenceCard(graphPersistence) {
         <span class="bme-debug-kv-value">${_escHtml(String(persistDelta?.moduleSource || "—"))}</span>
       </div>
     </div>
-    ${_renderDebugDetails("đồ thịLưu bền详情", graphPersistence)}
+    ${_renderDebugDetails("đồ thịLưu bềnchi tiết", graphPersistence)}
   `;
 }
 
 function _renderTaskDebugHostCard(hostCapabilities) {
   if (!hostCapabilities) {
     return `
-      <div class="bme-config-card-title">Host桥接Trạng thái</div>
-      <div class="bme-config-help">Hiện vẫn chưa cóHost桥接snapshot。</div>
+      <div class="bme-config-card-title">Hostcầu nốiTrạng thái</div>
+      <div class="bme-config-help">Hiện vẫn chưa cóHostcầu nốisnapshot。</div>
     `;
   }
 
@@ -9806,9 +9806,9 @@ function _renderTaskDebugHostCard(hostCapabilities) {
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">Host桥接Trạng thái</div>
+        <div class="bme-config-card-title">Hostcầu nốiTrạng thái</div>
         <div class="bme-config-card-subtitle">
-          当前插件和 SillyTavern 的接轨情况。
+          Tình trạng kết nối hiện tại giữa plugin và SillyTavern.
         </div>
       </div>
       <span class="bme-task-pill ${hostCapabilities.available ? "is-builtin" : ""}">
@@ -9817,23 +9817,23 @@ function _renderTaskDebugHostCard(hostCapabilities) {
     </div>
     <div class="bme-debug-kv-list">
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">总Trạng thái</span>
-        <span class="bme-debug-kv-value">${_escHtml(hostCapabilities.available ? "可用" : "Không khả dụng")}</span>
+        <span class="bme-debug-kv-key">Trạng thái tổng</span>
+        <span class="bme-debug-kv-value">${_escHtml(hostCapabilities.available ? "dùng được" : "Không khả dụng")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">说明</span>
+        <span class="bme-debug-kv-key">mô tả</span>
         <span class="bme-debug-kv-value">${_escHtml(hostCapabilities.fallbackReason || "Không")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">snapshot版本</span>
+        <span class="bme-debug-kv-key">snapshotphiên bản</span>
         <span class="bme-debug-kv-value">${_escHtml(String(hostCapabilities.snapshotRevision ?? "—"))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">snapshot时间</span>
+        <span class="bme-debug-kv-key">snapshotthời gian</span>
         <span class="bme-debug-kv-value">${_escHtml(_formatTaskProfileTime(hostCapabilities.snapshotCreatedAt))}</span>
       </div>
     </div>
-    <div class="bme-task-section-label">分项能力</div>
+    <div class="bme-task-section-label">Năng lực theo hạng mục</div>
     <div class="bme-debug-capability-list">
       ${capabilityNames
         .map((name) => {
@@ -9860,36 +9860,36 @@ function _renderTaskDebugHostCard(hostCapabilities) {
 function _renderTaskDebugPromptCard(taskType, promptBuild) {
   if (!promptBuild) {
     return `
-      <div class="bme-config-card-title">Gần nhất Prompt 组装</div>
-      <div class="bme-config-help">当前Tác vụ还没有lần gần nhất prompt 组装snapshot。</div>
+      <div class="bme-config-card-title">Lần lắp ráp prompt gần nhất</div>
+      <div class="bme-config-help">Tác vụ hiện tại vẫn chưa có snapshot lắp ráp prompt gần nhất.</div>
     `;
   }
 
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">Gần nhất Prompt 组装</div>
+        <div class="bme-config-card-title">Lần lắp ráp prompt gần nhất</div>
         <div class="bme-config-card-subtitle">
-          Tác vụ ${_escHtml(taskType)} lần gần nhất真实编排Kết quả。
+          Kết quả điều phối thực tế gần nhất của tác vụ ${_escHtml(taskType)}.
         </div>
       </div>
       <span class="bme-task-pill">${_escHtml(_formatTaskProfileTime(promptBuild.updatedAt))}</span>
     </div>
     <div class="bme-debug-kv-list">
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">预设</span>
+        <span class="bme-debug-kv-key">preset</span>
         <span class="bme-debug-kv-value">${_escHtml(promptBuild.profileName || promptBuild.profileId || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">块数量</span>
+        <span class="bme-debug-kv-key">Số lượng khối</span>
         <span class="bme-debug-kv-value">${_escHtml(String(promptBuild.debug?.renderedBlockCount ?? promptBuild.renderedBlocks?.length ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Tiêm计划</span>
+        <span class="bme-debug-kv-key">Tiêmkế hoạch</span>
         <span class="bme-debug-kv-value">${_escHtml(String(promptBuild.debug?.hostInjectionPlanCount ?? promptBuild.debug?.hostInjectionCount ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">私有tin nhắn</span>
+        <span class="bme-debug-kv-key">Tin nhắn riêng tư</span>
         <span class="bme-debug-kv-value">${_escHtml(String(promptBuild.debug?.executionMessageCount ?? promptBuild.executionMessages?.length ?? promptBuild.privateTaskMessages?.length ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -9897,53 +9897,53 @@ function _renderTaskDebugPromptCard(taskType, promptBuild) {
         <span class="bme-debug-kv-value">${_escHtml(promptBuild.debug?.ejsRuntimeStatus || "unknown")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">世界书</span>
+        <span class="bme-debug-kv-key">World Info</span>
         <span class="bme-debug-kv-value">${_escHtml(promptBuild.debug?.effectivePath?.worldInfo || "unknown")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">世界书缓存</span>
-        <span class="bme-debug-kv-value">${_escHtml(promptBuild.debug?.worldInfoCacheHit ? "命Trung bình" : "未命Trung bình")}</span>
+        <span class="bme-debug-kv-key">Bộ đệm World Info</span>
+        <span class="bme-debug-kv-value">${_escHtml(promptBuild.debug?.worldInfoCacheHit ? "trúng" : "không trúng")}</span>
       </div>
     </div>
-    ${_renderDebugDetails("实际投递路径", promptBuild.debug?.effectivePath || null)}
-    ${_renderDebugDetails("渲染后的块（按Cấu hình顺序）", promptBuild.renderedBlocks)}
-    ${_renderDebugDetails("实际执行tin nhắn序列", promptBuild.executionMessages || promptBuild.privateTaskMessages || null)}
-    ${_renderDebugDetails("系统提示词（兼容视图，不含 atDepth tin nhắn）", promptBuild.systemPrompt || "")}
-    ${_renderDebugDetails("世界书桶Nội dung（诊断）", promptBuild.hostInjections)}
-    ${_renderDebugDetails("世界书块命Trung bình计划（诊断）", promptBuild.hostInjectionPlan || null)}
-    ${_renderDebugDetails("世界书调试", promptBuild.worldInfo?.debug || promptBuild.worldInfoResolution?.debug || null)}
+    ${_renderDebugDetails("Đường đi phát thực tế", promptBuild.debug?.effectivePath || null)}
+    ${_renderDebugDetails("Các khối sau khi kết xuất (theo thứ tự cấu hình)", promptBuild.renderedBlocks)}
+    ${_renderDebugDetails("Chuỗi tin nhắn thực thi thực tế", promptBuild.executionMessages || promptBuild.privateTaskMessages || null)}
+    ${_renderDebugDetails("Prompt hệ thống (góc nhìn tương thích, không gồm tin nhắn atDepth)", promptBuild.systemPrompt || "")}
+    ${_renderDebugDetails("Nội dung bucket World Info (chẩn đoán)", promptBuild.hostInjections)}
+    ${_renderDebugDetails("Kế hoạch khối World Info trúng (chẩn đoán)", promptBuild.hostInjectionPlan || null)}
+    ${_renderDebugDetails("Gỡ lỗi World Info", promptBuild.worldInfo?.debug || promptBuild.worldInfoResolution?.debug || null)}
   `;
 }
 
 function _renderTaskDebugLlmCard(taskType, llmRequest) {
   if (!llmRequest) {
     return `
-      <div class="bme-config-card-title">Gần nhất实际下发参数</div>
-      <div class="bme-config-help">当前Tác vụ还没有lần gần nhất LLM 请求snapshot。</div>
+      <div class="bme-config-card-title">Tham số phát thực tế gần nhất</div>
+      <div class="bme-config-help">Tác vụ hiện tại vẫn chưa có snapshot yêu cầu LLM gần nhất.</div>
     `;
   }
 
   return `
     <div class="bme-config-card-head">
       <div>
-        <div class="bme-config-card-title">Gần nhất实际下发参数</div>
+        <div class="bme-config-card-title">Tham số phát thực tế gần nhất</div>
         <div class="bme-config-card-subtitle">
-          Tác vụ ${_escHtml(taskType)} lần gần nhất走私有请求层时的实际发送信息。
+          Thông tin gửi thực tế khi tác vụ ${_escHtml(taskType)} đi qua lớp yêu cầu riêng tư lần gần nhất.
         </div>
       </div>
       <span class="bme-task-pill">${_escHtml(_formatTaskProfileTime(llmRequest.updatedAt))}</span>
     </div>
     <div class="bme-debug-kv-list">
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">请求Nguồn</span>
+        <span class="bme-debug-kv-key">yêu cầuNguồn</span>
         <span class="bme-debug-kv-value">${_escHtml(llmRequest.requestSource || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">请求路径</span>
+        <span class="bme-debug-kv-key">yêu cầuđường đi</span>
         <span class="bme-debug-kv-value">${_escHtml(llmRequest.routeLabel || _getMonitorRouteLabel(llmRequest.route || "") || llmRequest.route || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">识别渠道</span>
+        <span class="bme-debug-kv-key">Kênh nhận diện</span>
         <span class="bme-debug-kv-value">${_escHtml(llmRequest.llmProviderLabel || llmRequest.llmProvider || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -9955,45 +9955,45 @@ function _renderTaskDebugLlmCard(taskType, llmRequest) {
         <span class="bme-debug-kv-value">${_escHtml(llmRequest.llmConfigSourceLabel || llmRequest.llmConfigSource || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Tác vụ API 模板</span>
-        <span class="bme-debug-kv-value">${_escHtml(llmRequest.llmPresetName || (llmRequest.requestedLlmPresetName ? `缺失: ${llmRequest.requestedLlmPresetName}` : "跟随当前 API"))}</span>
+        <span class="bme-debug-kv-key">Tác vụ API mẫu</span>
+        <span class="bme-debug-kv-value">${_escHtml(llmRequest.llmPresetName || (llmRequest.requestedLlmPresetName ? `thiếu hụt: ${llmRequest.requestedLlmPresetName}` : "Đi theo API hiện tại"))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">能力Chế độ lọc</span>
+        <span class="bme-debug-kv-key">năng lựcChế độ lọc</span>
         <span class="bme-debug-kv-value">${_escHtml(llmRequest.capabilityMode || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">调试脱敏</span>
-        <span class="bme-debug-kv-value">${_escHtml(llmRequest.redacted ? "已脱敏" : "未标记")}</span>
+        <span class="bme-debug-kv-key">Ẩn nhạy cảm khi gỡ lỗi</span>
+        <span class="bme-debug-kv-value">${_escHtml(llmRequest.redacted ? "Đã ẩn nhạy cảm" : "Chưa đánh dấu")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">实际路径</span>
+        <span class="bme-debug-kv-key">thực tếđường đi</span>
         <span class="bme-debug-kv-value">${_escHtml(llmRequest.effectiveRoute?.llm || llmRequest.route || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">输出清洗</span>
-        <span class="bme-debug-kv-value">${_escHtml(llmRequest.responseCleaning?.applied ? "已生效" : "未生效")}</span>
+        <span class="bme-debug-kv-key">đầu ralàm sạch</span>
+        <span class="bme-debug-kv-value">${_escHtml(llmRequest.responseCleaning?.applied ? "Đã có hiệu lực" : "Chưa có hiệu lực")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">发送前输入清洗</span>
-        <span class="bme-debug-kv-value">${_escHtml(llmRequest.requestCleaning?.applied ? "已生效" : "未生效")}</span>
+        <span class="bme-debug-kv-key">trước khi gửiđầu vàolàm sạch</span>
+        <span class="bme-debug-kv-value">${_escHtml(llmRequest.requestCleaning?.applied ? "Đã có hiệu lực" : "Chưa có hiệu lực")}</span>
       </div>
     </div>
-    ${_renderDebugDetails("提示词执行tóm tắt", llmRequest.promptExecution || null)}
-    ${_renderDebugDetails("发送前输入清洗", llmRequest.requestCleaning || null)}
-    ${_renderDebugDetails("实际请求路径", llmRequest.effectiveRoute || null)}
-    ${_renderDebugDetails("输出清洗", llmRequest.responseCleaning || null)}
-    ${_renderDebugDetails("Cấu hình API解析", {
+    ${_renderDebugDetails("promptthực thitóm tắt", llmRequest.promptExecution || null)}
+    ${_renderDebugDetails("trước khi gửiđầu vàolàm sạch", llmRequest.requestCleaning || null)}
+    ${_renderDebugDetails("thực tếyêu cầuđường đi", llmRequest.effectiveRoute || null)}
+    ${_renderDebugDetails("đầu ralàm sạch", llmRequest.responseCleaning || null)}
+    ${_renderDebugDetails("Cấu hình APIphân tích", {
       llmConfigSource: llmRequest.llmConfigSource || "",
       llmConfigSourceLabel: llmRequest.llmConfigSourceLabel || "",
       requestedLlmPresetName: llmRequest.requestedLlmPresetName || "",
       llmPresetName: llmRequest.llmPresetName || "",
       llmPresetFallbackReason: llmRequest.llmPresetFallbackReason || "",
     })}
-    ${_renderDebugDetails("实际保留参数", llmRequest.filteredGeneration || {})}
-    ${_renderDebugDetails("被Lọc掉的参数", llmRequest.removedGeneration || [])}
-    ${_renderDebugDetails("最终tin nhắn列表", llmRequest.messages || [])}
-    ${_renderDebugDetails("最终请求体", llmRequest.requestBody || null)}
+    ${_renderDebugDetails("Tham số được giữ lại thực tế", llmRequest.filteredGeneration || {})}
+    ${_renderDebugDetails("Tham số đã bị lọc bỏ", llmRequest.removedGeneration || [])}
+    ${_renderDebugDetails("cuối cùngtin nhắndanh sách", llmRequest.messages || [])}
+    ${_renderDebugDetails("Phần thân yêu cầu cuối cùng", llmRequest.requestBody || null)}
   `;
 }
 
@@ -10001,7 +10001,7 @@ function _renderTaskDebugInjectionCard(injectionSnapshot) {
   if (!injectionSnapshot) {
     return `
       <div class="bme-config-card-title">Gần nhấtTiêmKết quả</div>
-      <div class="bme-config-help">还没有lần gần nhấtTruy hồiTiêmsnapshot。</div>
+      <div class="bme-config-help">Vẫn chưa có snapshot tiêm truy hồi gần nhất.</div>
     `;
   }
 
@@ -10018,7 +10018,7 @@ function _renderTaskDebugInjectionCard(injectionSnapshot) {
       <div>
         <div class="bme-config-card-title">Gần nhấtTiêmKết quả</div>
         <div class="bme-config-card-subtitle">
-          展示lần gần nhấtTruy hồi后的Văn bản tiêm和Host投递方式。
+          Hiển thị văn bản tiêm và cách phát tới host sau lần truy hồi gần nhất.
         </div>
       </div>
       <span class="bme-task-pill">${_escHtml(_formatTaskProfileTime(injectionSnapshot.updatedAt))}</span>
@@ -10029,23 +10029,23 @@ function _renderTaskDebugInjectionCard(injectionSnapshot) {
         <span class="bme-debug-kv-value">${_escHtml(injectionSnapshot.sourceLabel || injectionSnapshot.source || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">触发钩子</span>
+        <span class="bme-debug-kv-key">Hook kích hoạt</span>
         <span class="bme-debug-kv-value">${_escHtml(injectionSnapshot.hookName || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">选Trung bìnhnút数</span>
+        <span class="bme-debug-kv-key">Số nút chọn trung bình</span>
         <span class="bme-debug-kv-value">${_escHtml(String(injectionSnapshot.selectedNodeIds?.length ?? 0))}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">LLM 选择协议</span>
+        <span class="bme-debug-kv-key">Giao thức LLM chọn lọc</span>
         <span class="bme-debug-kv-value">${_escHtml(llmMeta.selectionProtocol || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">原始短键</span>
+        <span class="bme-debug-kv-key">Khóa ngắn gốc</span>
         <span class="bme-debug-kv-value">${_escHtml(rawSelectedKeys || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">解析nút</span>
+        <span class="bme-debug-kv-key">phân tíchnút</span>
         <span class="bme-debug-kv-value">${_escHtml(resolvedSelectedNodeIds || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
@@ -10053,17 +10053,17 @@ function _renderTaskDebugInjectionCard(injectionSnapshot) {
         <span class="bme-debug-kv-value">${_escHtml(llmMeta.fallbackType || "—")}</span>
       </div>
       <div class="bme-debug-kv-item">
-        <span class="bme-debug-kv-key">Host投递</span>
+        <span class="bme-debug-kv-key">Phát tới host</span>
         <span class="bme-debug-kv-value">${_escHtml(injectionSnapshot.transport?.source || "—")} / ${_escHtml(injectionSnapshot.transport?.mode || "—")}</span>
       </div>
     </div>
-    ${_renderDebugDetails("Truy hồi统计", {
+    ${_renderDebugDetails("Truy hồithống kê", {
       retrievalMeta: injectionSnapshot.retrievalMeta || {},
       llmMeta: injectionSnapshot.llmMeta || {},
       stats: injectionSnapshot.stats || {},
       transport: injectionSnapshot.transport || {},
     })}
-    ${_renderDebugDetails("最终Văn bản tiêm", injectionSnapshot.injectionText || "")}
+    ${_renderDebugDetails("cuối cùngVăn bản tiêm", injectionSnapshot.injectionText || "")}
   `;
 }
 
@@ -10081,7 +10081,7 @@ function _renderDebugDetails(title, value) {
       <summary>${_escHtml(title)}</summary>
       ${
         isEmpty
-          ? '<div class="bme-debug-empty">暂KhôngNội dung</div>'
+          ? '<div class="bme-debug-empty">Chưa có nội dung</div>'
           : `<pre class="bme-debug-pre">${_escHtml(_stringifyDebugValue(value))}</pre>`
       }
     </details>
@@ -10130,8 +10130,8 @@ function _renderTaskBlockRow(block, index, state) {
       <div class="bme-task-block-row-header" data-task-action="toggle-block-expand" data-block-id="${_escAttr(block.id)}">
         <span
           class="bme-task-drag-handle"
-          title="拖拽排序"
-          aria-label="拖拽排序"
+          title="Kéo thả để sắp xếp"
+          aria-label="Kéo thả để sắp xếp"
           draggable="true"
         >
           <i class="fa-solid fa-grip-vertical"></i>
@@ -10167,7 +10167,7 @@ function _renderTaskBlockRow(block, index, state) {
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
-        <label class="bme-task-row-toggle" title="${block.enabled ? "已Bật" : "Đã tắt"}">
+        <label class="bme-task-row-toggle" title="${block.enabled ? "Đã bật" : "Đã tắt"}">
           <input
             type="checkbox"
             data-task-action="toggle-block-enabled-cb"
@@ -10207,13 +10207,13 @@ function _renderTaskBlockInlineEditor(block, state) {
 
   return `
     <div class="bme-config-row">
-      <label>块Tên</label>
+      <label>Tên khối</label>
       <input
         class="bme-config-input"
         type="text"
         data-block-field="name"
         value="${_escAttr(block.name || "")}"
-        placeholder="用于工作区显示"
+        placeholder="Dùng để hiển thị trong khu vực làm việc"
       />
     </div>
 
@@ -10231,7 +10231,7 @@ function _renderTaskBlockInlineEditor(block, state) {
         </select>
       </div>
       <div class="bme-config-row">
-        <label>Tiêm方式</label>
+        <label>Cách tiêm</label>
         <select class="bme-config-input" data-block-field="injectionMode">
           ${TASK_PROFILE_INJECTION_OPTIONS.map(
             (item) => `
@@ -10251,7 +10251,7 @@ function _renderTaskBlockInlineEditor(block, state) {
       block.type === "builtin"
         ? (() => {
             const externalSourceMap = {
-              charDescription: "Nhân vật卡mô tả",
+              charDescription: "Mô tả thẻ nhân vật",
               userPersona: "Người dùng Persona thiết lập",
               worldInfoBefore: "World Info (↑ Char)",
               worldInfoAfter: "World Info (↓ Char)",
@@ -10259,21 +10259,21 @@ function _renderTaskBlockInlineEditor(block, state) {
             const externalLabel = externalSourceMap[block.sourceKey];
             return `
             <div class="bme-config-row">
-              <label>内置Nguồn${_helpTip("运行时Tự động从Tác vụ上下文Tiêm的Dữ liệu。")}</label>
+              <label>Nguồn tích hợp sẵn${_helpTip("Runtime sẽ tự động đọc dữ liệu được tiêm từ ngữ cảnh tác vụ.")}</label>
               <select class="bme-config-input" data-block-field="sourceKey">
                 ${builtinOptions}
               </select>
             </div>
             ${externalLabel
               ? `<div class="bme-task-note" style="text-align:center;padding:0.75rem;opacity:0.7;">
-                   Nội dungNguồn：<strong>${externalLabel}</strong>，Không法在此Chỉnh sửa。
+                   Nguồn nội dung: <strong>${externalLabel}</strong>, không thể chỉnh sửa tại đây.
                  </div>`
               : `<div class="bme-config-row">
-                   <label>覆盖Nội dung（可选）${_helpTip("留空时Tự động从 sourceKey 对应的上下文Dữ liệuĐọc。")}</label>
+                   <label>Nội dung ghi đè (tùy chọn)${_helpTip("Để trống thì sẽ tự động đọc dữ liệu ngữ cảnh tương ứng với sourceKey.")}</label>
                    <textarea
                      class="bme-config-textarea"
                      data-block-field="content"
-                     placeholder="留空时从 sourceKey 对应的Tác vụ上下文Đọc。"
+                     placeholder="Để trống thì đọc từ ngữ cảnh tác vụ tương ứng với sourceKey."
                    >${_escHtml(block.content || "")}</textarea>
                  </div>`
             }`;
@@ -10281,28 +10281,28 @@ function _renderTaskBlockInlineEditor(block, state) {
         : block.type === "legacyPrompt"
           ? `
               <div class="bme-task-note">
-                当前块与旧版 prompt 字段保持兼容。留空时运行时会Lùi về到内置Mặc định prompt。
+                Khối hiện tại vẫn giữ tương thích với trường prompt bản cũ. Nếu để trống, runtime sẽ lùi về prompt mặc định tích hợp sẵn.
               </div>
               <div class="bme-config-row">
-                <label>兼容字段</label>
+                <label>Trường tương thích</label>
                 <input class="bme-config-input" type="text" value="${_escAttr(legacyField || block.sourceField || "")}" readonly />
               </div>
               <div class="bme-config-row">
-                <label>兼容 prompt Nội dung</label>
+                <label>tương thích prompt Nội dung</label>
                 <textarea
                   class="bme-config-textarea"
                   data-block-field="content"
-                  placeholder="留空 = 继续使用内置Mặc định prompt"
+                  placeholder="Để trống = tiếp tục dùng prompt mặc định tích hợp sẵn"
                 >${_escHtml(legacyValue)}</textarea>
               </div>
             `
           : `
               <div class="bme-config-row">
-                <label>块Nội dung</label>
+                <label>Nội dung khối</label>
                 <textarea
                   class="bme-config-textarea"
                   data-block-field="content"
-                  placeholder="支持 {{userMessage}} / {{recentMessages}} / {{schema}} 等轻量变量。"
+                  placeholder="Hỗ trợ các biến nhẹ như {{userMessage}} / {{recentMessages}} / {{schema}}..."
                 >${_escHtml(block.content || "")}</textarea>
               </div>
             `
@@ -10310,7 +10310,7 @@ function _renderTaskBlockInlineEditor(block, state) {
 
     <div class="bme-task-expand-footer">
       <button class="bme-config-secondary-btn" data-task-action="toggle-block-expand" data-block-id="${_escAttr(block.id)}" type="button">
-        <i class="fa-solid fa-chevron-up"></i> 收起
+        <i class="fa-solid fa-chevron-up"></i> Thu gọn
       </button>
     </div>
   `;
@@ -10331,14 +10331,14 @@ function _renderGenerationField(field, value, state = {}) {
     const hasCurrentPreset =
       !currentValue || presetNames.includes(currentValue);
     const currentLabel = !currentValue
-      ? "跟随当前 API"
+      ? "Đi theo API hiện tại"
       : hasCurrentPreset
         ? currentValue
-        : `${currentValue}（已丢失，将Lùi về当前 API）`;
+        : `${currentValue} (đã mất, sẽ lùi về API hiện tại)`;
     const options = [
       {
         value: "",
-        label: "跟随当前 API",
+        label: "Đi theo API hiện tại",
       },
       ...(!currentValue || hasCurrentPreset
         ? []
@@ -10459,7 +10459,7 @@ function _renderGenerationField(field, value, state = {}) {
         type="${field.type === "text" ? "text" : "number"}"
         ${field.step ? `step="${field.step}"` : ""}
         value="${_escAttr(effectiveValue ?? "")}"
-        placeholder="留空 = Theo mặc định"
+        placeholder="Để trống = Theo mặc định"
         data-generation-key="${_escAttr(field.key)}"
         data-value-type="${field.type === "text" ? "text" : "number"}"
       />
@@ -10471,14 +10471,14 @@ function _formatRegexRulePreview(findRegex = "") {
   const collapsed = String(findRegex || "")
     .replace(/\s+/g, " ")
     .trim();
-  return collapsed || "(未填写 find_regex)";
+  return collapsed || "(chưa điền find_regex)";
 }
 
 function _renderRegexRuleRow(rule, index, state, options = {}) {
   const isExpanded = rule.id === state.selectedRule?.id;
   const deleteAction = options.deleteAction || "delete-regex-rule";
   const defaultNamePrefix = options.defaultNamePrefix || "Cục bộQuy tắc";
-  const statusLabel = rule.enabled ? "Bật" : "停用";
+  const statusLabel = rule.enabled ? "Bật" : "Tắt";
   const previewText = _formatRegexRulePreview(rule.find_regex);
 
   return `
@@ -10493,8 +10493,8 @@ function _renderRegexRuleRow(rule, index, state, options = {}) {
       >
         <span
           class="bme-task-drag-handle bme-regex-drag-handle"
-          title="拖拽排序"
-          aria-label="拖拽排序"
+          title="Kéo thả để sắp xếp"
+          aria-label="Kéo thả để sắp xếp"
           draggable="true"
         >
           <i class="fa-solid fa-grip-vertical"></i>
@@ -10526,7 +10526,7 @@ function _renderRegexRuleRow(rule, index, state, options = {}) {
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
-        <label class="bme-task-row-toggle" title="${rule.enabled ? "已Bật" : "Đã tắt"}">
+        <label class="bme-task-row-toggle" title="${rule.enabled ? "Đã bật" : "Đã tắt"}">
           <input
             type="checkbox"
             data-regex-rule-row-enabled="true"
@@ -10554,7 +10554,7 @@ function _renderRegexRuleInlineEditor(rule) {
 
   return `
     <div class="bme-task-note">
-      字段尽量与 Tavern RegexCấu trúc保持对齐，方便后续NhậpXuất与对照。
+      Các trường nên giữ thẳng hàng với cấu trúc Tavern Regex càng nhiều càng tốt để thuận tiện cho việc nhập xuất và đối chiếu về sau.
     </div>
 
     <div class="bme-config-row">
@@ -10569,8 +10569,8 @@ function _renderRegexRuleInlineEditor(rule) {
 
     <label class="bme-toggle-item bme-task-editor-toggle">
       <span class="bme-toggle-copy">
-        <span class="bme-toggle-title">Bật此Quy tắc</span>
-        <span class="bme-toggle-desc">停用后该Quy tắc不再参与当前Preset tác vụXử lý。</span>
+        <span class="bme-toggle-title">Bật quy tắc này</span>
+        <span class="bme-toggle-desc">Sau khi tắt, quy tắc này sẽ không còn tham gia xử lý của preset tác vụ hiện tại.</span>
       </span>
       <input
         type="checkbox"
@@ -10580,7 +10580,7 @@ function _renderRegexRuleInlineEditor(rule) {
     </label>
 
     <div class="bme-config-row">
-      <label>查找Regex (find_regex)</label>
+      <label>tìmRegex (find_regex)</label>
       <textarea
         class="bme-config-textarea"
         data-regex-rule-field="find_regex"
@@ -10589,26 +10589,26 @@ function _renderRegexRuleInlineEditor(rule) {
     </div>
 
     <div class="bme-config-row">
-      <label>替换文本 (replace_string)</label>
+      <label>Văn bản thay thế (replace_string)</label>
       <textarea
         class="bme-config-textarea"
         data-regex-rule-field="replace_string"
-        placeholder="替换后的文本"
+        placeholder="Văn bản sau khi thay thế"
       >${_escHtml(rule.replace_string || "")}</textarea>
     </div>
 
     <div class="bme-config-row">
-      <label>裁剪字符串 (trim_strings)</label>
+      <label>Chuỗi cần cắt bỏ (trim_strings)</label>
       <textarea
         class="bme-config-textarea"
         data-regex-rule-field="trim_strings"
-        placeholder="每行一个要裁掉的字符串"
+        placeholder="Mỗi dòng là một chuỗi cần cắt bỏ"
       >${_escHtml(trimStrings)}</textarea>
     </div>
 
     <div class="bme-task-field-grid">
       <div class="bme-config-row">
-        <label>最小深度</label>
+        <label>Độ sâu nhỏ nhất</label>
         <input
           class="bme-config-input"
           type="number"
@@ -10617,7 +10617,7 @@ function _renderRegexRuleInlineEditor(rule) {
         />
       </div>
       <div class="bme-config-row">
-        <label>最大深度</label>
+        <label>Độ sâu lớn nhất</label>
         <input
           class="bme-config-input"
           type="number"
@@ -10631,8 +10631,8 @@ function _renderRegexRuleInlineEditor(rule) {
     <div class="bme-task-toggle-list">
       <label class="bme-toggle-item">
         <span class="bme-toggle-copy">
-          <span class="bme-toggle-title">Người dùng输入</span>
-          <span class="bme-toggle-desc">允许作用于 user / 输入侧文本。</span>
+          <span class="bme-toggle-title">Người dùngđầu vào</span>
+          <span class="bme-toggle-desc">Cho phép áp dụng cho văn bản phía user / đầu vào.</span>
         </span>
         <input
           type="checkbox"
@@ -10642,8 +10642,8 @@ function _renderRegexRuleInlineEditor(rule) {
       </label>
       <label class="bme-toggle-item">
         <span class="bme-toggle-copy">
-          <span class="bme-toggle-title">AI 输出</span>
-          <span class="bme-toggle-desc">允许作用于 assistant / 输出侧文本。</span>
+          <span class="bme-toggle-title">AI đầu ra</span>
+          <span class="bme-toggle-desc">Cho phép áp dụng cho văn bản phía assistant / đầu ra.</span>
         </span>
         <input
           type="checkbox"
@@ -10653,12 +10653,12 @@ function _renderRegexRuleInlineEditor(rule) {
       </label>
     </div>
 
-    <div class="bme-task-section-label">作用目标</div>
+    <div class="bme-task-section-label">Mục tiêu tác dụng</div>
     <div class="bme-task-toggle-list">
       <label class="bme-toggle-item">
         <span class="bme-toggle-copy">
-          <span class="bme-toggle-title">Prompt 构建</span>
-          <span class="bme-toggle-desc">应用到 prompt 输入构建链路。</span>
+          <span class="bme-toggle-title">Prompt xây dựng</span>
+          <span class="bme-toggle-desc">Áp dụng vào chuỗi xử lý xây dựng prompt đầu vào.</span>
         </span>
         <input
           type="checkbox"
@@ -10668,8 +10668,8 @@ function _renderRegexRuleInlineEditor(rule) {
       </label>
       <label class="bme-toggle-item">
         <span class="bme-toggle-copy">
-          <span class="bme-toggle-title">界面展示</span>
-          <span class="bme-toggle-desc">应用到展示层替换链路。</span>
+          <span class="bme-toggle-title">Hiển thị giao diện</span>
+          <span class="bme-toggle-desc">Áp dụng vào chuỗi xử lý thay thế ở tầng hiển thị.</span>
         </span>
         <input
           type="checkbox"
@@ -10686,7 +10686,7 @@ function _renderRegexRuleInlineEditor(rule) {
         data-rule-id="${_escAttr(rule.id)}"
         type="button"
       >
-        <i class="fa-solid fa-chevron-up"></i> 收起
+        <i class="fa-solid fa-chevron-up"></i> Thu gọn
       </button>
     </div>
   `;
@@ -10702,7 +10702,7 @@ function _moveTaskBlock(blockId, direction) {
       return null;
     }
     [blocks[index], blocks[targetIndex]] = [blocks[targetIndex], blocks[index]];
-    // 直接重新编号，不要再 sort（否则会按旧 order 排回去）
+    // Đánh số lại trực tiếp, đừng sort nữa (nếu không sẽ bị xếp lại theo thứ tự cũ)
     draft.blocks = blocks.map((block, i) => ({ ...block, order: i }));
     return { selectBlockId: blockId };
   });
@@ -11474,10 +11474,10 @@ function _downloadTaskProfile(taskProfiles, taskType, profile, globalTaskRegex =
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
-    toastr.success("预设Xuất成功", "ST-BME");
+    toastr.success("presetXuấtthành công", "ST-BME");
   } catch (error) {
     console.error("[ST-BME] XuấtPreset tác vụThất bại:", error);
-    toastr.error(`预设XuấtThất bại: ${error?.message || error}`, "ST-BME");
+    toastr.error(`presetXuấtThất bại: ${error?.message || error}`, "ST-BME");
   }
 }
 function _sanitizeFileName(fileName = "profile.json") {
@@ -11497,7 +11497,7 @@ function _downloadAllTaskProfiles(taskProfiles, globalTaskRegex = {}) {
       }
     }
     if (Object.keys(profiles).length === 0) {
-      toastr.warning("没有可Xuất的预设", "ST-BME");
+      toastr.warning("Không có preset nào để xuất", "ST-BME");
       return;
     }
     const payload = {
@@ -11518,10 +11518,10 @@ function _downloadAllTaskProfiles(taskProfiles, globalTaskRegex = {}) {
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
-    toastr.success(`Đã xuất ${Object.keys(profiles).length} 个Preset tác vụ`, "ST-BME");
+    toastr.success(`Đã xuất ${Object.keys(profiles).length} preset tác vụ`, "ST-BME");
   } catch (error) {
-    console.error("[ST-BME] XuấtTất cả预设Thất bại:", error);
-    toastr.error(`XuấtTất cả预设Thất bại: ${error?.message || error}`, "ST-BME");
+    console.error("[ST-BME] XuấtTất cảpresetThất bại:", error);
+    toastr.error(`XuấtTất cảpresetThất bại: ${error?.message || error}`, "ST-BME");
   }
 }
 function _cloneJson(value) {
@@ -11530,23 +11530,23 @@ function _cloneJson(value) {
 
 function _helpTip(text) {
   if (!text) return "";
-  return `<span class="bme-help-tip"><button type="button" class="bme-help-tip__trigger" aria-label="帮助">?</button><span class="bme-help-tip__bubble">${_escHtml(text)}</span></span>`;
+  return `<span class="bme-help-tip"><button type="button" class="bme-help-tip__trigger" aria-label="giúp">?</button><span class="bme-help-tip__bubble">${_escHtml(text)}</span></span>`;
 }
 
 function _getTaskBlockTypeLabel(type) {
   const typeMap = {
     custom: "Khối tùy chỉnh",
     builtin: "Khối tích hợp",
-    legacyPrompt: "兼容块",
+    legacyPrompt: "Khối tương thích",
   };
-  return typeMap[type] || type || "块";
+  return typeMap[type] || type || "Khối";
 }
 
 function _formatTaskProfileTime(raw) {
-  if (!raw) return "刚刚";
+  if (!raw) return "vừa rồi";
   try {
     const date = new Date(raw);
-    if (Number.isNaN(date.getTime())) return "刚刚";
+    if (Number.isNaN(date.getTime())) return "vừa rồi";
     return date.toLocaleString("zh-CN", {
       hour12: false,
       month: "2-digit",
@@ -11555,11 +11555,11 @@ function _formatTaskProfileTime(raw) {
       minute: "2-digit",
     });
   } catch {
-    return "刚刚";
+    return "vừa rồi";
   }
 }
 
-// ==================== 工具函数 ====================
+// ==================== Hàm công cụ ====================
 
 function _setText(id, text) {
   const el = document.getElementById(id);
@@ -11622,19 +11622,19 @@ function _getLatestBatchStatusSnapshot() {
 function _formatPersistenceOutcomeLabel(outcome = "") {
   switch (String(outcome || "")) {
     case "saved":
-      return "已Lưu";
+      return "Đã lưu";
     case "fallback":
-      return "兜底已Lưu";
+      return "Bản lưu lùi đã xong";
     case "not-attempted":
-      return "未尝试";
+      return "Chưa thử";
     case "queued":
-      return "已排队";
+      return "Đã xếp hàng";
     case "blocked":
       return "Đã chặn";
     case "failed":
       return "Thất bại";
     case "recoverable":
-      return "已捕获Neo khôi phục";
+      return "Đã bắt được neo khôi phục";
     default:
       return "Không rõ";
   }
@@ -11645,7 +11645,7 @@ function _formatPersistMismatchReason(reason = "") {
   if (!normalized) return "—";
   switch (normalized) {
     case "persist-mismatch:indexeddb-behind-commit-marker":
-      return "Cục bộđồ thị存储版本落后于Chat hiện tại已Xác nhận版本";
+      return "Phiên bản lưu trữ đồ thị cục bộ đang chậm hơn phiên bản đã xác nhận của chat hiện tại";
     default:
       return normalized;
   }
@@ -11655,9 +11655,9 @@ function _formatPersistMismatchHelp(reason = "") {
   const normalized = String(reason || "").trim();
   switch (normalized) {
     case "persist-mismatch:indexeddb-behind-commit-marker":
-      return "Chat hiện tại记录显示đồ thị已经Xác nhận到更Cao版本，但Cục bộ OPFS / IndexedDB 存储里还没有对应Dữ liệu。常见于刚清空Bộ đệm cục bộ，或写入Xác nhận还没Hoàn tất。建议先点“Thăm dò lại đồ thị”；如果仍异常，再点“Thử lưu bền lại”或执行重建/Khôi phục。";
+      return "Bản ghi hiển thị của chat hiện tại cho thấy đồ thị đã được xác nhận lên phiên bản cao hơn, nhưng trong lưu trữ cục bộ OPFS / IndexedDB vẫn chưa có dữ liệu tương ứng. Tình huống này thường gặp ngay sau khi vừa xóa bộ đệm cục bộ hoặc khi bước xác nhận ghi vẫn chưa hoàn tất. Hãy thử bấm "Thăm dò lại đồ thị" trước; nếu vẫn bất thường thì bấm "Thử lưu bền lại" hoặc chạy xây lại/khôi phục.";
     default:
-      return `检测到Lưu bềnBất thường nhất quán：${_formatPersistMismatchReason(normalized)}。建议先Thăm dò lại đồ thị；如果仍异常，再执行重建或Khôi phục。`;
+      return `Phát hiện lưu bền bất thường về tính nhất quán: ${_formatPersistMismatchReason(normalized)}. Hãy thăm dò lại đồ thị trước; nếu vẫn bất thường thì hãy xây lại hoặc khôi phục.`;
   }
 }
 
@@ -11697,9 +11697,9 @@ function _formatDashboardPersistMeta(loadInfo = {}, batchStatus = null) {
     const accepted = _isPersistenceRevisionAccepted(persistence, loadInfo);
     const parts = [
       accepted
-        ? "已Xác nhận"
+        ? "Đã xác nhận"
         : persistence.recoverable === true
-          ? "已捕获Neo khôi phục"
+          ? "Đã bắt được neo khôi phục"
           : _formatPersistenceOutcomeLabel(persistence.outcome),
       persistence.storageTier ? `tier ${persistence.storageTier}` : "",
       Number.isFinite(Number(persistence.revision)) && Number(persistence.revision) > 0
@@ -11708,13 +11708,13 @@ function _formatDashboardPersistMeta(loadInfo = {}, batchStatus = null) {
       persistence.reason || "",
       !accepted && localPersistError ? `Cục bộLỗi ${localPersistError}` : "",
     ].filter(Boolean);
-    return parts.join(" · ") || "尚KhôngLưu bền记录";
+    return parts.join(" · ") || "Vẫn chưa có bản ghi lưu bền";
   }
 
   const dualWrite = loadInfo?.dualWriteLastResult || null;
   if (dualWrite) {
     return [
-      dualWrite.success === true ? "Gần nhất写入成功" : "Gần nhất写入Thất bại",
+      dualWrite.success === true ? "Gần nhấtghi vàothành công" : "Gần nhấtghi vàoThất bại",
       dualWrite.target || dualWrite.source || "",
       Number.isFinite(Number(dualWrite.revision)) && Number(dualWrite.revision) > 0
         ? `rev ${Number(dualWrite.revision)}`
@@ -11730,10 +11730,10 @@ function _formatDashboardPersistMeta(loadInfo = {}, batchStatus = null) {
   }
 
   if (String(batchStatus?.outcome || "") === "failed") {
-    return "本批未进入Lưu bền";
+    return "Lô này chưa đi vào lưu bền";
   }
 
-  return "尚未执行Lưu bền";
+  return "vẫn chưathực thiLưu bền";
 }
 
 function _formatDashboardHistoryMeta(graph = null, loadInfo = {}, batchStatus = null) {
@@ -11751,23 +11751,23 @@ function _formatDashboardHistoryMeta(graph = null, loadInfo = {}, batchStatus = 
       : null;
 
   if (_hasMeaningfulPersistenceRecord(persistence) && !accepted && pendingFloor != null) {
-    return `Lưu bềnChờ xác nhận：Cục bộ已抽取到tầng ${pendingFloor}，已Xác nhậntầng ${lastConfirmedFloor}${localPersistError ? ` · Cục bộLỗi ${localPersistError}` : ""}`;
+    return `Lưu bền đang chờ xác nhận: cục bộ đã trích xuất tới tầng ${pendingFloor}, đã xác nhận tới tầng ${lastConfirmedFloor}${localPersistError ? ` · Lỗi cục bộ ${localPersistError}` : ""}`;
   }
 
   if (loadInfo?.persistMismatchReason) {
-    return `Lưu bềnBất thường nhất quán：${_formatPersistMismatchReason(loadInfo.persistMismatchReason)} · 已Xác nhậntầng ${lastConfirmedFloor}`;
+    return `Lưu bền bất thường về tính nhất quán: ${_formatPersistMismatchReason(loadInfo.persistMismatchReason)} · đã xác nhận tới tầng ${lastConfirmedFloor}`;
   }
 
   if (String(batchStatus?.outcome || "") === "failed") {
-    return `lô gần nhấtTrích xuấtThất bại，已Xác nhậnXử lý到tầng ${lastConfirmedFloor}`;
+    return `Lô trích xuất gần nhất đã thất bại, đã xử lý xác nhận tới tầng ${lastConfirmedFloor}`;
   }
 
   const dirtyFrom = graph?.historyState?.historyDirtyFrom;
   if (Number.isFinite(dirtyFrom)) {
-    return `脏区从tầng ${dirtyFrom} 开始，已Xác nhậnXử lý到tầng ${lastConfirmedFloor}`;
+    return `Vùng bẩn bắt đầu từ tầng ${dirtyFrom}, đã xử lý xác nhận tới tầng ${lastConfirmedFloor}`;
   }
 
-  return `干净，已Xác nhậnXử lý到tầng ${lastConfirmedFloor}`;
+  return `Sạch, đã xử lý xác nhận tới tầng ${lastConfirmedFloor}`;
 }
 
 function _getGraphLoadLabel(loadInfoOrState = "") {
@@ -11781,16 +11781,16 @@ function _getGraphLoadLabel(loadInfoOrState = "") {
   switch (loadState) {
     case "loading":
       return loadInfo?.runtimeGraphReadable === true
-        ? "đồ thị已暂载，正在Xác nhậnCục bộ存储"
+        ? "Đồ thị đã được nạp tạm, đang xác nhận lưu trữ cục bộ"
         : "Đang tải đồ thị của chat hiện tại";
     case "shadow-restored":
-      return "Đã từ本lần会话临时Khôi phục，正在Đang chờ正式聊天Metadata";
+      return "Đã khôi phục từ snapshot tạm thời của phiên hiện tại, đang chờ chatMetadata chính thức";
     case "empty-confirmed":
-      return "Chat hiện tại还没有đồ thị";
+      return "Chat hiện tại vẫn chưa có đồ thị";
     case "blocked":
-      return "Chat hiện tạiđồ thị未能Hoàn tất正式Lưu bềnXác nhận，请稍后重试";
+      return "Đồ thị của chat hiện tại chưa thể hoàn tất xác nhận lưu bền chính thức, vui lòng thử lại sau";
     case "loaded":
-      return "聊天đồ thịĐã tải";
+      return "chatđồ thịĐã tải";
     case "no-chat":
     default:
       return "Hiện chưa vào cuộc chat";
@@ -11830,8 +11830,8 @@ function _refreshPersistenceRepairUi(
     help.textContent = "";
     if (actionHelp) {
       actionHelp.textContent = isLuker
-        ? "这里集Trung bình放Sửa lưu bền入口。通用情况先用“Thử lưu bền lại”和“Thăm dò lại đồ thị”；如果是 Luker 主 sidecar 脱节，再用右侧 3 个专项修复按钮。"
-        : "这里集Trung bình放Sửa lưu bền入口。通常先用“Thử lưu bền lại”，Trạng thái没Khôi phục再试“Thăm dò lại đồ thị”。";
+        ? "Khu vực này tập trung các lối sửa lưu bền. Trường hợp thường gặp hãy dùng "Thử lưu bền lại" và "Thăm dò lại đồ thị" trước; nếu sidecar chính của Luker bị lệch thì mới dùng 3 nút sửa chuyên sâu bên phải."
+        : "Khu vực này tập trung các lối sửa lưu bền. Thông thường hãy thử "Thử lưu bền lại" trước, nếu trạng thái chưa khôi phục thì thử tiếp "Thăm dò lại đồ thị".";
     }
     return;
   }
@@ -11840,8 +11840,8 @@ function _refreshPersistenceRepairUi(
   if (loadInfo?.pendingPersist === true) {
     helpText =
       isLuker
-        ? "lô gần nhấtTrích xuất已经Hoàn tất，但 Luker manifest 还没Xác nhận。先试“Thử lưu bền lại”，如果仍Chưa xác nhận，再到“Thao tác”页的 Luker Sidecar 区域做“Sửa Sidecar chính”或“Xây lại bộ đệm cục bộ”。"
-        : "lô gần nhấtTrích xuất已经Hoàn tất，但正式写回还没Xác nhận。先试“Thử lưu bền lại”，如果Trạng thái没变化，再试“Thăm dò lại đồ thị”。";
+        ? "Lô trích xuất gần nhất đã hoàn tất nhưng manifest Luker vẫn chưa xác nhận. Hãy thử "Thử lưu bền lại" trước; nếu vẫn chưa xác nhận thì sang khu vực Luker Sidecar ở trang "Thao tác" để chạy "Sửa Sidecar chính" hoặc "Xây lại bộ đệm cục bộ"."
+        : "Lô trích xuất gần nhất đã hoàn tất nhưng ghi ngược chính thức vẫn chưa được xác nhận. Hãy thử "Thử lưu bền lại" trước; nếu trạng thái không đổi thì thử tiếp "Thăm dò lại đồ thị".";
     if (loadInfo?.indexedDbLastError) {
       helpText = `${helpText}\nCục bộLỗi：${loadInfo.indexedDbLastError}`;
     }
@@ -11851,11 +11851,11 @@ function _refreshPersistenceRepairUi(
     helpText =
       persistence?.recoverable === true
         ? isLuker
-          ? "lô gần nhất已经捕获了Neo khôi phục，但 Luker 主 sidecar 还没Xác nhận。可以先Thử lưu bền lại；必要时再到“Thao tác”页的Sửa lưu bền区域执行更深修复。"
-          : "lô gần nhất已经捕获了Neo khôi phục，但还没有进入正式 accepted 存储。可以先Thử lưu bền lại；如果仍Chưa xác nhận，再Thăm dò lại đồ thị。"
+          ? "Lô gần nhất đã bắt được neo khôi phục nhưng sidecar chính của Luker vẫn chưa xác nhận. Có thể thử "Thử lưu bền lại" trước; khi cần thì vào khu vực sửa lưu bền của trang "Thao tác" để chạy bản sửa sâu hơn."
+          : "Lô gần nhất đã bắt được neo khôi phục nhưng vẫn chưa đi vào vùng lưu trữ accepted chính thức. Có thể thử "Thử lưu bền lại" trước; nếu vẫn chưa xác nhận thì hãy thăm dò lại đồ thị."
         : isLuker
-          ? "lô gần nhấtLưu bền没有被 Luker manifest 接受。可以先Thử lưu bền lại；如果主 sidecar 与Bộ đệm cục bộ脱节，再到“Thao tác”页的Sửa lưu bền区域执行更深修复。"
-          : "lô gần nhấtLưu bền没有被接受。可以先Thử lưu bền lại；如果Host延迟加载了Cục bộ存储，再Thăm dò lại đồ thị。";
+          ? "Lô lưu bền gần nhất chưa được Luker manifest chấp nhận. Có thể thử "Thử lưu bền lại" trước; nếu sidecar chính bị lệch với bộ đệm cục bộ thì sang khu vực sửa lưu bền ở trang "Thao tác" để chạy bản sửa sâu hơn."
+          : "Lô lưu bền gần nhất chưa được chấp nhận. Có thể thử "Thử lưu bền lại" trước; nếu host tải lưu trữ cục bộ bị trễ thì hãy thăm dò lại đồ thị.";
   }
   help.textContent = helpText;
   if (actionHelp) {
@@ -11900,7 +11900,7 @@ function _refreshGraphAvailabilityState() {
   const mobileOverlayText = document.getElementById("bme-mobile-graph-overlay-text");
   const blocked = _isGraphWriteBlocked(loadInfo);
   const loadLabel = _getGraphLoadLabel(loadInfo);
-  const pausedLabel = "đồ thị渲染Đã tạm dừng，可点击工具栏按钮Khôi phục。";
+  const pausedLabel = "Kết xuất đồ thị đã tạm dừng, bạn có thể nhấn nút trên thanh công cụ để khôi phục.";
   const renderingPaused = !_isGraphRenderingEnabled();
 
   GRAPH_WRITE_ACTION_IDS.forEach((id) => {
@@ -12088,7 +12088,7 @@ function _refreshCloudStorageModeUi(settings = _getSettings?.() || {}) {
 function _refreshRuntimeStatus() {
   const runtimeStatus = _getRuntimeStatus?.() || {};
   const text = runtimeStatus.text || "Chờ";
-  const meta = runtimeStatus.meta || "准备就绪";
+  const meta = runtimeStatus.meta || "chuẩn bịsẵn sàng";
   _setText("bme-status-text", text);
   _setText("bme-status-meta", meta);
   _setText("bme-mobile-status-text", text);
@@ -12098,7 +12098,7 @@ function _refreshRuntimeStatus() {
   _refreshGraphAvailabilityState();
 }
 
-function _showActionProgressUi(label, meta = "请稍候…") {
+function _showActionProgressUi(label, meta = "Vui lòng chờ...") {
   _setText("bme-status-text", `${label}Trung bình`);
   _setText("bme-status-meta", meta);
   _setText("bme-panel-status", `${label}Trung bình`);
@@ -12401,7 +12401,7 @@ function _syncLlmPresetControls(activePreset = "") {
   const deleteBtn = document.getElementById("bme-llm-preset-delete");
   if (deleteBtn) {
     deleteBtn.disabled = !activePreset;
-    deleteBtn.title = activePreset ? "Xóa mẫu hiện tại" : "Thủ công模式下没有可Xóa的模板";
+    deleteBtn.title = activePreset ? "Xóa preset hiện tại" : "Ở chế độ thủ công không có preset nào để xóa";
   }
 }
 
@@ -12507,7 +12507,7 @@ function _renderFetchedModelOptions(selectId, models, currentValue = "") {
   placeholder.value = "";
   placeholder.textContent = normalized.length
     ? "Chọn model từ kết quả tải về"
-    : "暂Không已Lấy model";
+    : "Chưa lấy được model";
   select.appendChild(placeholder);
 
   normalized.forEach((model) => {
@@ -12538,7 +12538,7 @@ function _refreshPromptCardStates(settings = _getSettings?.() || {}) {
     const isCustom = Boolean(String(settings?.[settingKey] || "").trim());
     card.classList.toggle("is-custom", isCustom);
     if (statusEl) {
-      statusEl.textContent = isCustom ? "已自định nghĩa" : "Mặc định";
+      statusEl.textContent = isCustom ? "Đã tự định nghĩa" : "Mặc định";
       statusEl.classList.toggle("is-custom", isCustom);
     }
     if (resetButton) {
@@ -12617,17 +12617,17 @@ function _buildScopeMetaText(node) {
   const parts = [];
   if (scope.layer === "pov") {
     parts.push(
-      `${scope.ownerType === "user" ? "POV người dùng" : "POV nhân vật"}: ${scope.ownerName || scope.ownerId || "未命名"}`,
+      `${scope.ownerType === "user" ? "POV người dùng" : "POV nhân vật"}: ${scope.ownerName || scope.ownerId || "Chưa đặt tên"}`,
     );
   }
   const regionLine = buildRegionLine(scope);
   if (regionLine) parts.push(regionLine);
   const storyTime = _describeNodeStoryTimeDisplay(node);
-  if (storyTime) parts.push(`剧情Thời gian: ${storyTime}`);
+  if (storyTime) parts.push(`cốt truyệnThời gian: ${storyTime}`);
   return parts.join(" · ");
 }
 
-/** Ký ức列表等指标：避免浮点误差打出 9.499999999999998 */
+/** Chỉ số như danh sách ký ức: tránh lỗi số thực in ra kiểu 9.499999999999998 */
 function _formatMemoryMetricNumber(value, { fallback = 0, maxFrac = 2 } = {}) {
   const x =
     value === undefined || value === null || value === ""
@@ -12655,7 +12655,7 @@ function _typeLabel(type) {
     location: "Địa điểm",
     thread: "tuyến chính",
     rule: "Quy tắc",
-    synopsis: "Toàn cục概要（旧）",
+    synopsis: "Tóm lược toàn cục (cũ)",
     reflection: "Phản tư",
     pov_memory: "Ký ức chủ quan",
   };
@@ -12670,7 +12670,7 @@ function _getNodeSnippet(node) {
   if (fields.constraint) return fields.constraint;
   if (fields.insight) return fields.insight;
   if (fields.traits) return fields.traits;
-  if (storyTime) return `剧情Thời gian: ${storyTime}`;
+  if (storyTime) return `cốt truyệnThời gian: ${storyTime}`;
 
   const entries = Object.entries(fields).filter(
     ([key]) => !["name", "title", "summary", "embedding"].includes(key),

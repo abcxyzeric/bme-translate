@@ -2206,7 +2206,7 @@ export function buildGraphFromSnapshot(snapshot, options = {}) {
 
   if (inconsistentReasons.length > 0) {
     const error = new Error(
-      `đồ thịsnapshot完整性校验Thất bại: ${inconsistentReasons.join(", ")}`,
+      `Kiểm tra tính toàn vẹn của snapshot đồ thị thất bại: ${inconsistentReasons.join(", ")}`,
     );
     error.code = "BME_SNAPSHOT_INTEGRITY_ERROR";
     error.reasons = inconsistentReasons;
@@ -2229,7 +2229,7 @@ async function loadDexieFromNodeFallback() {
     // ignore and continue to throw below.
   }
 
-  throw new Error("Dexie Không khả dụng（Node 环境缺少 dexie 依赖）");
+  throw new Error("Dexie Không khả dụng（Node môi trườngthiếu dexie phụ thuộc）");
 }
 
 async function loadDexieByModuleImport() {
@@ -2250,18 +2250,18 @@ async function loadDexieByModuleImport() {
     }
   } catch (error) {
     throw new Error(
-      `Dexie 模块Nhập thất bại: ${error?.message || String(error) || moduleUrl}`,
+      `Nhập mô-đun Dexie thất bại: ${error?.message || String(error) || moduleUrl}`,
     );
   }
 
-  throw new Error("Dexie 模块Đã tải但未Xuất可用构造函数");
+  throw new Error("Mô-đun Dexie đã tải nhưng không export ra constructor dùng được");
 }
 
 async function loadDexieByScriptInjection() {
   const scriptUrl = new URL(DEXIE_SCRIPT_SOURCE, import.meta.url).toString();
   const doc = globalThis.document;
   if (!doc || typeof doc.createElement !== "function") {
-    throw new Error("document Không khả dụng，Không法Tiêm Dexie 脚本");
+    throw new Error("document không khả dụng, không thể tiêm script Dexie");
   }
 
   await new Promise((resolve, reject) => {
@@ -2272,11 +2272,11 @@ async function loadDexieByScriptInjection() {
       existingScript.addEventListener("load", () => resolve(), { once: true });
       existingScript.addEventListener(
         "error",
-        () => reject(new Error("Dexie 脚本加载Thất bại")),
+        () => reject(new Error("Dexie scripttảiThất bại")),
         { once: true },
       );
 
-      // 兼容脚本已经加载Hoàn tất的情况
+      // Tương thích với trường hợp script đã tải xong
       if (globalThis.Dexie) {
         resolve();
       }
@@ -2290,20 +2290,20 @@ async function loadDexieByScriptInjection() {
     script.addEventListener("load", () => resolve(), { once: true });
     script.addEventListener(
       "error",
-      () => reject(new Error(`Dexie 脚本加载Thất bại: ${scriptUrl}`)),
+      () => reject(new Error(`Dexie scripttảiThất bại: ${scriptUrl}`)),
       { once: true },
     );
 
     const mountTarget = doc.head || doc.documentElement || doc.body;
     if (!mountTarget) {
-      reject(new Error("Không法找到可用的脚本挂载nút"));
+      reject(new Error("Không thể tìm thấy nút script gắn vào dùng được"));
       return;
     }
     mountTarget.appendChild(script);
   });
 
   if (!globalThis.Dexie) {
-    throw new Error("Dexie 脚本Đã tải但 window.Dexie Không khả dụng");
+    throw new Error("Script Dexie đã tải nhưng window.Dexie không khả dụng");
   }
 
   return globalThis.Dexie;
@@ -2327,7 +2327,7 @@ export async function ensureDexieLoaded() {
       try {
         return await loadDexieByModuleImport();
       } catch (moduleError) {
-        console.warn("[ST-BME] Dexie 模块Nhập thất bại，Lùi về脚本Tiêm:", moduleError);
+        console.warn("[ST-BME] Nhập mô-đun Dexie thất bại, lùi về tiêm script:", moduleError);
       }
 
       return await loadDexieByScriptInjection();
@@ -2337,7 +2337,7 @@ export async function ensureDexieLoaded() {
         return DexieCtor;
       })
       .catch((error) => {
-        console.warn("[ST-BME] Dexie 加载Thất bại:", error);
+        console.warn("[ST-BME] Dexie tảiThất bại:", error);
         throw error;
       })
       .finally(() => {
@@ -2381,7 +2381,7 @@ export class BmeDatabase {
           globalThis.Dexie ||
           (await ensureDexieLoaded());
         if (typeof DexieCtor !== "function") {
-          throw new Error("Dexie 构造函数Không khả dụng");
+          throw new Error("Constructor Dexie không khả dụng");
         }
 
         const db = new DexieCtor(this.dbName);

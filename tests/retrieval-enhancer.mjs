@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -54,10 +54,10 @@ const {
   splitIntentSegments,
 } = await loadEnhancer();
 
-const segments = splitIntentSegments("Quy tắc一，然后Quy tắc二。另外Quy tắc三", {
+const segments = splitIntentSegments("Quy tắc 1, sau đó Quy tắc 2. ngoài ra Quy tắc 3", {
   maxSegments: 4,
 });
-assert.deepEqual(Array.from(segments), ["Quy tắc一", "Quy tắc二", "Quy tắc三"]);
+assert.deepEqual(Array.from(segments), ["Quy tắc 1", "Quy tắc 2", "Quy tắc 3"]);
 
 const diversity = applyDiversitySampling(
   [
@@ -101,7 +101,7 @@ const location = createNode({
   type: "location",
   seq: 2,
   seqRange: [2, 2],
-  fields: { name: "酒馆" },
+  fields: { name: "SillyTavern" },
 });
 addNode(graph, ruleA);
 addNode(graph, ruleB);
@@ -152,3 +152,4 @@ const sparse = sparseCodeResidual(
 assert.ok(sparse.residualNorm < 0.2);
 
 console.log("retrieval-enhancer tests passed");
+

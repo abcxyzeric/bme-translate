@@ -1,5 +1,5 @@
-// ST-BME: 主入口
-// Sự kiện钩子、设置管理、流程调度
+﻿// ST-BME: Lối vào chính
+// Hook sự kiện, quản lý cài đặt, điều phối luồng
 
 import {
   eventSource,
@@ -342,7 +342,7 @@ import {
 
 export { DEFAULT_TRIGGER_KEYWORDS, getSmartTriggerDecision };
 
-// 操控面板模块（动态加载，防止加载Thất bại崩溃整个扩展）
+// Mô-đun điều khiển bảng (tải động để tránh lỗi tải làm sập toàn bộ extension)
 let _panelModule = null;
 let _themesModule = null;
 
@@ -860,11 +860,11 @@ function isRestoreLockActive() {
   return normalizeRestoreLockState(graphPersistenceState.restoreLock).active;
 }
 
-function getRestoreLockMessage(operationLabel = "当前Thao tác") {
+function getRestoreLockMessage(operationLabel = "hiện tạiThao tác") {
   const lock = normalizeRestoreLockState(graphPersistenceState.restoreLock);
   if (!lock.active) return "";
   const details = [lock.reason, lock.source].filter(Boolean).join(" / ");
-  return `${operationLabel}Đã tạm dừng：当前处于Khôi phục锁${details ? `（${details}）` : ""}`;
+  return `${operationLabel} đã tạm dừng: hiện đang ở trong khóa khôi phục${details ? ` (${details})` : ""}`;
 }
 
 function enterRestoreLock(source = "runtime", reason = "") {
@@ -1071,12 +1071,12 @@ function triggerChatMetadataSave(
         const result = immediateSave.call(context);
         if (result && typeof result.catch === "function") {
           result.catch((error) => {
-            console.error("[ST-BME] 立即Lưu聊天MetadataThất bại:", error);
+            console.error("[ST-BME] Lưu chatMetadata ngay lập tức thất bại:", error);
           });
         }
         return "immediate";
       } catch (error) {
-        console.error("[ST-BME] 触发立即Lưu聊天MetadataThất bại:", error);
+        console.error("[ST-BME] Kích hoạt lưu chatMetadata ngay lập tức thất bại:", error);
       }
     }
   }
@@ -1205,9 +1205,9 @@ let activeRecallPromise = null;
 let recallRunSequence = 0;
 let nativePersistDeltaInstallPromise = null;
 let lastInjectionContent = "";
-let lastExtractedItems = []; // Trích xuất gần nhất的nút（面板展示用）
-let lastRecalledItems = []; // Truy hồi gần nhất的nút（面板展示用）
-let extractionCount = 0; // v2: Số lần trích xuất计数器（定期触发概要/遗忘/Phản tư）
+let lastExtractedItems = []; // Các nút của lần trích xuất gần nhất (dùng để hiển thị trên bảng)
+let lastRecalledItems = []; // Các nút của lần truy hồi gần nhất (dùng để hiển thị trên bảng)
+let extractionCount = 0; // v2: Bộ đếm số lần trích xuất (định kỳ kích hoạt tóm lược/lãng quên/phản tư)
 let serverSettingsSaveTimer = null;
 let isRecoveringHistory = false;
 let lastRecallFallbackNoticeAt = 0;
@@ -1221,9 +1221,9 @@ const HISTORY_MUTATION_RETRY_DELAYS_MS = [80, 220, 500, 900];
 const GRAPH_LOAD_RETRY_DELAYS_MS = [120, 450, 1200, 2500];
 const AUTO_EXTRACTION_DEFER_RETRY_DELAYS_MS = [120, 320, 800, 1600, 2800];
 const AUTO_EXTRACTION_HOST_SETTLE_MS = 120;
-let runtimeStatus = createUiStatus("Chờ", "准备就绪", "idle");
+let runtimeStatus = createUiStatus("Chờ", "chuẩn bịsẵn sàng", "idle");
 let lastExtractionStatus = createUiStatus("Chờ", "Chưa thực hiện trích xuất", "idle");
-let lastVectorStatus = createUiStatus("Chờ", "尚未执行VectorTác vụ", "idle");
+let lastVectorStatus = createUiStatus("Chờ", "vẫn chưathực thiVectorTác vụ", "idle");
 let lastRecallStatus = createUiStatus("Chờ", "Chưa thực hiện truy hồi", "idle");
 let graphPersistenceState = createGraphPersistenceState();
 const lastStatusToastAt = {};
@@ -1721,14 +1721,14 @@ function hasReadableRuntimeGraphForRecall(chatId = getCurrentChatId()) {
     currentGraph.historyState.chatId,
   );
 
-  // chatId 匹配验证：如果两者都有，必须一致
+  // Xác thực khớp chatId: nếu cả hai cùng có thì bắt buộc phải nhất quán
   if (activeChatId && runtimeChatId) {
     return runtimeChatId === activeChatId;
   }
 
-  // 兜底：chatId Không khả dụng（ST 插件环境可能Không法获取 chatId），
-  // 只要 currentGraph Cấu trúc完整且有nútDữ liệu，就允许Truy hồi。
-  // 这对应Người dùng能在 UI 看到đồ thị，但 getCurrentChatId() 返回空的场景。
+  // Đường lùi: chatId không khả dụng (một số môi trường plugin ST có thể không lấy được chatId),
+  // Chỉ cần cấu trúc currentGraph đầy đủ và có dữ liệu nút thì vẫn cho phép truy hồi.
+  // Điều này tương ứng với tình huống người dùng vẫn thấy đồ thị trên UI nhưng getCurrentChatId() trả về rỗng.
   return currentGraph.nodes.length > 0 || currentGraph.edges.length > 0;
 }
 
@@ -1786,10 +1786,10 @@ function isGraphReadableForRecall(
     return true;
   }
 
-  // 当 loadState 不在Bình thường可读Trạng thái时（如 NO_CHAT、LOADING），
-  // 仍检查运行时đồ thị的实际Cấu trúc。Trạng thái lưu bền机可能失Đồng bộ
-  // （如 getCurrentChatId 在某些 ST 环境下返回空导致 loadState 卡在 NO_CHAT），
-  // 但 currentGraph 已经通过其他路径（IndexedDB probe / metadata fallback）加载了Dữ liệu。
+  // Khi loadState không ở trạng thái có thể đọc bình thường (ví dụ NO_CHAT, LOADING),
+  // Vẫn kiểm tra cấu trúc thực tế của đồ thị runtime. Máy trạng thái lưu bền có thể mất đồng bộ
+  // (ví dụ getCurrentChatId trả về rỗng trong một số môi trường ST làm loadState bị kẹt ở NO_CHAT),
+  // nhưng currentGraph đã được nạp dữ liệu qua đường khác (IndexedDB probe / metadata fallback).
   return hasReadableRuntimeGraphForRecall(chatId);
 }
 
@@ -1802,41 +1802,41 @@ function createGraphLoadUiStatus() {
     case GRAPH_LOAD_STATES.LOADING:
       if (hasMeaningfulRuntimeGraphForChat(chatId)) {
         return createUiStatus(
-          "đồ thị已暂载",
+          "Đồ thị đã được nạp tạm",
           chatId
-            ? `已读到聊天 ${chatId} 的临时đồ thị，正在Xác nhậnCục bộ存储`
-            : "已读到临时đồ thị，正在Xác nhậnCục bộ存储",
+            ? `Đã đọc được đồ thị tạm thời của chat ${chatId}, đang xác nhận lưu trữ cục bộ`
+            : "Đã đọc được đồ thị tạm thời, đang xác nhận lưu trữ cục bộ",
           "warning",
         );
       }
       return createUiStatus(
         "đồ thịĐang tải",
         chatId
-          ? `正在Đọc聊天 ${chatId} 的 IndexedDB đồ thị`
-          : "正在Đang chờ聊天上下文准备Hoàn tất",
+          ? `Đang đọc đồ thị IndexedDB của chat ${chatId}`
+          : "đangĐang chờchatngữ cảnhchuẩn bịHoàn tất",
         "running",
       );
     case GRAPH_LOAD_STATES.SHADOW_RESTORED:
       return createUiStatus(
-        "đồ thị临时Khôi phục",
-        "Đã từ本lần会话临时Khôi phục，正在Đang chờ正式聊天Metadata",
+        "đồ thịtạm thờiKhôi phục",
+        "Đã khôi phục từ snapshot tạm thời của phiên hiện tại, đang chờ chatMetadata chính thức",
         "warning",
       );
     case GRAPH_LOAD_STATES.EMPTY_CONFIRMED:
       return createUiStatus(
         "đồ thịChờ",
-        chatId ? "Chat hiện tại还没有đồ thị" : "Hiện chưa vào cuộc chat",
+        chatId ? "Chat hiện tại vẫn chưa có đồ thị" : "Hiện chưa vào cuộc chat",
         "idle",
       );
     case GRAPH_LOAD_STATES.BLOCKED:
       return createUiStatus(
-        "đồ thị加载受阻",
-        "đồ thị hiện tại未能Hoàn tất IndexedDB Xác nhận，请稍后重试",
+        "Tải đồ thị bị chặn",
+        "Đồ thị hiện tại chưa thể hoàn tất xác nhận IndexedDB, vui lòng thử lại sau",
         "warning",
       );
     case GRAPH_LOAD_STATES.LOADED:
     default:
-      return createUiStatus("Chờ", "Đã tải聊天đồ thị，Đang chờ下一lầnTác vụ", "idle");
+      return createUiStatus("Chờ", "Đã tảichatđồ thị，Đang chờtiếp theolầnTác vụ", "idle");
   }
 }
 
@@ -1854,7 +1854,7 @@ function getPanelRuntimeStatus() {
   return runtimeStatus;
 }
 
-function getGraphMutationBlockReason(operationLabel = "当前Thao tác") {
+function getGraphMutationBlockReason(operationLabel = "hiện tạiThao tác") {
   if (isRestoreLockActive()) {
     return getRestoreLockMessage(operationLabel);
   }
@@ -1864,27 +1864,27 @@ function getGraphMutationBlockReason(operationLabel = "当前Thao tác") {
   }
 
   if (graphPersistenceState.dbReady || isGraphLoadStateDbReady(loadState)) {
-    return `${operationLabel}暂Không khả dụng。`;
+    return `${operationLabel}Chưa có khả dụng。`;
   }
 
   switch (graphPersistenceState.loadState) {
     case GRAPH_LOAD_STATES.LOADING:
       return hasMeaningfulRuntimeGraphForChat()
-        ? `${operationLabel}Đã tạm dừng：đồ thị hiện tại已暂载，正在Xác nhậnCục bộ存储。`
-        : `${operationLabel}Đã tạm dừng：正在加载 IndexedDB đồ thị。`;
+        ? `${operationLabel} đã tạm dừng: đồ thị hiện tại đã được nạp tạm và đang xác nhận lưu trữ cục bộ.`
+        : `${operationLabel}Đã tạm dừng：đangtải IndexedDB đồ thị。`;
     case GRAPH_LOAD_STATES.SHADOW_RESTORED:
-      return `${operationLabel}Đã tạm dừng：đồ thị hiện tại仍处于旧Khôi phụcTrạng thái，请Đang chờ IndexedDB 初始化Hoàn tất。`;
+      return `${operationLabel} đã tạm dừng: đồ thị hiện tại vẫn đang ở trạng thái khôi phục cũ, hãy chờ IndexedDB khởi tạo xong.`;
     case GRAPH_LOAD_STATES.BLOCKED:
-      return `${operationLabel}Đã tạm dừng：IndexedDB 初始化受阻，请稍后重试。`;
+      return `${operationLabel} đã tạm dừng: IndexedDB khởi tạo bị chặn, vui lòng thử lại sau.`;
     case GRAPH_LOAD_STATES.NO_CHAT:
       return `${operationLabel}Đã tạm dừng：Hiện chưa vào cuộc chat。`;
     default:
-      return `${operationLabel}Đã tạm dừng：đồ thị尚未Hoàn tất初始化。`;
+      return `${operationLabel}Đã tạm dừng：đồ thịvẫn chưaHoàn tấtkhởi tạo。`;
   }
 }
 
 function ensureGraphMutationReady(
-  operationLabel = "当前Thao tác",
+  operationLabel = "hiện tạiThao tác",
   { notify = true, ignoreRestoreLock = false } = {},
 ) {
   if (!ignoreRestoreLock && isRestoreLockActive()) {
@@ -2001,7 +2001,7 @@ function assertRecoveryChatStillActive(expectedChatId, label = "") {
     )
   ) {
     throw createAbortError(
-      `历史Khôi phụcĐã chấm dứt：聊天Đã từ ${normalizedExpectedChatId} 切换到 ${currentId}${label ? ` (${label})` : ""}`,
+      `Khôi phục lịch sử đã chấm dứt: chat đã chuyển từ ${normalizedExpectedChatId} sang ${currentId}${label ? ` (${label})` : ""}`,
     );
   }
 }
@@ -2015,9 +2015,9 @@ function getStageAbortLabel(stage) {
     case "recall":
       return "Truy hồi";
     case "history":
-      return "历史Khôi phục";
+      return "lịch sửKhôi phục";
     default:
-      return "当前流程";
+      return "hiện tạiluồng";
   }
 }
 
@@ -2094,7 +2094,7 @@ function buildAbortStageAction(stage) {
   if (!abortStageName) return undefined;
 
   return {
-    label: `终止${getStageAbortLabel(abortStageName)}`,
+    label: `chấm dứt${getStageAbortLabel(abortStageName)}`,
     kind: "danger",
     onClick: () => {
       abortStage(abortStageName);
@@ -2359,7 +2359,7 @@ function clearCoreEventBindingState() {
     try {
       cleanup?.();
     } catch (error) {
-      console.warn("[ST-BME] 清理核心Sự kiện绑定Thất bại:", error);
+      console.warn("[ST-BME] dọn sạchcốt lõiSự kiệngắnThất bại:", error);
     }
   }
   coreEventBindingState = {
@@ -2546,11 +2546,11 @@ function recordRecallSentUserMessage(messageId, text, source = "message-sent") {
     });
   }
 
-  // 注意：不再在 MESSAGE_SENT 阶段清空 pendingRecallSendIntent /
+  // Lưu ý: không còn xóa pendingRecallSendIntent ở giai đoạn MESSAGE_SENT /
   // pendingHostGenerationInputSnapshot / transactions。
-  // 这些Dữ liệu在 GENERATION_AFTER_COMMANDS 中被消费；MESSAGE_SENT 先于
-  // GENERATION_AFTER_COMMANDS 触发，提前清空会导致Truy hồi拿不到Người dùng输入。
-  // 真正的消费发生在 recall 执行后（runRecallController 内部）。
+  // Dữ liệu này sẽ được tiêu thụ trong GENERATION_AFTER_COMMANDS; MESSAGE_SENT diễn ra trước
+  // GENERATION_AFTER_COMMANDS, nếu xóa sớm sẽ làm truy hồi không lấy được đầu vào người dùng.
+  // Việc tiêu thụ thật sự diễn ra sau khi recall chạy xong (bên trong runRecallController).
 
   return lastRecallSentUserMessage;
 }
@@ -2724,10 +2724,10 @@ function resolveRecallPersistenceTargetUserMessageIndex(
     }
   }
 
-  // Bình thường生成阶段里，ST 可能会在真正发送前改写Người dùng文本
-  // （命令展开、包装显示、辅助 UI Xử lý等），导致 hash 已Không法精确匹配。
-  // 这时仍应优先回绑到“当前最新 user tầng”，否则Truy hồi记录虽然生成了，
-  // Recall Card 会因为找不到目标tầng而消失。
+  // Trong giai đoạn sinh bình thường, ST có thể viết lại văn bản người dùng trước khi gửi thật sự
+  // (mở rộng lệnh, bọc hiển thị, xử lý UI hỗ trợ...), khiến hash không còn khớp chính xác.
+  // Lúc này vẫn nên ưu tiên buộc lại vào "tầng user mới nhất hiện tại", nếu không thì dù bản ghi truy hồi đã sinh ra,
+  // Recall Card sẽ biến mất vì không tìm được tầng mục tiêu.
   if (
     normalizedGenerationType === "normal" &&
     Number.isFinite(latestUserIndex) &&
@@ -2781,7 +2781,7 @@ function persistRecallInjectionRecord({
   );
 
   if (!Number.isFinite(resolvedTargetIndex)) {
-    debugPersistedRecallPersistence("目标 user tầng解析Thất bại", {
+    debugPersistedRecallPersistence("mục tiêu user tầngphân tíchThất bại", {
       generationType,
       explicitTargetUserMessageIndex: recallInput?.targetUserMessageIndex,
       lastSentUserMessageId: lastRecallSentUserMessage?.messageId,
@@ -2791,7 +2791,7 @@ function persistRecallInjectionRecord({
   }
 
   if (!chat[resolvedTargetIndex]?.is_user) {
-    debugPersistedRecallPersistence("目标tầng不是 user tin nhắn，Bỏ quaLưu bền", {
+    debugPersistedRecallPersistence("Tầng mục tiêu không có tin nhắn user, bỏ qua lưu bền", {
       targetUserMessageIndex: resolvedTargetIndex,
       messageKeys: Object.keys(chat[resolvedTargetIndex] || {}),
     });
@@ -2811,7 +2811,7 @@ function persistRecallInjectionRecord({
     readPersistedRecallFromUserMessage(chat, resolvedTargetIndex),
   );
   if (!String(record?.injectionText || "").trim()) {
-    debugPersistedRecallPersistence("Không有效 injectionText，Bỏ quaLưu bền", {
+    debugPersistedRecallPersistence("Khônghợp lệ injectionText，Bỏ quaLưu bền", {
       targetUserMessageIndex: resolvedTargetIndex,
       selectedNodeCount: Array.isArray(result?.selectedNodeIds)
         ? result.selectedNodeIds.length
@@ -2820,7 +2820,7 @@ function persistRecallInjectionRecord({
     return null;
   }
   if (!writePersistedRecallToUserMessage(chat, resolvedTargetIndex, record)) {
-    debugPersistedRecallPersistence("写入 user tầngThất bại", {
+    debugPersistedRecallPersistence("ghi vào user tầngThất bại", {
       targetUserMessageIndex: resolvedTargetIndex,
     });
     return null;
@@ -2829,7 +2829,7 @@ function persistRecallInjectionRecord({
   triggerChatMetadataSave(getContext(), { immediate: false });
   schedulePersistedRecallMessageUiRefresh();
   debugPersistedRecallPersistence(
-    "Truy hồi记录已写入 user tầng",
+    "Bản ghi truy hồi đã ghi vào tầng user",
     {
       targetUserMessageIndex: resolvedTargetIndex,
       injectionTextLength: String(record?.injectionText || "").length,
@@ -2995,7 +2995,7 @@ function ensurePersistedRecallRecordForGeneration({
   triggerChatMetadataSave(getContext(), { immediate: false });
   schedulePersistedRecallMessageUiRefresh();
   debugPersistedRecallPersistence(
-    "最终阶段已补写Truy hồi记录",
+    "Đã ghi bù bản ghi truy hồi ở giai đoạn cuối",
     {
       targetUserMessageIndex,
       hookName:
@@ -3498,8 +3498,8 @@ function applyFinalRecallInjectionForGeneration({
         mode: "rewrite-cleared",
       };
       runtimeStatus = createUiStatus(
-        "Truy hồi已改写",
-        `本轮发送载荷已 rewrite · ${rewriteResult.path || rewriteResult.field || "payload"}`,
+        "Truy hồi đã rewrite",
+        `Payload gửi ở lượt này đã được rewrite · ${rewriteResult.path || rewriteResult.field || "payload"}`,
         "success",
       );
     } else {
@@ -3511,7 +3511,7 @@ function applyFinalRecallInjectionForGeneration({
         ) || transport;
       runtimeStatus = createUiStatus(
         "Truy hồiLùi về",
-        `rewrite 未命中，已Lùi vềTiêm · ${rewriteResult.reason}`,
+        `Rewrite không khớp, đã lùi về tiêm · ${rewriteResult.reason}`,
         "warning",
       );
     }
@@ -3523,8 +3523,8 @@ function applyFinalRecallInjectionForGeneration({
     lastInjectionContent = resolved.injectionText || "";
     rewrite.reason = "immediate-injection";
     runtimeStatus = createUiStatus(
-      "Truy hồi已Tiêm",
-      "本轮Đã dùng最新Truy hồiKết quả",
+      "Truy hồi đã tiêm",
+      "Lượt này đã dùng kết quả truy hồi mới nhất",
       "success",
     );
   } else if (resolved.source === "persisted") {
@@ -3542,7 +3542,7 @@ function applyFinalRecallInjectionForGeneration({
   } else {
     transport = applyModuleInjectionPrompt("", getSettings()) || transport;
     lastInjectionContent = "";
-    runtimeStatus = createUiStatus("Chờ", "当前Không有效TiêmNội dung", "idle");
+    runtimeStatus = createUiStatus("Chờ", "hiện tạiKhônghợp lệTiêmNội dung", "idle");
   }
 
   if (
@@ -3646,7 +3646,7 @@ function clearLiveRecallInjectionPromptForRewrite() {
       }
     );
   } catch (error) {
-    console.warn("[ST-BME] 清理 rewrite 前旧TiêmThất bại:", error);
+    console.warn("[ST-BME] Dọn phần tiêm cũ trước rewrite thất bại:", error);
     return {
       applied: false,
       source: "rewrite-clear-error",
@@ -3682,7 +3682,7 @@ function cleanupRecallCardElement(cardElement) {
   try {
     cardElement._bmeDestroyRenderer?.();
   } catch (error) {
-    console.warn("[ST-BME] Recall Card renderer 清理Thất bại:", error);
+    console.warn("[ST-BME] Recall Card renderer dọn sạchThất bại:", error);
   }
   cardElement.remove?.();
 }
@@ -3843,7 +3843,7 @@ function refreshPersistedRecallMessageUi() {
 
   const chatRoot = document.getElementById("chat");
   if (!chatRoot) {
-    debugPersistedRecallUi("缺少 #chat 根nút");
+    debugPersistedRecallUi("Thiếu nút gốc #chat");
     return {
       status: "missing_chat_root",
       renderedCount: 0,
@@ -3868,7 +3868,7 @@ function refreshPersistedRecallMessageUi() {
     const messageIndex = resolveMessageIndexFromElement(messageElement);
     if (!Number.isFinite(messageIndex)) {
       debugPersistedRecallUi(
-        "tin nhắn DOM 缺少稳定索引属性，Bỏ qua挂载",
+        "tin nhắn DOM thiếuổn địnhchỉ mụcthuộc tính，Bỏ quagắn lên",
         {
           className: messageElement.className || "",
         },
@@ -3882,7 +3882,7 @@ function refreshPersistedRecallMessageUi() {
       const nextPriority = getRecallMessageElementPriority(messageElement);
       const shouldReplace = nextPriority >= previousPriority;
       debugPersistedRecallUi(
-        "检测到重复tin nhắn DOM 索引，已挑选更可靠的锚点",
+        "Phát hiện chỉ mục DOM tin nhắn bị trùng, đã chọn neo đáng tin cậy hơn",
         {
           messageIndex,
           previousPriority,
@@ -3931,7 +3931,7 @@ function refreshPersistedRecallMessageUi() {
       if (unexpectedRecord) {
         summary.skippedNonUserIndices.push(messageIndex);
         debugPersistedRecallUi(
-          "非 user tầng存在持久Truy hồi记录，Đã bỏ qua挂载",
+          "Có bản ghi truy hồi lưu bền nằm trên tầng không phải user, đã bỏ qua việc gắn lên",
           {
             messageIndex,
           },
@@ -3954,7 +3954,7 @@ function refreshPersistedRecallMessageUi() {
     if (!messageElement) {
       summary.waitingMessageIndices.push(messageIndex);
       debugPersistedRecallUi(
-        "目标 user tầng DOM 未就绪，Đang chờ后续刷新",
+        "DOM của tầng user mục tiêu chưa sẵn sàng, đang chờ làm mới sau",
         {
           messageIndex,
         },
@@ -3969,7 +3969,7 @@ function refreshPersistedRecallMessageUi() {
       cleanupRecallCardElement(existingCard);
       summary.anchorFailureIndices.push(messageIndex);
       debugPersistedRecallUi(
-        "目标 user tầng锚点解析Thất bại，Bỏ qua挂载",
+        "mục tiêu user tầngmốc neophân tíchThất bại，Bỏ quagắn lên",
         {
           messageIndex,
         },
@@ -4013,10 +4013,10 @@ function refreshPersistedRecallMessageUi() {
 
   summary.status = summarizePersistedRecallRefreshStatus(summary);
   if (summary.status === "missing_recall_record") {
-    debugPersistedRecallUi("当前Không有效持久Truy hồi记录可渲染");
+    debugPersistedRecallUi("Hiện không có bản ghi truy hồi lưu bền hợp lệ để kết xuất");
   } else if (summary.renderedCount > 0) {
     debugPersistedRecallUi(
-      "Recall Card 挂载Hoàn tất",
+      "Recall Card gắn lênHoàn tất",
       {
         renderedCount: summary.renderedCount,
         persistedRecordCount: summary.persistedRecordCount,
@@ -4043,9 +4043,9 @@ function getRecallCardCallbacks() {
           onSave: (idx, newText) => {
             const edited = editMessageRecallRecord(idx, newText);
             if (edited) {
-              toastr.success("已LưuChỉnh sửa thủ công");
+              toastr.success("Đã lưu chỉnh sửa thủ công");
             } else {
-              toastr.warning("Chỉnh sửaThất bại：Văn bản tiêm不能为空");
+              toastr.warning("Chỉnh sửaThất bại：Văn bản tiêmkhông thểtrống");
             }
             schedulePersistedRecallMessageUiRefresh();
           },
@@ -4055,7 +4055,7 @@ function getRecallCardCallbacks() {
     },
     onDelete: (messageIndex) => {
       if (removeMessageRecallRecord(messageIndex)) {
-        toastr.success("已Xóa持久Truy hồiTiêm");
+        toastr.success("Đã xóa phần tiêm truy hồi lưu bền");
         schedulePersistedRecallMessageUiRefresh();
       }
     },
@@ -4078,8 +4078,8 @@ function getRecallCardCallbacks() {
         callbacks: {
           onSave: (idx, newText) => {
             const edited = editMessageRecallRecord(idx, newText);
-            if (edited) toastr.success("已LưuChỉnh sửa thủ công");
-            else toastr.warning("Chỉnh sửaThất bại：Văn bản tiêm不能为空");
+            if (edited) toastr.success("Đã lưu chỉnh sửa thủ công");
+            else toastr.warning("Chỉnh sửaThất bại：Văn bản tiêmkhông thểtrống");
             schedulePersistedRecallMessageUiRefresh();
           },
           estimateTokens,
@@ -4138,8 +4138,8 @@ function schedulePersistedRecallMessageUiRefresh(delayMs = 0) {
         summary.status === "missing_message_anchor") &&
       attemptIndex < retryDelays.length - 1;
 
-    // 勿在「已成功渲染」时长期监听 MutationObserver：chat 的 class/流式Cập nhật会疯狂触发
-    // runAttempt，造成满屏刷新与日志；显式Sự kiện（USER_MESSAGE_RENDERED 等）仍会 schedule 刷新。
+    // Đừng duy trì MutationObserver quá lâu sau khi "đã kết xuất thành công": cập nhật class/dòng chảy của chat sẽ kích hoạt điên cuồng
+    // runAttempt, làm màn hình ngập tràn việc làm mới và log; các sự kiện tường minh (USER_MESSAGE_RENDERED...) vẫn sẽ lên lịch làm mới.
     const shouldWatchForRepaint = false;
 
     if (!shouldRetryForPending && !shouldWatchForRepaint) {
@@ -4191,13 +4191,13 @@ async function rerunRecallForMessage(messageIndex) {
   const message = Array.isArray(chat) ? chat[messageIndex] : null;
   cleanupPersistedRecallMessageUi();
   if (!message?.is_user) {
-    toastr.info("仅Người dùngtin nhắn支持Truy hồi lại");
+    toastr.info("Chỉ tin nhắn người dùng mới hỗ trợ truy hồi lại");
     return null;
   }
 
   const userMessage = normalizeRecallInputText(message.mes || "");
   if (!userMessage) {
-    toastr.info("该tầngNội dung为空，Không法Truy hồi lại");
+    toastr.info("Nội dung của tầng này đang trống, không thể truy hồi lại");
     return null;
   }
 
@@ -4275,7 +4275,7 @@ function installSendIntentHooks() {
   });
 }
 
-// ==================== 设置管理 ====================
+// ==================== cài đặtquản lý ====================
 
 function getSettings() {
   const mergedSettings = mergePersistedSettings(
@@ -4542,7 +4542,7 @@ function getPreferredGraphLocalStorePresentationSync(settings = getSettings()) {
   }
 
   if (!bmeLocalStoreCapabilityWarningShown) {
-    console.warn("[ST-BME] OPFS Không khả dụng，已Lùi về到 IndexedDB:", capability.reason);
+    console.warn("[ST-BME] OPFS không khả dụng, đã lùi về IndexedDB:", capability.reason);
     bmeLocalStoreCapabilityWarningShown = true;
    }
    return buildIndexedDbStorePresentation();
@@ -4637,7 +4637,7 @@ async function refreshCurrentChatLocalStoreBinding(
     } catch (error) {
       reopenError = error?.message || String(error);
       console.warn(
-        "[ST-BME] 刷新Chat hiện tạiCục bộ存储绑定Thất bại:",
+        "[ST-BME] làm mớiChat hiện tạiCục bộlưu trữgắnThất bại:",
         {
           chatId: normalizedChatId,
           source,
@@ -4796,10 +4796,10 @@ async function applyMessageHideNow(reason = "manual-apply") {
       getMessageHideSettings(),
       getHideRuntimeAdapters(),
     );
-    debugLog("[ST-BME] 已应用旧tầng隐藏:", reason, result);
+    debugLog("[ST-BME] Đã áp dụng ẩn tầng cũ:", reason, result);
     return result;
   } catch (error) {
-    console.warn("[ST-BME] 应用旧tầng隐藏Thất bại:", reason, error);
+    console.warn("[ST-BME] Áp dụng ẩn tầng cũ thất bại:", reason, error);
     return {
       active: false,
       error: error instanceof Error ? error.message : String(error || "Không rõLỗi"),
@@ -4815,7 +4815,7 @@ function scheduleMessageHideApply(reason = "scheduled", delayMs = 120) {
       delayMs,
     );
   } catch (error) {
-    console.warn("[ST-BME] 调度旧tầng隐藏Thất bại:", reason, error);
+    console.warn("[ST-BME] Điều độ ẩn tầng cũ thất bại:", reason, error);
   }
 }
 
@@ -4826,11 +4826,11 @@ async function runIncrementalMessageHide(reason = "incremental") {
       getHideRuntimeAdapters(),
     );
     if (result?.active) {
-      debugLog("[ST-BME] 已增量Cập nhật旧tầng隐藏:", reason, result);
+      debugLog("[ST-BME] Đã cập nhật tăng dần phần ẩn tầng cũ:", reason, result);
     }
     return result;
   } catch (error) {
-    console.warn("[ST-BME] 增量Cập nhật旧tầng隐藏Thất bại:", reason, error);
+    console.warn("[ST-BME] Cập nhật tăng dần phần ẩn tầng cũ thất bại:", reason, error);
     return {
       active: false,
       error: error instanceof Error ? error.message : String(error || "Không rõLỗi"),
@@ -4841,19 +4841,19 @@ async function runIncrementalMessageHide(reason = "incremental") {
 function clearMessageHideState(reason = "reset") {
   try {
     resetHideState(getHideRuntimeAdapters());
-    debugLog("[ST-BME] 已Đặt lại旧tầng隐藏Trạng thái:", reason);
+    debugLog("[ST-BME] Đã đặt lại trạng thái ẩn tầng cũ:", reason);
   } catch (error) {
-    console.warn("[ST-BME] Đặt lại旧tầng隐藏Trạng tháiThất bại:", reason, error);
+    console.warn("[ST-BME] Đặt lại trạng thái ẩn tầng cũ thất bại:", reason, error);
   }
 }
 
 async function clearAllHiddenMessages(reason = "manual-clear") {
   try {
     const result = await unhideAll(getHideRuntimeAdapters());
-    debugLog("[ST-BME] 已HủyTất cả旧tầng隐藏:", reason, result);
+    debugLog("[ST-BME] Đã hủy toàn bộ phần ẩn tầng cũ:", reason, result);
     return result;
   } catch (error) {
-    console.warn("[ST-BME] HủyTất cả旧tầng隐藏Thất bại:", reason, error);
+    console.warn("[ST-BME] Hủy toàn bộ phần ẩn tầng cũ thất bại:", reason, error);
     return {
       active: false,
       error: error instanceof Error ? error.message : String(error || "Không rõLỗi"),
@@ -4868,7 +4868,7 @@ function initializeHostCapabilityBridge(options = {}) {
       ...options,
     });
   } catch (error) {
-    console.warn("[ST-BME] Host桥接初始化Thất bại:", error);
+    console.warn("[ST-BME] Hostcầu nốikhởi tạoThất bại:", error);
   }
 
   return getHostCapabilityStatus();
@@ -4907,7 +4907,7 @@ export function getHostCapabilityStatus(options = {}) {
     recordHostCapabilitySnapshot(snapshot);
     return snapshot;
   } catch (error) {
-    console.warn("[ST-BME] ĐọcHost桥接Trạng tháiThất bại:", error);
+    console.warn("[ST-BME] ĐọcHostcầu nốiTrạng tháiThất bại:", error);
     return buildHostCapabilityErrorStatus(error);
   }
 }
@@ -4926,7 +4926,7 @@ export function getHostCapability(name, options = {}) {
   try {
     return readHostCapability(normalizedName, options) || null;
   } catch (error) {
-    console.warn("[ST-BME] ĐọcHost桥接能力Thất bại:", error);
+    console.warn("[ST-BME] ĐọcHostcầu nốinăng lựcThất bại:", error);
     return getHostCapabilityStatus(options)?.[normalizedName] || null;
   }
 }
@@ -4949,7 +4949,7 @@ function getSchema() {
   const schema = settings.nodeTypeSchema || DEFAULT_NODE_SCHEMA;
   const validation = validateSchema(schema);
   if (!validation.valid) {
-    console.warn("[ST-BME] Schema 非法，Lùi về到Mặc định Schema:", validation.errors);
+    console.warn("[ST-BME] Schema không hợp lệ, lùi về schema mặc định:", validation.errors);
     return DEFAULT_NODE_SCHEMA;
   }
   return schema;
@@ -5349,26 +5349,26 @@ function applyShadowSnapshotToRuntime(
     getContext()?.chat,
   );
   runtimeStatus = createUiStatus(
-    "đồ thị临时Khôi phục",
-    "Đã từ本lần会话临时snapshotKhôi phụcGần nhấtđồ thị，正在补写 IndexedDB",
+    "đồ thịtạm thờiKhôi phục",
+    "Đã khôi phục đồ thị gần nhất từ snapshot tạm thời của phiên này, đang ghi bù vào IndexedDB",
     "warning",
   );
   lastExtractionStatus = createUiStatus(
     "Chờ",
-    "Đã từ会话snapshotKhôi phụcGần nhấtđồ thị，Đang chờ下一lầnTrích xuất",
+    "Đã từphiênsnapshotKhôi phụcGần nhấtđồ thị，Đang chờtiếp theolầnTrích xuất",
     "idle",
   );
   lastVectorStatus = createUiStatus(
     "Chờ",
     currentGraph.vectorIndexState?.lastWarning ||
-      "Đã từ会话snapshotKhôi phụcGần nhấtđồ thị，Đang chờ下一lầnVectorTác vụ",
+      "Đã từphiênsnapshotKhôi phụcGần nhấtđồ thị，Đang chờtiếp theolầnVectorTác vụ",
     "idle",
   );
   lastRecallStatus = createUiStatus(
     "Chờ",
     restoredRecallUi.restored
-      ? "Đã từLưu bềnTruy hồi记录Khôi phục显示，并已Khôi phụcGần nhấtđồ thị"
-      : "Đã từ会话snapshotKhôi phụcGần nhấtđồ thị，Đang chờ下一lầnTruy hồi",
+      ? "Đã khôi phục hiển thị từ bản ghi truy hồi lưu bền, đồng thời đã khôi phục đồ thị gần nhất"
+      : "Đã từphiênsnapshotKhôi phụcGần nhấtđồ thị，Đang chờtiếp theolầnTruy hồi",
     "idle",
   );
 
@@ -5645,7 +5645,7 @@ async function syncIndexedDbMetaToPersistenceState(
     updateGraphPersistenceState(patch);
     return patch;
   } catch (error) {
-    console.warn("[ST-BME] ĐọcCục bộ图库Đồng bộMetadataThất bại:", error);
+    console.warn("[ST-BME] Đọc metadata đồng bộ của thư viện cục bộ thất bại:", error);
     updateGraphPersistenceState({
       syncState: "error",
       lastSyncError: error?.message || String(error),
@@ -5717,7 +5717,7 @@ async function runBmeAutoSyncForChat(source = "unknown", chatId = "") {
 function ensureBmeChatManager() {
   if (typeof BmeChatManager !== "function") {
     if (!bmeChatManagerUnavailableWarned) {
-      console.warn("[ST-BME] BmeChatManager Không khả dụng，IndexedDB 能力暂时停用");
+      console.warn("[ST-BME] BmeChatManager không khả dụng, năng lực IndexedDB tạm thời bị vô hiệu hóa");
       bmeChatManagerUnavailableWarned = true;
     }
     return null;
@@ -5774,7 +5774,7 @@ function scheduleBmeIndexedDbTask(task) {
     Promise.resolve()
       .then(task)
       .catch((error) => {
-        console.warn("[ST-BME] IndexedDB 后台Tác vụThất bại:", error);
+        console.warn("[ST-BME] Tác vụ nền IndexedDB thất bại:", error);
       });
   });
 }
@@ -5808,7 +5808,7 @@ async function syncBmeChatManagerWithCurrentChat(
 
   if (!chatId) {
     await manager.closeCurrent();
-    debugDebug("[ST-BME] IndexedDB 会话已Tắt（Không活动聊天）", {
+    debugDebug("[ST-BME] Phiên IndexedDB đã tắt (không có chat hoạt động)", {
       source,
     });
     return {
@@ -5819,7 +5819,7 @@ async function syncBmeChatManagerWithCurrentChat(
   }
 
   const db = await manager.switchChat(chatId);
-  debugDebug("[ST-BME] IndexedDB 会话已Đồng bộ", {
+  debugDebug("[ST-BME] Phiên IndexedDB đã đồng bộ", {
     source,
     chatId,
   });
@@ -6612,7 +6612,7 @@ function scheduleLukerGraphSidecarCompaction(
       chatId: normalizedChatId,
     }))
     .catch((error) => {
-      console.warn("[ST-BME] Luker sidecar 压实Thất bại:", error);
+      console.warn("[ST-BME] Nén sidecar Luker thất bại:", error);
       updateGraphPersistenceState({
         opfsCompactionState: buildLukerJournalCompactionState("error", {
           lastAt: Date.now(),
@@ -7205,7 +7205,7 @@ async function loadGraphFromLukerSidecarV2(
       baseResult?.reason || "luker-sidecar-load-invalid",
     );
     if (baseResult?.error) {
-      console.warn(`[ST-BME] Luker sidecar 加载Thất bại: ${blockedReason}`, baseResult.error);
+      console.warn(`[ST-BME] Luker sidecar tảiThất bại: ${blockedReason}`, baseResult.error);
     }
     applyGraphLoadState(GRAPH_LOAD_STATES.BLOCKED, {
       chatId: normalizedChatId,
@@ -7268,7 +7268,7 @@ async function loadGraphFromLukerSidecarV2(
     attemptIndex,
     storagePrimary: "chat-state",
     storageMode: "luker-chat-state",
-    statusLabel: "Luker 侧车",
+    statusLabel: "Sidecar Luker",
     reasonPrefix: "luker-chat-state",
   });
   if (loadResult?.loaded) {
@@ -7550,7 +7550,7 @@ async function loadGraphFromChatState(
       normalizedChatId,
     );
   } catch (error) {
-    console.warn("[ST-BME] Sidecar chatđồ thị反序列化Thất bại:", error);
+    console.warn("[ST-BME] Giải tuần tự đồ thị sidecar chat thất bại:", error);
     if (shouldFallbackToLocalStore) {
       scheduleIndexedDbGraphProbe(normalizedChatId, {
         source: `${source}:luker-local-cache-fallback`,
@@ -7696,7 +7696,7 @@ async function loadGraphFromChatState(
     storageMode:
       shouldFallbackToLocalStore === true ? "luker-chat-state" : "chat-state",
     statusLabel:
-      shouldFallbackToLocalStore === true ? "Luker 侧车" : "Sidecar chat",
+      shouldFallbackToLocalStore === true ? "Sidecar Luker" : "Sidecar chat",
     reasonPrefix:
       shouldFallbackToLocalStore === true ? "luker-chat-state" : "chat-state",
   });
@@ -8031,7 +8031,7 @@ function scheduleGraphChatStateProbe(chatId, options = {}) {
   scheduleBmeIndexedDbTask(() => {
     const loadPromise = loadGraphFromChatState(normalizedChatId, options)
       .catch((error) => {
-        console.warn("[ST-BME] Sidecar chat后台加载Thất bại:", error);
+        console.warn("[ST-BME] Tải nền sidecar chat thất bại:", error);
       })
       .finally(() => {
         if (
@@ -8202,7 +8202,7 @@ async function maybeRecoverIndexedDbGraphFromStableIdentity(
         }),
       );
     } catch (syncError) {
-      console.warn("[ST-BME] 身份Khôi phục后的Đồng bộThất bại:", syncError);
+      console.warn("[ST-BME] Đồng bộ sau khi khôi phục danh tính thất bại:", syncError);
       syncResult = {
         synced: false,
         reason: "identity-recovery-sync-failed",
@@ -8277,7 +8277,7 @@ async function maybeRecoverIndexedDbGraphFromStableIdentity(
         });
       }
     } catch (error) {
-      console.warn("[ST-BME] 通过Snapshot bóngKhôi phục聊天身份Thất bại:", error);
+      console.warn("[ST-BME] Khôi phục danh tính chat qua shadow snapshot thất bại:", error);
     }
   }
 
@@ -8313,7 +8313,7 @@ async function maybeRecoverIndexedDbGraphFromStableIdentity(
         migrationSource: "indexeddb-identity-alias",
       });
     } catch (error) {
-      console.warn("[ST-BME] Đọc旧身份 IndexedDB đồ thịThất bại:", {
+      console.warn("[ST-BME] Đọc đồ thị IndexedDB của danh tính cũ thất bại:", {
         legacyChatId,
         error,
       });
@@ -8430,7 +8430,7 @@ async function maybeMigrateLegacyGraphToIndexedDb(
 
       const postMigrationSnapshot = await targetDb.exportSnapshot();
       cacheIndexedDbSnapshot(normalizedChatId, postMigrationSnapshot);
-      debugDebug("[ST-BME] legacy chat_metadata đồ thị迁移Hoàn tất", {
+      debugDebug("[ST-BME] legacy chat_metadata đồ thịdi chuyểnHoàn tất", {
         source,
         chatId: normalizedChatId,
         revision:
@@ -8454,7 +8454,7 @@ async function maybeMigrateLegacyGraphToIndexedDb(
           }),
         );
       } catch (syncError) {
-        console.warn("[ST-BME] legacy 迁移后立即Đồng bộThất bại:", syncError);
+        console.warn("[ST-BME] Đồng bộ ngay sau khi di chuyển legacy thất bại:", syncError);
         syncResult = {
           synced: false,
           reason: "post-migration-sync-failed",
@@ -8472,7 +8472,7 @@ async function maybeMigrateLegacyGraphToIndexedDb(
         syncResult,
       };
     } catch (error) {
-      console.warn("[ST-BME] legacy chat_metadata 迁移Thất bại:", error);
+      console.warn("[ST-BME] legacy chat_metadata di chuyểnThất bại:", error);
       return {
         migrated: false,
         reason: "migration-failed",
@@ -8615,7 +8615,7 @@ async function maybeImportLegacyIndexedDbSnapshotToLocalStore(
       });
       const snapshot = await targetDb.exportSnapshot();
 
-      debugDebug("[ST-BME] 已将 legacy IndexedDB snapshot迁移到当前Cục bộ存储", {
+      debugDebug("[ST-BME] Đã di chuyển snapshot IndexedDB legacy vào lưu trữ cục bộ hiện tại", {
         source,
         chatId: normalizedChatId,
         targetStore: cloneRuntimeDebugValue(targetStore, null),
@@ -8633,7 +8633,7 @@ async function maybeImportLegacyIndexedDbSnapshotToLocalStore(
         targetStore,
       };
     } catch (error) {
-      console.warn("[ST-BME] 迁移 legacy IndexedDB snapshot到当前Cục bộ存储Thất bại:", {
+      console.warn("[ST-BME] Di chuyển snapshot IndexedDB legacy vào lưu trữ cục bộ hiện tại thất bại:", {
         chatId: normalizedChatId,
         error,
       });
@@ -8685,10 +8685,10 @@ function applyIndexedDbEmptyToRuntime(
   lastExtractedItems = [];
   lastRecalledItems = [];
   lastInjectionContent = "";
-  runtimeStatus = createUiStatus("Chờ", "Chat hiện tại还没有đồ thị", "idle");
+  runtimeStatus = createUiStatus("Chờ", "Chat hiện tại vẫn chưa có đồ thị", "idle");
   lastExtractionStatus = createUiStatus("Chờ", "Chat hiện tạiChưa thực hiện trích xuất", "idle");
-  lastVectorStatus = createUiStatus("Chờ", "Chat hiện tại尚未执行VectorTác vụ", "idle");
-  lastRecallStatus = createUiStatus("Chờ", "Chat hiện tại尚未建立đồ thị ký ức", "idle");
+  lastVectorStatus = createUiStatus("Chờ", "Chat hiện tạivẫn chưathực thiVectorTác vụ", "idle");
+  lastRecallStatus = createUiStatus("Chờ", "Chat hiện tại vẫn chưa xây dựng đồ thị ký ức", "idle");
   const activeStore = getPreferredGraphLocalStorePresentationSync();
 
   applyGraphLoadState(GRAPH_LOAD_STATES.EMPTY_CONFIRMED, {
@@ -8929,7 +8929,7 @@ async function maybeResolveOrphanAcceptedCommitMarker(
     immediate: true,
     resetAcceptedRevision: true,
   });
-  debugDebug("[ST-BME] 已Tự động清理孤儿 accepted commit marker", {
+  debugDebug("[ST-BME] Đã tự động dọn sạch accepted commit marker bị mồ côi", {
     chatId: normalizedChatId,
     source,
     acceptedRevision,
@@ -9036,7 +9036,7 @@ function applyIndexedDbSnapshotToRuntime(
     updateGraphPersistenceState({
       ...persistencePatch,
     });
-    debugDebug(`[ST-BME] 已拒绝用较旧 ${statusLabel} snapshot覆盖当前运行时đồ thị`, {
+    debugDebug(`[ST-BME] Đã từ chối dùng snapshot ${statusLabel} cũ hơn để ghi đè đồ thị runtime hiện tại`, {
       chatId: normalizedChatId,
       source,
       revision,
@@ -9083,7 +9083,7 @@ function applyIndexedDbSnapshotToRuntime(
     updateGraphPersistenceState({
       ...persistencePatch,
     });
-    console.warn(`[ST-BME] ${statusLabel} đồ thịsnapshot已拒绝加载`, {
+    console.warn(`[ST-BME] Snapshot đồ thị ${statusLabel} đã bị từ chối khi tải`, {
       chatId: normalizedChatId,
       source,
       revision,
@@ -9122,23 +9122,23 @@ function applyIndexedDbSnapshotToRuntime(
   const restoredRecallUi = restoreRecallUiStateFromPersistence(
     getContext()?.chat,
   );
-  runtimeStatus = createUiStatus("Chờ", `Đã từ${statusLabel}加载聊天đồ thị`, "idle");
+  runtimeStatus = createUiStatus("Chờ", `Đã từ${statusLabel}tảichatđồ thị`, "idle");
   lastExtractionStatus = createUiStatus(
     "Chờ",
-    `Đã từ${statusLabel}加载聊天đồ thị，Đang chờ下一lầnTrích xuất`,
+    `Đã từ${statusLabel}tảichatđồ thị，Đang chờtiếp theolầnTrích xuất`,
     "idle",
   );
   lastVectorStatus = createUiStatus(
     "Chờ",
     currentGraph.vectorIndexState?.lastWarning ||
-      `Đã từ${statusLabel}加载聊天đồ thị，Đang chờ下一lầnVectorTác vụ`,
+      `Đã từ${statusLabel}tảichatđồ thị，Đang chờtiếp theolầnVectorTác vụ`,
     "idle",
   );
   lastRecallStatus = createUiStatus(
     "Chờ",
     restoredRecallUi.restored
-      ? "Đã từLưu bềnTruy hồi记录Khôi phục显示，Đang chờ下一lầnTruy hồi"
-      : `Đã từ${statusLabel}加载聊天đồ thị，Đang chờ下一lầnTruy hồi`,
+      ? "Đã từLưu bềnTruy hồibản ghiKhôi phụchiển thị，Đang chờtiếp theolầnTruy hồi"
+      : `Đã từ${statusLabel}tảichatđồ thị，Đang chờtiếp theolầnTruy hồi`,
     "idle",
   );
 
@@ -9191,7 +9191,7 @@ function applyIndexedDbSnapshotToRuntime(
   removeGraphShadowSnapshot(normalizedChatId);
   refreshPanelLiveState();
   schedulePersistedRecallMessageUiRefresh(30);
-  debugDebug(`[ST-BME] Đã từ${statusLabel}加载đồ thị`, {
+  debugDebug(`[ST-BME] Đã từ${statusLabel}tảiđồ thị`, {
     chatId: normalizedChatId,
     source,
     revision,
@@ -9635,7 +9635,7 @@ function scheduleIndexedDbGraphProbe(chatId, options = {}) {
         }),
       )
       .catch((error) => {
-        console.warn("[ST-BME] IndexedDB 后台加载Thất bại:", error);
+        console.warn("[ST-BME] Tải nền IndexedDB thất bại:", error);
         return reconcileIndexedDbProbeFailureState(
           normalizedChatId,
           {
@@ -10107,7 +10107,7 @@ function maybeResumePendingAutoExtraction(source = "auto-extraction-resume") {
       lockedEndFloor,
       triggerSource: source,
     }).catch((error) => {
-      console.error("[ST-BME] 延迟Tự độngTrích xuấtThất bại:", error);
+      console.error("[ST-BME] Tự động trích xuất bị trễ đã thất bại:", error);
       notifyExtractionIssue(error?.message || String(error) || "Tự độngTrích xuấtThất bại");
     });
   });
@@ -10169,7 +10169,7 @@ function readMvuExtraAnalysisFlag() {
     if (typeof getActivePinia === "function") {
       const pinia = getActivePinia();
       return Boolean(
-        pinia?.state?.value?.["MVU变量框架"]?.runtimes?.is_during_extra_analysis,
+        pinia?.state?.value?.["Khung biến MVU"]?.runtimes?.is_during_extra_analysis,
       );
     }
   } catch {}
@@ -10203,7 +10203,7 @@ function isTavernHelperPromptViewerRefreshActive() {
     const dialogs = Array.from(doc.querySelectorAll('[role="dialog"]'));
     for (const dialog of dialogs) {
       const dialogText = String(dialog?.textContent || "");
-      if (!/(提示词查看器|prompt\s*viewer)/i.test(dialogText)) {
+      if (!/(trình xem prompt|prompt\s*viewer)/i.test(dialogText)) {
         continue;
       }
 
@@ -10788,7 +10788,7 @@ function applyAcceptedPendingPersistState(
       : null;
     if (typeof setLastExtractionStatus === "function") {
       setLastExtractionStatus(
-        "Lưu bền已Xác nhận",
+        "Lưu bền đã xác nhận",
         [
           safeFloor != null ? `tầng ${safeFloor}` : "",
           `rev ${Number(persistenceRecord.revision || 0)}`,
@@ -10848,7 +10848,7 @@ function schedulePendingGraphPersistRetry(
       retryAttempt: normalizedAttempt,
       scheduleRetryOnFailure: true,
     }).catch((error) => {
-      console.warn("[ST-BME] Chờ xác nhậnLưu bềnTự động重试Thất bại:", error);
+      console.warn("[ST-BME] Tự động thử lại khi chờ xác nhận lưu bền thất bại:", error);
     });
   }, delayMs);
 
@@ -11379,7 +11379,7 @@ function scheduleGraphLoadRetry(
   pendingGraphLoadRetryChatId =
     normalizedChatId || (allowPendingChat ? GRAPH_LOAD_PENDING_CHAT_ID : "");
   debugDebug(
-    `[ST-BME] đồ thịMetadata尚未就绪，${delayMs}ms 后重试加载（chat=${normalizedChatId || "pending"}，attempt=${attemptIndex + 1}，reason=${reason}）`,
+    `[ST-BME] Metadata đồ thị vẫn chưa sẵn sàng, sẽ thử tải lại sau ${delayMs}ms (chat=${normalizedChatId || "pending"}, attempt=${attemptIndex + 1}, reason=${reason})`,
   );
 
   pendingGraphLoadRetryTimer = setTimeout(() => {
@@ -11677,10 +11677,10 @@ function clearInjectionState(options = {}) {
   lastInjectionContent = "";
   lastRecalledItems = [];
   if (!preserveRecallStatus) {
-    lastRecallStatus = createUiStatus("Chờ", "当前Không有效TiêmNội dung", "idle");
+    lastRecallStatus = createUiStatus("Chờ", "hiện tạiKhônghợp lệTiêmNội dung", "idle");
   }
   if (!preserveRuntimeStatus) {
-    runtimeStatus = createUiStatus("Chờ", "当前Không有效TiêmNội dung", "idle");
+    runtimeStatus = createUiStatus("Chờ", "hiện tạiKhônghợp lệTiêmNội dung", "idle");
   }
   recordInjectionSnapshot("recall", {
     injectionText: "",
@@ -11700,7 +11700,7 @@ function clearInjectionState(options = {}) {
   try {
     applyModuleInjectionPrompt("", getSettings());
   } catch (error) {
-    console.warn("[ST-BME] 清理旧TiêmThất bại:", error);
+    console.warn("[ST-BME] Dọn phần tiêm cũ thất bại:", error);
   }
 
   refreshPanelLiveState();
@@ -11816,7 +11816,7 @@ function setLastRecallStatus(
   }
 }
 
-function notifyExtractionIssue(message, title = "ST-BME Trích xuất提示") {
+function notifyExtractionIssue(message, title = "ST-BME Trích xuấtnhắc") {
   setLastExtractionStatus("Trích xuấtThất bại", message, "warning", {
     syncRuntime: true,
   });
@@ -11836,7 +11836,7 @@ async function fetchLocalWithTimeout(
     () =>
       controller.abort(
         new DOMException(
-          `Cục bộ请求超时 (${Math.round(timeoutMs / 1000)}s)`,
+          `Cục bộyêu cầuquá thời gian (${Math.round(timeoutMs / 1000)}s)`,
           "AbortError",
         ),
       ),
@@ -11901,7 +11901,7 @@ function restoreRuntimeUiState(snapshot = {}) {
     ? snapshot.lastRecalledItems.map((item) => ({ ...item }))
     : [];
   runtimeStatus = {
-    ...createUiStatus("Chờ", "准备就绪", "idle"),
+    ...createUiStatus("Chờ", "chuẩn bịsẵn sàng", "idle"),
     ...(snapshot.runtimeStatus || {}),
   };
   lastExtractionStatus = {
@@ -11909,7 +11909,7 @@ function restoreRuntimeUiState(snapshot = {}) {
     ...(snapshot.lastExtractionStatus || {}),
   };
   lastVectorStatus = {
-    ...createUiStatus("Chờ", "尚未执行VectorTác vụ", "idle"),
+    ...createUiStatus("Chờ", "vẫn chưathực thiVectorTác vụ", "idle"),
     ...(snapshot.lastVectorStatus || {}),
   };
   lastRecallStatus = {
@@ -12008,7 +12008,7 @@ function evaluateAutoConsolidationGate(
     return {
       shouldRun: true,
       minNewNodes,
-      reason: `本批新增 ${safeNewNodeCount}  nút，达到Tự độngHợp nhất门槛 ${minNewNodes}`,
+      reason: `Lô này thêm mới ${safeNewNodeCount} nút, đã đạt ngưỡng tự động hợp nhất ${minNewNodes}`,
       matchedScore: null,
       matchedNodeId: "",
     };
@@ -12020,7 +12020,7 @@ function evaluateAutoConsolidationGate(
       minNewNodes,
       reason:
         String(analysis.reason || "").trim() ||
-        "检测到高重复风险，已触发Tự độngHợp nhất",
+        "Phát hiện rủi ro trùng lặp cao, đã kích hoạt tự động hợp nhất",
       matchedScore: Number.isFinite(Number(analysis?.matchedScore))
         ? Number(analysis.matchedScore)
         : null,
@@ -12033,7 +12033,7 @@ function evaluateAutoConsolidationGate(
     minNewNodes,
     reason:
       String(analysis?.reason || "").trim() ||
-      `本批只新增 ${safeNewNodeCount}  nút，低于Tự độngHợp nhất门槛 ${minNewNodes}`,
+      `Lô này chỉ thêm ${safeNewNodeCount} nút mới, thấp hơn ngưỡng tự động hợp nhất ${minNewNodes}`,
     matchedScore: Number.isFinite(Number(analysis?.matchedScore))
       ? Number(analysis.matchedScore)
       : null,
@@ -12059,7 +12059,7 @@ function evaluateAutoCompressionSchedule(
       scheduled: false,
       everyN,
       nextExtractionCount: null,
-      reason: "Nén tự động开关已Tắt",
+      reason: "Nén tự độngcông tắcĐã tắt",
     };
   }
 
@@ -12069,7 +12069,7 @@ function evaluateAutoCompressionSchedule(
       scheduled: false,
       everyN,
       nextExtractionCount: safeExtractionCount + (everyN - remainder),
-      reason: `当前为第 ${safeExtractionCount} lầnTrích xuất，未到每 ${everyN} lầnChu kỳ nén tự động`,
+      reason: `Hiện tại là lần trích xuất thứ ${safeExtractionCount}, chưa tới chu kỳ nén tự động mỗi ${everyN} lần`,
     };
   }
 
@@ -12085,13 +12085,13 @@ function buildMaintenanceSummary(action, result, mode = "manual") {
   const prefix = mode === "auto" ? "Tự động" : "Thủ công";
   switch (String(action || "")) {
     case "compress":
-      return `${prefix}Nén：新增 ${result?.created || 0}，Lưu trữ ${result?.archived || 0}`;
+      return `${prefix}Nén: thêm ${result?.created || 0}, lưu trữ ${result?.archived || 0}`;
     case "consolidate":
       return `${prefix}Hợp nhất：Hợp nhất ${result?.merged || 0}, bỏ qua ${result?.skipped || 0}, giữ lại ${result?.kept || 0}, tiến hóa ${result?.evolved || 0}, liên kết mới ${result?.connections || 0}, cập nhật hồi ngược ${result?.updates || 0}`;
     case "sleep":
-      return `${prefix}遗忘：Lưu trữ ${result?.forgotten || 0}  nút`;
+      return `${prefix}Lãng quên：Lưu trữ ${result?.forgotten || 0}  nút`;
     default:
-      return `${prefix}维护已执行`;
+      return `${prefix}Bảo trì đã thực thi`;
   }
 }
 
@@ -12150,7 +12150,7 @@ function undoLastMaintenanceAction() {
   return result;
 }
 
-function markVectorStateDirty(reason = "Trạng thái vector已标记为待重建") {
+function markVectorStateDirty(reason = "Trạng thái vector đã được đánh dấu chờ xây lại") {
   if (!currentGraph) return;
   ensureCurrentGraphRuntimeState();
   currentGraph.vectorIndexState.dirty = true;
@@ -12226,8 +12226,8 @@ async function syncVectorState({
       ? `Phạm vi ${Math.min(range.start, range.end)}-${Math.max(range.start, range.end)}`
       : "Chat hiện tại";
   setLastVectorStatus(
-    "VectorXử lý中",
-    `${scopeLabel} · ${force ? "强制Đồng bộ" : "增量Đồng bộ"}`,
+    "Đang xử lý vector",
+    `${scopeLabel} · ${force ? "Đồng bộ cưỡng chế" : "Đồng bộ tăng dần"}`,
     "running",
     { syncRuntime: true },
   );
@@ -12312,17 +12312,17 @@ async function ensureVectorReadyIfNeeded(
   if (result?.error) {
     currentGraph.vectorIndexState.lastWarning = result.error;
     saveGraphToChat({ reason: "vector-auto-repair-failed" });
-    console.warn("[ST-BME] Trạng thái vectorTự động修复Thất bại:", reason, result.error);
+    console.warn("[ST-BME] Tự động sửa trạng thái vector thất bại:", reason, result.error);
     return result;
   }
 
   currentGraph.vectorIndexState.lastWarning = "";
   saveGraphToChat({ reason: "vector-auto-repair-succeeded" });
-  debugLog("[ST-BME] Trạng thái vector已Tự động修复:", reason, result.stats);
+  debugLog("[ST-BME] Trạng thái vector đã được tự động sửa:", reason, result.stats);
   return result;
 }
 
-async function resetVectorStateForConfigChange(reason = "VectorCấu hình已变更") {
+async function resetVectorStateForConfigChange(reason = "Cấu hình vector đã thay đổi") {
   if (!currentGraph) return;
   ensureCurrentGraphRuntimeState();
   markVectorStateDirty(reason);
@@ -12372,7 +12372,7 @@ async function loadServerSettings() {
       saveSettingsDebounced();
     }
   } catch (error) {
-    console.warn("[ST-BME] Đọc服务端设置Thất bại，Lùi về到Cục bộ运行时设置:", error);
+    console.warn("[ST-BME] Đọc cài đặt phía máy chủ thất bại, lùi về cài đặt runtime cục bộ:", error);
   }
 }
 
@@ -12404,7 +12404,7 @@ function scheduleServerSettingsSave() {
     try {
       await saveServerSettings();
     } catch (error) {
-      console.error("[ST-BME] Lưu服务端设置Thất bại:", error);
+      console.error("[ST-BME] Lưuphía máy chủcài đặtThất bại:", error);
     }
   }, 300);
 }
@@ -12452,33 +12452,33 @@ function updateModuleSettings(patch = {}) {
       lastRecalledItems = [];
       runtimeStatus = createUiStatus(
         "Đã tắt",
-        "插件已Tắt，TiêmNội dung已清空",
+        "Plugin đã tắt, nội dung tiêm đã được xóa sạch",
         "idle",
       );
       lastExtractionStatus = createUiStatus(
         "Đã tắt",
-        "插件已Tắt，Tự độngTrích xuất已停止",
+        "Plugin đã tắt, tự động trích xuất đã dừng",
         "idle",
       );
       lastVectorStatus = createUiStatus(
         "Đã tắt",
-        "插件已Tắt，VectorTác vụ已停止",
+        "Plugin đã tắt, tác vụ vector đã dừng",
         "idle",
       );
       lastRecallStatus = createUiStatus(
         "Đã tắt",
-        "插件已Tắt，TiêmNội dung已清空",
+        "Plugin đã tắt, nội dung tiêm đã được xóa sạch",
         "idle",
       );
       refreshPanelLiveState();
     } catch (error) {
-      console.warn("[ST-BME] Tắt插件时清理TiêmThất bại:", error);
+      console.warn("[ST-BME] Dọn phần tiêm khi tắt plugin thất bại:", error);
     }
   }
 
   if (Object.keys(patch).some((key) => vectorConfigKeys.has(key))) {
     void resetVectorStateForConfigChange(
-      "Embedding Cấu hình已变更，Vector索引待重建",
+      "Cấu hình embedding đã thay đổi, chỉ mục vector đang chờ xây lại",
     );
   }
 
@@ -12550,7 +12550,7 @@ function updateModuleSettings(patch = {}) {
   return settings;
 }
 
-// ==================== 图Trạng tháiLưu bền ====================
+// ==================== Trạng thái lưu bền của đồ thị ====================
 
 function loadGraphFromChat(options = {}) {
   const {
@@ -12594,22 +12594,22 @@ function loadGraphFromChat(options = {}) {
       lastInjectionContent = "";
       runtimeStatus = createUiStatus(
         "đồ thịĐang tải",
-        "正在Đang chờChat hiện tại会话 ID 就绪",
+        "đangĐang chờChat hiện tạiphiên ID sẵn sàng",
         "running",
       );
       lastExtractionStatus = createUiStatus(
         "Chờ",
-        "正在Đang chờChat hiện tại会话 ID 就绪",
+        "đangĐang chờChat hiện tạiphiên ID sẵn sàng",
         "idle",
       );
       lastVectorStatus = createUiStatus(
         "Chờ",
-        "正在Đang chờChat hiện tại会话 ID 就绪",
+        "đangĐang chờChat hiện tạiphiên ID sẵn sàng",
         "idle",
       );
       lastRecallStatus = createUiStatus(
         "Chờ",
-        "正在Đang chờChat hiện tại会话 ID 就绪",
+        "đangĐang chờChat hiện tạiphiên ID sẵn sàng",
         "idle",
       );
       applyGraphLoadState(GRAPH_LOAD_STATES.LOADING, {
@@ -12864,25 +12864,25 @@ function loadGraphFromChat(options = {}) {
       );
       runtimeStatus = createUiStatus(
         "đồ thịĐang tải",
-        "Đã từ兼容 metadata 暂载đồ thị，Đang chờ IndexedDB 权威Xác nhận",
+        "Đã nạp tạm đồ thị từ metadata tương thích, đang chờ IndexedDB xác nhận có thẩm quyền",
         "running",
       );
       lastExtractionStatus = createUiStatus(
         "Chờ",
-        "兼容đồ thị暂载中，Đang chờ IndexedDB Xác nhận后再执行Trích xuất",
+        "Đồ thị tương thích đang được nạp tạm, đang chờ IndexedDB xác nhận rồi mới thực thi trích xuất",
         "idle",
       );
       lastVectorStatus = createUiStatus(
         "Chờ",
         currentGraph.vectorIndexState?.lastWarning ||
-          "兼容đồ thị暂载中，Đang chờ IndexedDB Xác nhận后再执行VectorTác vụ",
+          "Đồ thị tương thích đang được nạp tạm, đang chờ IndexedDB xác nhận rồi mới thực thi tác vụ vector",
         "idle",
       );
       lastRecallStatus = createUiStatus(
         "Chờ",
         restoredRecallUi.restored
-          ? "Đã từLưu bềnTruy hồi记录Khôi phục显示，Đang chờ IndexedDB 权威Xác nhận"
-          : "兼容đồ thị暂载中，Đang chờ IndexedDB Xác nhận后再执行Truy hồi",
+          ? "Đã khôi phục hiển thị từ bản ghi truy hồi lưu bền, đang chờ IndexedDB xác nhận có thẩm quyền"
+          : "Đồ thị tương thích đang được nạp tạm, đang chờ IndexedDB xác nhận rồi mới thực thi truy hồi",
         "idle",
       );
       applyGraphLoadState(GRAPH_LOAD_STATES.LOADING, {
@@ -12945,7 +12945,7 @@ function loadGraphFromChat(options = {}) {
       };
     } catch (error) {
       console.warn(
-        "[ST-BME] 兼容 metadata đồ thịĐọcThất bại，将Lùi về IndexedDB:",
+        "[ST-BME] Đọc metadata đồ thị tương thích thất bại, sẽ lùi về IndexedDB:",
         error,
       );
     }
@@ -13341,7 +13341,7 @@ async function saveGraphToIndexedDb(
         scheduleUploadWarning =
           error?.message || String(error) || "schedule-upload-failed";
         console.warn(
-          `[ST-BME] ${localStore.statusLabel} 已写入，但Đồng bộ上传调度Thất bại:`,
+          `[ST-BME] ${localStore.statusLabel} đã ghi xong, nhưng điều độ tải lên đồng bộ bị thất bại:`,
           error,
         );
       }
@@ -13640,7 +13640,7 @@ async function saveGraphToIndexedDb(
     };
   } catch (error) {
     console.warn(
-      `[ST-BME] ${localStore.statusLabel} 写入Thất bại, giữ lại metadata 兜底:`,
+      `[ST-BME] ${localStore.statusLabel} ghi vàoThất bại, giữ lại metadata làm đường lui:`,
       error,
     );
     updatePersistDeltaDiagnostics({
@@ -13957,7 +13957,7 @@ function saveGraphToChat(options = {}) {
 
   if (!isGraphMetadataWriteAllowed()) {
     console.warn(
-      `[ST-BME] đồ thị写回已被安全保护拦截（chat=${chatId}，state=${graphPersistenceState.loadState}，reason=${reason}）`,
+      `[ST-BME] Ghi ngược đồ thị đã bị chặn bởi cơ chế bảo vệ an toàn (chat=${chatId}, state=${graphPersistenceState.loadState}, reason=${reason})`,
     );
     return queueGraphPersist(reason, revision, { immediate });
   }
@@ -14007,7 +14007,7 @@ function handleGraphShadowSnapshotVisibilityChange() {
   }
 }
 
-// ==================== 核心流程 ====================
+// ==================== cốt lõiluồng ====================
 
 function getLatestUserChatMessage(chat) {
   if (!Array.isArray(chat)) return null;
@@ -14082,7 +14082,7 @@ function buildGenerationAfterCommandsRecallInput(type, params = {}, chat) {
     generationType,
   });
 
-  // 对于 history Loại（continue/regenerate/swipe），必须依赖 chat 中的Người dùngtin nhắn
+  // Với loại history (continue/regenerate/swipe), bắt buộc phải dựa vào tin nhắn người dùng trong chat
   if (generationType !== "normal") {
     if (!Number.isFinite(targetUserMessageIndex)) {
       return {
@@ -14104,10 +14104,10 @@ function buildGenerationAfterCommandsRecallInput(type, params = {}, chat) {
     };
   }
 
-  // 对于 normal Loại：GENERATION_AFTER_COMMANDS 触发时Người dùngtin nhắn可能不在 chat 末尾
-  // （ST 可能已Nối thêm空 assistant tin nhắn）。如果 chat 中存在任何Người dùngtin nhắn，
-  // 继续走 buildNormalGenerationRecallInput，它会通过 latestUserText 兜底找到。
-  // 如果 chat 中完全没有Người dùngtin nhắn，则延迟到 BEFORE_COMBINE_PROMPTS Xử lý。
+  // Với loại normal: khi GENERATION_AFTER_COMMANDS kích hoạt thì tin nhắn người dùng có thể không nằm ở cuối chat
+  // (ST có thể đã nối thêm một tin nhắn assistant rỗng). Nếu trong chat vẫn tồn tại bất kỳ tin nhắn người dùng nào,
+  // thì tiếp tục đi theo buildNormalGenerationRecallInput, nó sẽ dùng latestUserText làm đường lùi để tìm ra.
+  // nếu trong chat hoàn toàn không có tin nhắn người dùng thì hoãn tới BEFORE_COMBINE_PROMPTS mới xử lý.
   if (!Number.isFinite(targetUserMessageIndex) && !getLatestUserChatMessage(chat)) {
     return {
       generationType,
@@ -14133,9 +14133,9 @@ function buildNormalGenerationRecallInput(chat, options = {}) {
   const tailUserText = lastNonSystemMessage?.is_user
     ? normalizeRecallInputText(lastNonSystemMessage?.mes || "")
     : "";
-  // 当 GENERATION_AFTER_COMMANDS 触发时，ST 可能已Nối thêm了空 assistant tin nhắn。
-  // 导致 lastNonSystemMessage 不是 user。用 getLatestUserChatMessage 反向扫描
-  // 定位真正的Người dùngtin nhắn（与 shujuku 参考实现一致）。
+  // Khi GENERATION_AFTER_COMMANDS kích hoạt, ST có thể đã nối thêm một tin nhắn assistant rỗng.
+  // Khiến lastNonSystemMessage không phải user. Dùng getLatestUserChatMessage quét ngược
+  // để định vị tin nhắn người dùng thật sự (giống với cách tham chiếu của shujuku).
   const latestUserMessage = !tailUserText ? getLatestUserChatMessage(chat) : null;
   const latestUserText = latestUserMessage
     ? normalizeRecallInputText(latestUserMessage?.mes || "")
@@ -14163,7 +14163,7 @@ function buildNormalGenerationRecallInput(chat, options = {}) {
       ? {
           text: sendIntentText,
           source: "send-intent",
-          sourceLabel: "发送意图",
+          sourceLabel: "ý định gửi",
           reason: tailUserText
             ? "send-intent-overrides-chat-tail"
             : "send-intent-captured",
@@ -14176,7 +14176,7 @@ function buildNormalGenerationRecallInput(chat, options = {}) {
           source: String(
             frozenInputSnapshot?.source || "host-generation-lifecycle",
           ),
-          sourceLabel: "Host发送snapshot",
+          sourceLabel: "Hostgửisnapshot",
           reason: sendIntentText
             ? "host-snapshot-suppressed-by-send-intent"
             : tailUserText
@@ -14189,7 +14189,7 @@ function buildNormalGenerationRecallInput(chat, options = {}) {
       ? {
           text: tailUserText,
           source: "chat-tail-user",
-          sourceLabel: "当前Người dùngtầng",
+          sourceLabel: "hiện tạiNgười dùngtầng",
           reason:
             sendIntentText || hostSnapshotText
               ? "chat-tail-deprioritized"
@@ -14201,7 +14201,7 @@ function buildNormalGenerationRecallInput(chat, options = {}) {
       ? {
           text: latestUserText,
           source: "chat-latest-user",
-          sourceLabel: "Gần nhấtNgười dùngtin nhắn",
+          sourceLabel: "Gần nhấtTin nhắn người dùng",
           reason:
             sendIntentText || hostSnapshotText || tailUserText
               ? "latest-user-deprioritized"
@@ -14213,7 +14213,7 @@ function buildNormalGenerationRecallInput(chat, options = {}) {
       ? {
           text: textareaText,
           source: "textarea-live",
-          sourceLabel: "输入框当前文本",
+          sourceLabel: "Văn bản hiện tại trong ô nhập",
           reason:
             sendIntentText || hostSnapshotText || tailUserText
               ? "textarea-live-deprioritized"
@@ -14277,8 +14277,8 @@ function buildHistoryGenerationRecallInput(chat) {
       ? "chat-last-user"
       : "chat-last-user-missing",
     overrideSourceLabel: Number.isFinite(targetUserMessageIndex)
-      ? "历史最后Người dùngtầng"
-      : "历史Người dùngtầng缺失",
+      ? "Tầng người dùng cuối cùng trong lịch sử"
+      : "lịch sửNgười dùngtầngthiếu hụt",
     includeSyntheticUserMessage: false,
   };
 }
@@ -14470,10 +14470,10 @@ function resolveGenerationRecallDeliveryMode(
     return "immediate";
   }
 
-  // GENERATION_AFTER_COMMANDS: immediate —— await 完Truy hồi后直接通过
-  // setExtensionPrompt TiêmKý ức，与 shujuku 参考实现一致。
-  // GENERATE_BEFORE_COMBINE_PROMPTS: deferred —— 作为兜底，通过 promptData
-  // rewrite 补救Tiêm。
+  // GENERATION_AFTER_COMMANDS: immediate —— sau khi await truy hồi xong thì trực tiếp thông qua
+  // setExtensionPrompt để tiêm ký ức, nhất quán với cách tham chiếu của shujuku.
+  // GENERATE_BEFORE_COMBINE_PROMPTS: deferred —— đóng vai trò đường lùi, thông qua promptData
+  // để rewrite và cứu phần tiêm.
   if (hookName === "GENERATE_BEFORE_COMBINE_PROMPTS") {
     return "deferred";
   }
@@ -14834,7 +14834,7 @@ function clearGenerationRecallTransactionsForChat(
   return removed;
 }
 
-function invalidateRecallAfterHistoryMutation(reason = "聊天记录已变更") {
+function invalidateRecallAfterHistoryMutation(reason = "Bản ghi chat đã thay đổi") {
   if (isRestoreLockActive()) {
     return false;
   }
@@ -14845,7 +14845,7 @@ function invalidateRecallAfterHistoryMutation(reason = "聊天记录已变更") 
       !stageAbortControllers.recall.signal?.aborted),
   );
   if (hadActiveRecall) {
-    abortRecallStageWithReason(`${reason}，当前Truy hồi已Hủy`);
+    abortRecallStageWithReason(`${reason}, truy hồi hiện tại đã bị hủy`);
   }
 
   clearGenerationRecallTransactionsForChat();
@@ -14858,8 +14858,8 @@ function invalidateRecallAfterHistoryMutation(reason = "聊天记录已变更") 
 
   if (hadActiveRecall) {
     setLastRecallStatus(
-      "Truy hồi已Hủy",
-      `${reason}，Đang chờ新的Truy hồi请求`,
+      "Truy hồi đã bị hủy",
+      `${reason}，Đang chờmớiTruy hồiyêu cầu`,
       "warning",
       {
         syncRuntime: true,
@@ -15109,7 +15109,7 @@ async function handleExtractionSuccess(
             return {
               shouldRun: true,
               minNewNodes,
-              reason: `本批新增 ${safeCount}  nút，达到Tự độngHợp nhất门槛 ${minNewNodes}`,
+              reason: `Lô này thêm mới ${safeCount} nút, đã đạt ngưỡng tự động hợp nhất ${minNewNodes}`,
               matchedScore: null,
               matchedNodeId: "",
             };
@@ -15120,7 +15120,7 @@ async function handleExtractionSuccess(
               minNewNodes,
               reason:
                 String(analysis.reason || "").trim() ||
-                "检测到高重复风险，已触发Tự độngHợp nhất",
+                "Phát hiện rủi ro trùng lặp cao, đã kích hoạt tự động hợp nhất",
               matchedScore: Number.isFinite(Number(analysis?.matchedScore))
                 ? Number(analysis.matchedScore)
                 : null,
@@ -15132,7 +15132,7 @@ async function handleExtractionSuccess(
             minNewNodes,
             reason:
               String(analysis?.reason || "").trim() ||
-              `本批新增少且Không明显重复风险，Bỏ quaTự độngHợp nhất`,
+              `Lô này thêm mới ít và không thấy rõ rủi ro trùng lặp, bỏ qua tự động hợp nhất`,
             matchedScore: Number.isFinite(Number(analysis?.matchedScore))
               ? Number(analysis.matchedScore)
               : null,
@@ -15144,7 +15144,7 @@ async function handleExtractionSuccess(
       ? analyzeAutoConsolidationGate
       : async () => ({
           triggered: false,
-          reason: "本批新增少且Không明显重复风险，Bỏ quaTự độngHợp nhất",
+          reason: "Lô này thêm mới ít và không thấy rõ rủi ro trùng lặp, bỏ qua tự động hợp nhất",
           matchedScore: null,
           matchedNodeId: "",
         });
@@ -15164,7 +15164,7 @@ async function handleExtractionSuccess(
               scheduled: false,
               everyN,
               nextExtractionCount: null,
-              reason: "Nén tự động开关已Tắt",
+              reason: "Nén tự độngcông tắcĐã tắt",
             };
           }
           const remainder = safeCount % everyN;
@@ -15173,7 +15173,7 @@ async function handleExtractionSuccess(
               scheduled: false,
               everyN,
               nextExtractionCount: safeCount + (everyN - remainder),
-              reason: `当前为第 ${safeCount} lầnTrích xuất，未到每 ${everyN} lầnChu kỳ nén tự động`,
+              reason: `Hiện tại là lần trích xuất thứ ${safeCount}, chưa tới chu kỳ nén tự động mỗi ${everyN} lần`,
             };
           }
           return {
@@ -15188,7 +15188,7 @@ async function handleExtractionSuccess(
       ? inspectAutoCompressionCandidates
       : () => ({
           hasCandidates: false,
-          reason: "已到Chu kỳ nén tự động，但Hiện không có达到内部Nén阈值的候选组",
+          reason: "Đã tới chu kỳ nén tự động, nhưng hiện không có nhóm ứng viên nén nội bộ đạt ngưỡng",
         });
   const applyMaintenanceGateNote =
     typeof noteMaintenanceGate === "function"
@@ -15215,13 +15215,13 @@ async function handleExtractionSuccess(
           const prefix = mode === "auto" ? "Tự động" : "Thủ công";
           switch (String(action || "")) {
             case "compress":
-              return `${prefix}Nén：新增 ${maintenanceResult?.created || 0}，Lưu trữ ${maintenanceResult?.archived || 0}`;
+              return `${prefix}Nén: thêm ${maintenanceResult?.created || 0}, lưu trữ ${maintenanceResult?.archived || 0}`;
             case "consolidate":
               return `${prefix}Hợp nhất：Hợp nhất ${maintenanceResult?.merged || 0}, bỏ qua ${maintenanceResult?.skipped || 0}, giữ lại ${maintenanceResult?.kept || 0}, tiến hóa ${maintenanceResult?.evolved || 0}, liên kết mới ${maintenanceResult?.connections || 0}, cập nhật hồi ngược ${maintenanceResult?.updates || 0}`;
             case "sleep":
-              return `${prefix}遗忘：Lưu trữ ${maintenanceResult?.forgotten || 0}  nút`;
+              return `${prefix}Lãng quên：Lưu trữ ${maintenanceResult?.forgotten || 0}  nút`;
             default:
-              return `${prefix}维护已执行`;
+              return `${prefix}Bảo trì đã thực thi`;
           }
         };
   const runSummaryPostProcess =
@@ -15246,7 +15246,7 @@ async function handleExtractionSuccess(
           created: false,
           smallSummary: {
             created: false,
-            reason: "Tóm tắt phân tầng运行器Không khả dụng，Đã bỏ qua",
+            reason: "Trình chạy tóm tắt phân tầng không khả dụng, đã bỏ qua",
           },
           rollup: null,
         });
@@ -15254,7 +15254,7 @@ async function handleExtractionSuccess(
     typeof runHierarchicalSummaryPostProcess === "function"
       ? "Tóm tắt phân tầng"
       : typeof generateSynopsis === "function"
-        ? "旧式Toàn cục概要生成"
+        ? "kiểu cũToàn cụctóm lượcsinh"
         : "Tóm tắt phân tầng";
   const cloneMaintenanceSnapshot =
     typeof cloneGraphSnapshot === "function"
@@ -15282,8 +15282,8 @@ async function handleExtractionSuccess(
   updateLastExtractedItems(result.newNodeIds || []);
   setBatchStageOutcome(status, "core", "success");
   updateExtractionPostProcessStatus(
-    "Trích xuất收尾中",
-    `已抽取 ${newNodeCount} 个新nút，正在Xử lý后续阶段`,
+    "Đang hoàn tất trích xuất",
+    `Đã trích xuất ${newNodeCount} nút mới, đang xử lý các giai đoạn về sau`,
   );
 
   if (settings.enableConsolidation && result.newNodeIds?.length > 0) {
@@ -15297,8 +15297,8 @@ async function handleExtractionSuccess(
     );
     if (newNodeCount < minNewNodes) {
       updateExtractionPostProcessStatus(
-        "Hợp nhất判定中",
-        `本批新增 ${newNodeCount}  nút，正在检查是否需要Tự độngHợp nhất/进化`,
+        "Đang phán định hợp nhất",
+        `Lô này thêm ${newNodeCount} nút mới, đang kiểm tra xem có cần tự động hợp nhất/tiến hóa hay không`,
       );
       consolidationAnalysis = await analyzeConsolidationGate({
         graph: currentGraph,
@@ -15328,8 +15328,8 @@ async function handleExtractionSuccess(
     } else {
       try {
         updateExtractionPostProcessStatus(
-          "Hợp nhất/进化中",
-          String(gate.reason || "").trim() || "正在Tự độngHợp nhất新旧Ký ức",
+          "Đang hợp nhất/tiến hóa",
+          String(gate.reason || "").trim() || "Đang tự động hợp nhất ký ức mới và cũ",
         );
         const beforeSnapshot = cloneMaintenanceSnapshot(currentGraph);
         const consolidationResult = await consolidateMemories({
@@ -15357,7 +15357,7 @@ async function handleExtractionSuccess(
         pushBatchStageArtifact(status, "structural", "consolidation");
       } catch (e) {
         if (isAbortError(e)) throw e;
-        const message = e?.message || String(e) || "Hợp nhất ký ức阶段Thất bại";
+        const message = e?.message || String(e) || "Hợp nhất ký ứcgiai đoạnThất bại";
         setBatchStageOutcome(
           status,
           "structural",
@@ -15376,10 +15376,10 @@ async function handleExtractionSuccess(
           ? getContext().chat
           : [];
       updateExtractionPostProcessStatus(
-        summaryStageLabel === "旧式Toàn cục概要生成" ? "旧式Toàn cục概要Cập nhật中" : "Tóm tắt phân tầngXử lý中",
-        summaryStageLabel === "旧式Toàn cục概要生成"
-          ? `${extractionCount} lầnTrích xuất，正在生成旧式Toàn cục概要`
-          : `${extractionCount} lầnTrích xuất，正在检查Tóm tắt ngắn与折叠总结`,
+        summaryStageLabel === "Sinh tóm lược toàn cục kiểu cũ" ? "Đang cập nhật tóm lược toàn cục kiểu cũ" : "Đang xử lý tóm tắt phân tầng",
+        summaryStageLabel === "kiểu cũToàn cụctóm lượcsinh"
+          ? `${extractionCount} lầnTrích xuất，đangsinhkiểu cũToàn cụctóm lược`
+          : `${extractionCount} lần trích xuất, đang kiểm tra tóm tắt ngắn và gộp tổng kết`,
       );
       const summaryResult = await runSummaryPostProcess({
         graph: currentGraph,
@@ -15403,7 +15403,7 @@ async function handleExtractionSuccess(
       }
     } catch (e) {
       if (isAbortError(e)) throw e;
-      const message = e?.message || String(e) || `${summaryStageLabel}阶段Thất bại`;
+      const message = e?.message || String(e) || `${summaryStageLabel}giai đoạnThất bại`;
       setBatchStageOutcome(
         status,
         "semantic",
@@ -15420,8 +15420,8 @@ async function handleExtractionSuccess(
   ) {
     try {
       updateExtractionPostProcessStatus(
-        "Phản tư生成中",
-        `${extractionCount} lầnTrích xuất，正在生成长期Phản tư`,
+        "Đang sinh phản tư",
+        `${extractionCount} lần trích xuất, đang sinh phản tư dài hạn`,
       );
       await generateReflection({
         graph: currentGraph,
@@ -15435,7 +15435,7 @@ async function handleExtractionSuccess(
       pushBatchStageArtifact(status, "semantic", "reflection");
     } catch (e) {
       if (isAbortError(e)) throw e;
-      const message = e?.message || String(e) || "Phản tư生成阶段Thất bại";
+      const message = e?.message || String(e) || "Phản tưsinhgiai đoạnThất bại";
       setBatchStageOutcome(
         status,
         "semantic",
@@ -15452,8 +15452,8 @@ async function handleExtractionSuccess(
   ) {
     try {
       updateExtractionPostProcessStatus(
-        "Lãng quên chủ động中",
-        `${extractionCount} lầnTrích xuất，正在Lưu trữ低价值Ký ức`,
+        "Đang lãng quên chủ động",
+        `${extractionCount} lần trích xuất, đang lưu trữ ký ức giá trị thấp`,
       );
       const beforeSnapshot = cloneMaintenanceSnapshot(currentGraph);
       const sleepResult = sleepCycle(currentGraph, settings);
@@ -15468,7 +15468,7 @@ async function handleExtractionSuccess(
         pushBatchStageArtifact(status, "semantic", "sleep");
       }
     } catch (e) {
-      const message = e?.message || String(e) || "Lãng quên chủ động阶段Thất bại";
+      const message = e?.message || String(e) || "Lãng quên chủ độnggiai đoạnThất bại";
       setBatchStageOutcome(
         status,
         "semantic",
@@ -15499,12 +15499,12 @@ async function handleExtractionSuccess(
       if (!compressionInspection?.hasCandidates) {
         status.autoCompressionSkippedReason =
           String(compressionInspection?.reason || "").trim() ||
-          "已到Chu kỳ nén tự động，但Hiện không có达到内部Nén阈值的候选组";
+          "Đã tới chu kỳ nén tự động, nhưng hiện không có nhóm ứng viên nén nội bộ đạt ngưỡng";
         pushBatchStageArtifact(status, "structural", "compression-skipped");
       } else {
         updateExtractionPostProcessStatus(
-          "Nén tự động中",
-          `已到第 ${extractionCount} lầnTrích xuất周期，正在Nén层级Ký ức`,
+          "Đang nén tự động",
+          `Đã tới chu kỳ trích xuất lần thứ ${extractionCount}, đang nén ký ức phân tầng`,
         );
         status.autoCompressionSkippedReason = "";
         const beforeSnapshot = cloneMaintenanceSnapshot(currentGraph);
@@ -15532,18 +15532,18 @@ async function handleExtractionSuccess(
           pushBatchStageArtifact(status, "structural", "compression");
         } else {
           status.autoCompressionSkippedReason =
-            "已尝试Nén tự động，但本轮未产生可Lưu bền变化";
+            "Đã thử nén tự động, nhưng lượt này không tạo ra thay đổi có thể lưu bền";
         }
       }
     }
   } catch (error) {
     if (isAbortError(error)) throw error;
-    const message = error?.message || String(error) || "Nén阶段Thất bại";
+    const message = error?.message || String(error) || "Néngiai đoạnThất bại";
     setBatchStageOutcome(
       status,
       "structural",
       "partial",
-      `Nén阶段Thất bại: ${message}`,
+      `Néngiai đoạnThất bại: ${message}`,
     );
     console.error("[ST-BME] Ký ứcNénThất bại:", error);
   }
@@ -15551,13 +15551,13 @@ async function handleExtractionSuccess(
   let vectorSync = null;
   try {
     updateExtractionPostProcessStatus(
-      "VectorĐồng bộ中",
-      "正在Đồng bộ本批Trích xuất后的Vector索引",
+      "Đang đồng bộ vector",
+      "Đang đồng bộ chỉ mục vector sau lần trích xuất này",
     );
     vectorSync = await syncVectorState({ signal });
   } catch (error) {
     if (isAbortError(error)) throw error;
-    const message = error?.message || String(error) || "VectorĐồng bộ阶段Thất bại";
+    const message = error?.message || String(error) || "VectorĐồng bộgiai đoạnThất bại";
     setBatchStageOutcome(
       status,
       "finalize",
@@ -15613,8 +15613,8 @@ async function handleExtractionSuccess(
 function notifyHistoryDirty(dirtyFrom, reason) {
   updateStageNotice(
     "history",
-    "检测到tầng历史变化",
-    `将从tầng ${dirtyFrom} 之后Tự độngKhôi phục${reason ? `\n${reason}` : ""}`,
+    "phát hiệntầnglịch sửthay đổi",
+    `Sẽ tự động khôi phục từ sau tầng ${dirtyFrom}${reason ? `\n${reason}` : ""}`,
     "warning",
     {
       persist: true,
@@ -15651,10 +15651,10 @@ function scheduleImmediateHistoryRecovery(
         refreshPanelLiveState();
       })
       .catch((error) => {
-        console.error("[ST-BME] Sự kiện触发的历史Khôi phụcThất bại:", error);
+        console.error("[ST-BME] Khôi phục lịch sử do sự kiện kích hoạt đã thất bại:", error);
         updateStageNotice(
           "history",
-          "历史Khôi phụcThất bại",
+          "lịch sửKhôi phụcThất bại",
           error?.message || String(error),
           "error",
           {
@@ -15662,7 +15662,7 @@ function scheduleImmediateHistoryRecovery(
             persist: false,
           },
         );
-        toastr.error(`历史Khôi phụcThất bại: ${error?.message || error}`);
+        toastr.error(`lịch sửKhôi phụcThất bại: ${error?.message || error}`);
       });
   }, delayMs);
 }
@@ -15682,8 +15682,8 @@ function scheduleHistoryMutationRecheck(
 
   updateStageNotice(
     "history",
-    "检测到tầng变动",
-    "正在Đang chờHosttầngTrạng thái稳定后重新核对đồ thị",
+    "phát hiệntầngbiến động",
+    "Đang chờ trạng thái tầng của host ổn định rồi đối chiếu lại đồ thị",
     "warning",
     {
       persist: true,
@@ -15761,8 +15761,8 @@ function inspectHistoryMutation(
     chat,
   );
   const metaReason = String(trigger || "").includes("message-deleted")
-    ? `${trigger} Metadata检测到Xóa边界变动`
-    : `${trigger} Metadata检测到tầng变动`;
+    ? `${trigger} Metadataphát hiệnXóaranh giớibiến động`
+    : `${trigger} Metadataphát hiệntầngbiến động`;
   if (
     metaDetection &&
     Number.isFinite(metaDetection.floor) &&
@@ -15843,7 +15843,7 @@ async function prepareVectorStateForReplay(
         if (isAbortError(error)) {
           throw error;
         }
-        console.warn("[ST-BME] 清理BackendVector索引Thất bại，继续Cục bộKhôi phục:", error);
+        console.warn("[ST-BME] dọn sạchBackendVectorchỉ mụcThất bại，tiếp tụcCục bộKhôi phục:", error);
       }
       currentGraph.vectorIndexState.hashToNodeId = {};
       currentGraph.vectorIndexState.nodeToHash = {};
@@ -15859,8 +15859,8 @@ async function prepareVectorStateForReplay(
       currentGraph.vectorIndexState.pendingRepairFromFloor = 0;
     }
     currentGraph.vectorIndexState.lastWarning = skipBackendPurge
-      ? "历史Khôi phục后需要修复受影响后缀的BackendVector索引"
-      : "历史Khôi phục后需要重建BackendVector索引";
+      ? "Sau khi khôi phục lịch sử cần sửa chỉ mục vector backend của phần hậu tố bị ảnh hưởng"
+      : "Sau khi khôi phục lịch sử cần xây lại chỉ mục vector backend";
     return;
   }
 
@@ -15872,7 +15872,7 @@ async function prepareVectorStateForReplay(
     currentGraph.vectorIndexState.dirtyReason = "history-recovery-reset";
     currentGraph.vectorIndexState.pendingRepairFromFloor = 0;
     currentGraph.vectorIndexState.lastWarning =
-      "历史Khôi phục后需要重嵌Chat hiện tạiVector";
+      "Sau khi khôi phục lịch sử cần nhúng lại vector của chat hiện tại";
   }
 }
 
@@ -15924,7 +15924,7 @@ async function replayExtractionFromHistory(
   let replayedBatches = 0;
 
   while (true) {
-    throwIfAborted(signal, "历史Khôi phụcĐã chấm dứt");
+    throwIfAborted(signal, "lịch sửKhôi phụcĐã chấm dứt");
     assertRecoveryChatStillActive(expectedChatId, "replay-loop");
     const pendingAssistantTurns = getAssistantTurns(chat).filter(
       (index) => index > getLastProcessedAssistantFloor(),
@@ -15948,7 +15948,7 @@ async function replayExtractionFromHistory(
       throw new Error(
         batchResult.error ||
           batchResult?.result?.error ||
-          "历史Khôi phục回放过程中出现Trích xuấtThất bại",
+          "Trong quá trình phát lại khôi phục lịch sử đã xảy ra lỗi trích xuất",
       );
     }
 
@@ -16005,8 +16005,8 @@ function applyRecoveryPlanToVectorState(
         }
       : null;
   vectorState.lastWarning = recoveryPlan?.legacyGapFallback
-    ? "历史Khôi phục检测到 legacy-gap，Vector索引需按受影响后缀修复"
-    : "历史Khôi phục后需要修复受影响后缀的Vector索引";
+    ? "Khôi phục lịch sử phát hiện legacy-gap, chỉ mục vector cần được sửa theo hậu tố bị ảnh hưởng"
+    : "Sau khi khôi phục lịch sử cần sửa chỉ mục vector của hậu tố bị ảnh hưởng";
 }
 
 async function rollbackGraphForReroll(targetFloor, context = getContext()) {
@@ -16032,7 +16032,7 @@ async function rollbackGraphForReroll(targetFloor, context = getContext()) {
   if (!recoveryPoint) {
     return buildRerollFailure(
       "unavailable",
-      "未找到可用的回滚点，Không法安全Trích xuất lại。请先执行一lần历史Khôi phục或Trích xuất lại更早的批lần。",
+      "Không tìm thấy điểm hoàn tác dùng được, không thể trích xuất lại an toàn. Hãy thực hiện một lần khôi phục lịch sử hoặc trích xuất lại lô sớm hơn.",
       {
         resultCode: "reroll.rollback.unavailable",
       },
@@ -16063,7 +16063,7 @@ async function rollbackGraphForReroll(targetFloor, context = getContext()) {
           path: "reverse-journal",
           affectedBatchCount,
           detectionSource: "manual-reroll",
-          reason: `回滚计划完整性校验Thất bại: ${invalidReason}`,
+          reason: `Kiểm tra tính toàn vẹn kế hoạch hoàn tác thất bại: ${invalidReason}`,
           debugReason: `reroll-rollback-plan-invalid:${invalidReason}`,
           resultCode: "reroll.rollback.plan-invalid",
           invalidReason,
@@ -16073,7 +16073,7 @@ async function rollbackGraphForReroll(targetFloor, context = getContext()) {
       refreshPanelLiveState();
       return buildRerollFailure(
         "reverse-journal-rejected",
-        `回滚计划完整性校验Thất bại: ${invalidReason}`,
+        `Kiểm tra tính toàn vẹn kế hoạch hoàn tác thất bại: ${invalidReason}`,
         {
           affectedBatchCount,
           resultCode: "reroll.rollback.plan-invalid",
@@ -16090,8 +16090,8 @@ async function rollbackGraphForReroll(targetFloor, context = getContext()) {
       recoveryPlan.backendDeleteHashes.length > 0
     ) {
       setRuntimeStatus(
-        "Trích xuất lại准备中",
-        `正在整理VectorKhôi phụcTrạng thái（${recoveryPlan.backendDeleteHashes.length} 项）`,
+        "Trích xuất lạiđang chuẩn bị",
+        `Đang sắp xếp trạng thái khôi phục vector (${recoveryPlan.backendDeleteHashes.length} mục)`,
         "running",
       );
       assertRecoveryChatStillActive(chatId, "reroll-pre-vector");
@@ -16108,8 +16108,8 @@ async function rollbackGraphForReroll(targetFloor, context = getContext()) {
 
     if (isBackendVectorConfig(config)) {
       setRuntimeStatus(
-        "Trích xuất lại准备中",
-        "正在准备Vector回放Trạng thái",
+        "Trích xuất lạiđang chuẩn bị",
+        "đangchuẩn bịVectorphát lạiTrạng thái",
         "running",
       );
     }
@@ -16133,7 +16133,7 @@ async function rollbackGraphForReroll(targetFloor, context = getContext()) {
         path: recoveryPath,
         affectedBatchCount,
         detectionSource: "manual-reroll",
-        reason: `不支持的回滚路径: ${recoveryPath}`,
+        reason: `Đường hoàn tác không được hỗ trợ: ${recoveryPath}`,
         debugReason: `reroll-rollback-unsupported:${recoveryPath}`,
         resultCode: "reroll.rollback.path-unsupported",
       },
@@ -16142,7 +16142,7 @@ async function rollbackGraphForReroll(targetFloor, context = getContext()) {
     refreshPanelLiveState();
     return buildRerollFailure(
       recoveryPath,
-      `不支持的回滚路径: ${recoveryPath}`,
+      `Đường hoàn tác không được hỗ trợ: ${recoveryPath}`,
       {
         affectedBatchCount,
         resultCode: "reroll.rollback.path-unsupported",
@@ -16232,7 +16232,7 @@ async function tryDeleteBackendVectorHashesForRecovery(
         () =>
           controller.abort(
             new DOMException(
-              `VectorKhôi phục准备超时 (${Math.round(VECTOR_RECOVERY_PREP_TIMEOUT_MS / 1000)}s)`,
+              `VectorKhôi phụcchuẩn bịquá thời gian (${Math.round(VECTOR_RECOVERY_PREP_TIMEOUT_MS / 1000)}s)`,
               "AbortError",
             ),
           ),
@@ -16274,7 +16274,7 @@ async function tryDeleteBackendVectorHashesForRecovery(
     if (isAbortError(error) && signal?.aborted) {
       throw error;
     }
-    console.warn("[ST-BME] VectorKhôi phục预清理Thất bại，已降级为后续修复:", {
+    console.warn("[ST-BME] Dọn trước cho khôi phục vector thất bại, đã hạ cấp thành sửa về sau:", {
       source,
       collectionId,
       hashCount: hashes.length,
@@ -16286,7 +16286,7 @@ async function tryDeleteBackendVectorHashesForRecovery(
         currentGraph.vectorIndexState.dirtyReason ||
         "history-recovery-replay";
       currentGraph.vectorIndexState.lastWarning =
-        "VectorKhôi phục预清理Thất bại，Đã bỏ qua并标记为后续修复";
+        "Dọn trước cho khôi phục vector thất bại, đã bỏ qua và đánh dấu để sửa về sau";
     }
     return {
       ok: false,
@@ -16339,10 +16339,10 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
 
   updateStageNotice(
     "history",
-    "历史Khôi phục中",
+    "Đang khôi phục lịch sử",
     Number.isFinite(initialDirtyFrom)
-      ? `受影响起点tầng ${initialDirtyFrom} · 正在回滚并重放`
-      : "正在回滚并重放受影响后缀",
+      ? `Điểm bắt đầu bị ảnh hưởng ở tầng ${initialDirtyFrom} · đang hoàn tác và phát lại`
+      : "Đang hoàn tác và phát lại hậu tố bị ảnh hưởng",
     "running",
     {
       persist: true,
@@ -16351,7 +16351,7 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
   );
 
   try {
-    throwIfAborted(historySignal, "历史Khôi phụcĐã chấm dứt");
+    throwIfAborted(historySignal, "lịch sửKhôi phụcĐã chấm dứt");
     const recoveryPoint = findJournalRecoveryPoint(
       currentGraph,
       initialDirtyFrom,
@@ -16382,8 +16382,8 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
       ) {
         updateStageNotice(
           "history",
-          "历史Khôi phục中",
-          `正在整理VectorKhôi phụcTrạng thái（${recoveryPlan.backendDeleteHashes.length} 项）`,
+          "Đang khôi phục lịch sử",
+          `Đang sắp xếp trạng thái khôi phục vector (${recoveryPlan.backendDeleteHashes.length} mục)`,
           "running",
           {
             persist: true,
@@ -16404,8 +16404,8 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
       if (isBackendVectorConfig(config)) {
         updateStageNotice(
           "history",
-          "历史Khôi phục中",
-          "正在准备Vector回放Trạng thái",
+          "Đang khôi phục lịch sử",
+          "đangchuẩn bịVectorphát lạiTrạng thái",
           "running",
           {
             persist: true,
@@ -16473,13 +16473,13 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
     refreshPanelLiveState();
     settleExtractionStatusAfterHistoryRecovery(
       "Trích xuấtHoàn tất",
-      `历史Khôi phục回放 ${replayedBatches} 批`,
+      `Khôi phục lịch sử đã phát lại ${replayedBatches} lô`,
       "success",
     );
     updateStageNotice(
       "history",
-      usedFullRebuild ? "历史Khôi phụcHoàn tất（全量重建）" : "历史Khôi phụcHoàn tất",
-      `path ${recoveryPath} · 起点tầng ${initialDirtyFrom} · 受影响 ${affectedBatchCount} 批 · 回放 ${replayedBatches} 批`,
+      usedFullRebuild ? "lịch sửKhôi phụcHoàn tất（toàn lượngxây lại）" : "lịch sửKhôi phụcHoàn tất",
+      `path ${recoveryPath} · điểm bắt đầu ở tầng ${initialDirtyFrom} · ảnh hưởng ${affectedBatchCount} lô · phát lại ${replayedBatches} lô`,
       usedFullRebuild ? "warning" : "success",
       {
         busy: false,
@@ -16487,7 +16487,7 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
       },
     );
     if (usedFullRebuild) {
-      toastr.warning("历史变化已触发全量重建");
+      toastr.warning("Thay đổi lịch sử đã kích hoạt xây lại toàn lượng");
     }
     return true;
   } catch (error) {
@@ -16503,7 +16503,7 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
             "hash-recheck",
           affectedBatchCount,
           replayedBatchCount: replayedBatches,
-          reason: error?.message || "已Thủ công终止当前Khôi phục流程",
+          reason: error?.message || "Đã thủ công chấm dứt luồng khôi phục hiện tại",
           debugReason: `history-recovery-aborted:${recoveryPath}`,
           resultCode: "history.recovery.aborted",
         }),
@@ -16516,13 +16516,13 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
       currentGraph.vectorIndexState.dirtyReason = "";
       settleExtractionStatusAfterHistoryRecovery(
         "Trích xuấtĐã chấm dứt",
-        error?.message || "历史Khôi phụcĐã chấm dứt",
+        error?.message || "lịch sửKhôi phụcĐã chấm dứt",
         "warning",
       );
       updateStageNotice(
         "history",
-        "历史Khôi phụcĐã chấm dứt",
-        error?.message || "已Thủ công终止当前Khôi phục流程",
+        "lịch sửKhôi phụcĐã chấm dứt",
+        error?.message || "Đã thủ công chấm dứt luồng khôi phục hiện tại",
         "warning",
         {
           busy: false,
@@ -16532,7 +16532,7 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
       saveGraphToChat({ reason: "history-recovery-aborted" });
       return false;
     }
-    console.error("[ST-BME] 历史Khôi phụcThất bại，尝试全量重建:", error);
+    console.error("[ST-BME] lịch sửKhôi phụcThất bại，thửtoàn lượngxây lại:", error);
 
     try {
       currentGraph = normalizeGraphRuntimeState(createEmptyGraph(), chatId);
@@ -16557,7 +16557,7 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
             "hash-recheck",
           affectedBatchCount,
           replayedBatchCount: replayedBatches,
-          reason: `Khôi phụcThất bại后兜底全量重建: ${error?.message || error}`,
+          reason: `Khôi phục thất bại, lùi về xây lại toàn lượng: ${error?.message || error}`,
           debugReason: `history-recovery-fallback-full-rebuild:${recoveryPath}`,
           resultCode: "history.recovery.fallback-full-rebuild",
         }),
@@ -16575,20 +16575,20 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
       refreshPanelLiveState();
       settleExtractionStatusAfterHistoryRecovery(
         "Trích xuấtHoàn tất",
-        `历史Khôi phục已退化为全量重建，回放 ${replayedBatches} 批`,
+        `Khôi phục lịch sử đã thoái lui thành xây lại toàn lượng, phát lại ${replayedBatches} lô`,
         "warning",
       );
       updateStageNotice(
         "history",
-        "历史Khôi phục已退化为全量重建",
-        `path full-rebuild · 起点tầng ${initialDirtyFrom} · 回放 ${replayedBatches} 批`,
+        "Khôi phục lịch sử đã thoái lui thành xây lại toàn lượng",
+        `path full-rebuild · điểm bắt đầu ở tầng ${initialDirtyFrom} · phát lại ${replayedBatches} lô`,
         "warning",
         {
           busy: false,
           persist: false,
         },
       );
-      toastr.warning("历史Khôi phục已退化为全量重建");
+      toastr.warning("Khôi phục lịch sử đã thoái lui thành xây lại toàn lượng");
       return true;
     } catch (fallbackError) {
       currentGraph.historyState.lastRecoveryResult = buildRecoveryResult(
@@ -16617,7 +16617,7 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
       );
       updateStageNotice(
         "history",
-        "历史Khôi phụcThất bại",
+        "lịch sửKhôi phụcThất bại",
         fallbackError?.message || String(fallbackError),
         "error",
         {
@@ -16625,7 +16625,7 @@ async function recoverHistoryIfNeeded(trigger = "history-recovery") {
           persist: false,
         },
       );
-      toastr.error(`历史Khôi phụcThất bại: ${fallbackError?.message || fallbackError}`);
+      toastr.error(`lịch sửKhôi phụcThất bại: ${fallbackError?.message || fallbackError}`);
       return false;
     }
   } finally {
@@ -16659,7 +16659,7 @@ function settleExtractionStatusAfterHistoryRecovery(
 
   const currentText = String(statusSnapshot.text || "");
   const currentLevel = String(statusSnapshot.level || "");
-  if (currentText !== "AI 生成中" && currentLevel !== "running") {
+  if (currentText !== "AI đang sinh" && currentLevel !== "running") {
     return;
   }
   setLastExtractionStatus(text, meta, level, {
@@ -16669,7 +16669,7 @@ function settleExtractionStatusAfterHistoryRecovery(
 }
 
 /**
- * Trích xuấtPipeline：Xử lý未Trích xuất的对话tầng
+ * Pipeline trích xuất: xử lý các tầng hội thoại chưa trích xuất
  */
 async function runExtraction() {
   const options =
@@ -16959,7 +16959,7 @@ async function runPlannerRecallForEna({
 }
 
 /**
- * Truy hồiPipeline：检索并TiêmKý ức
+ * Pipeline truy hồi: truy xuất và tiêm ký ức
  */
 async function runRecall(options = {}) {
   if (!options?.ignoreRestoreLock && isRestoreLockActive()) {
@@ -17028,7 +17028,7 @@ async function runRecall(options = {}) {
   );
 }
 
-// ==================== Sự kiện钩子 ====================
+// ==================== Hook sự kiện ====================
 
 function onChatChanged() {
   isHostGenerationRunning = false;
@@ -17622,7 +17622,7 @@ function onApplyPanelKnowledgeOverride(payload = {}) {
   if (!currentGraph || !nodeId || !ownerKey) {
     return { ok: false, error: "invalid-payload" };
   }
-  if (!ensureGraphMutationReady("认知覆盖", { notify: false })) {
+  if (!ensureGraphMutationReady("nhận thứcbao phủ", { notify: false })) {
     return { ok: false, error: "graph-write-blocked" };
   }
   if (!["known", "hidden", "mistaken"].includes(mode)) {
@@ -17662,7 +17662,7 @@ function onClearPanelKnowledgeOverride(payload = {}) {
   if (!currentGraph || !nodeId || !ownerKey) {
     return { ok: false, error: "invalid-payload" };
   }
-  if (!ensureGraphMutationReady("认知覆盖清理", { notify: false })) {
+  if (!ensureGraphMutationReady("nhận thứcbao phủdọn sạch", { notify: false })) {
     return { ok: false, error: "graph-write-blocked" };
   }
   if (!getNode(currentGraph, nodeId)) {
@@ -17694,7 +17694,7 @@ function onSetPanelActiveRegion(payload = {}) {
   if (!currentGraph) {
     return { ok: false, error: "missing-graph" };
   }
-  if (!ensureGraphMutationReady("地区覆盖", { notify: false })) {
+  if (!ensureGraphMutationReady("khu vựcbao phủ", { notify: false })) {
     return { ok: false, error: "graph-write-blocked" };
   }
 
@@ -17720,7 +17720,7 @@ function onSetPanelActiveStoryTime(payload = {}) {
   if (!currentGraph) {
     return { ok: false, error: "missing-graph" };
   }
-  if (!ensureGraphMutationReady("剧情时间覆盖", { notify: false })) {
+  if (!ensureGraphMutationReady("thời gian cốt truyệnbao phủ", { notify: false })) {
     return { ok: false, error: "graph-write-blocked" };
   }
   const result = setManualActiveStorySegment(currentGraph, { label });
@@ -17744,7 +17744,7 @@ function onClearPanelActiveStoryTime() {
   if (!currentGraph) {
     return { ok: false, error: "missing-graph" };
   }
-  if (!ensureGraphMutationReady("剧情时间覆盖清理", { notify: false })) {
+  if (!ensureGraphMutationReady("thời gian cốt truyệnbao phủdọn sạch", { notify: false })) {
     return { ok: false, error: "graph-write-blocked" };
   }
   const result = clearManualActiveStorySegment(currentGraph);
@@ -17778,7 +17778,7 @@ function onUpdatePanelRegionAdjacency(payload = {}) {
   if (!currentGraph || !region) {
     return { ok: false, error: "missing-region" };
   }
-  if (!ensureGraphMutationReady("地区邻接Chỉnh sửa", { notify: false })) {
+  if (!ensureGraphMutationReady("khu vựckề cậnChỉnh sửa", { notify: false })) {
     return { ok: false, error: "graph-write-blocked" };
   }
 
@@ -18246,14 +18246,14 @@ async function onBackupCurrentChatToCloud() {
     const backupFailureMessage =
       result?.reason === "backup-manifest-error"
         ? result?.backupUploaded
-          ? "备份文件已上传，但服务器备份清单Cập nhậtThất bại，请稍后重试"
-          : "服务器备份清单Cập nhậtThất bại，请稍后重试"
-        : `备份Thất bại: ${result?.error?.message || result?.reason || "Không rõNguyên nhân"}`;
+          ? "Tệp sao lưu đã tải lên nhưng cập nhật danh sách sao lưu trên máy chủ thất bại, vui lòng thử lại sau"
+          : "Cập nhật danh sách sao lưu trên máy chủ thất bại, vui lòng thử lại sau"
+        : `sao lưuThất bại: ${result?.error?.message || result?.reason || "Không rõNguyên nhân"}`;
     toastr.error(backupFailureMessage);
     return { handledToast: true, result };
   }
 
-  toastr.success("Chat hiện tại已Sao lưu lên đám mây");
+  toastr.success("Chat hiện tại đã được sao lưu lên đám mây");
   await syncIndexedDbMetaToPersistenceState(chatId, {
     syncState: "idle",
     lastSyncError: "",
@@ -18273,7 +18273,7 @@ async function onRestoreCurrentChatFromCloud() {
       }
 
       const confirmed = globalThis.confirm?.(
-        "这会用云端备份完整覆盖Chat hiện tại的Cục bộKý ức，并先保留一份Cục bộ安全snapshot。确定继续吗？",
+        "Thao tác này sẽ dùng bản sao lưu trên đám mây để ghi đè toàn bộ ký ức cục bộ của chat hiện tại, đồng thời giữ lại trước một bản snapshot cục bộ an toàn. Có tiếp tục không?",
       );
       if (!confirmed) {
         return { cancelled: true };
@@ -18289,11 +18289,11 @@ async function onRestoreCurrentChatFromCloud() {
 
       if (!result?.restored) {
         const reasonMap = {
-          "not-found": "服务器上没有找到Chat hiện tại的备份",
-          "backup-missing": "服务器上没有找到Chat hiện tại的备份",
-          "backup-version-mismatch": "备份版本与当前运行时不兼容",
-          "backup-chat-id-mismatch": "备份聊天 ID 与Chat hiện tại不匹配",
-          "snapshot-chat-id-mismatch": "备份内部snapshot与Chat hiện tại不匹配",
+          "not-found": "Không tìm thấy bản sao lưu của chat hiện tại trên máy chủ",
+          "backup-missing": "Không tìm thấy bản sao lưu của chat hiện tại trên máy chủ",
+          "backup-version-mismatch": "Phiên bản sao lưu không tương thích với runtime hiện tại",
+          "backup-chat-id-mismatch": "Chat ID trong sao lưu không khớp với chat hiện tại",
+          "snapshot-chat-id-mismatch": "Snapshot bên trong sao lưu không khớp với chat hiện tại",
         };
         toastr.error(
           reasonMap[result?.reason] ||
@@ -18302,7 +18302,7 @@ async function onRestoreCurrentChatFromCloud() {
         return { handledToast: true, result };
       }
 
-      toastr.success("Đã từ云端Khôi phụcChat hiện tại备份");
+      toastr.success("Đã khôi phục bản sao lưu của chat hiện tại từ đám mây");
       await syncIndexedDbMetaToPersistenceState(chatId, {
         syncState: "idle",
         lastSyncError: "",
@@ -18408,12 +18408,12 @@ async function onRollbackLastRestore() {
 
       const safetyStatus = await onGetRestoreSafetySnapshotStatus();
       if (!safetyStatus?.exists) {
-        toastr.info("Chat hiện tại还没有可用的上lầnKhôi phục回滚点");
+        toastr.info("Chat hiện tại vẫn chưa có điểm hoàn tác dùng được trước lần khôi phục gần nhất");
         return { handledToast: true, result: safetyStatus };
       }
 
       const confirmed = globalThis.confirm?.(
-        "这会回滚到上lần从云端Khôi phục之前的Cục bộTrạng thái。确定继续吗？",
+        "Thao tác này sẽ hoàn tác về trạng thái cục bộ trước lần khôi phục từ đám mây gần nhất. Có tiếp tục không?",
       );
       if (!confirmed) {
         return { cancelled: true };
@@ -18429,12 +18429,12 @@ async function onRollbackLastRestore() {
 
       if (!result?.restored) {
         toastr.error(
-          `回滚Thất bại: ${result?.error?.message || result?.reason || "Không rõNguyên nhân"}`,
+          `hoàn tácThất bại: ${result?.error?.message || result?.reason || "Không rõNguyên nhân"}`,
         );
         return { handledToast: true, result };
       }
 
-      toastr.success("已回滚到上lầnKhôi phục前的Cục bộTrạng thái");
+      toastr.success("Đã hoàn tác về trạng thái cục bộ trước lần khôi phục gần nhất");
       await syncIndexedDbMetaToPersistenceState(chatId, {
         syncState: "idle",
         lastSyncError: "",
@@ -18459,17 +18459,17 @@ async function onRetryPendingPersist() {
   refreshPanelLiveState();
 
   if (result?.accepted === true) {
-    toastr.success("lô gần nhấtLưu bền已Xác nhận");
+    toastr.success("Lô lưu bền gần nhất đã được xác nhận");
     return { handledToast: true, result };
   }
 
   if (!hadPending && String(result?.reason || "") === "no-pending-persist") {
-    toastr.info("Hiện không có待重试的Lưu bền批lần");
+    toastr.info("Hiện không có lô lưu bền nào đang chờ thử lại");
     return { handledToast: true, result };
   }
 
   toastr.warning(
-    `Thử lưu bền lại仍未成功: ${result?.reason || result?.loadState || "Không rõNguyên nhân"}`,
+    `Thử lưu bền lại vẫn chưa thành công: ${result?.reason || result?.loadState || "Không rõ nguyên nhân"}`,
   );
   return { handledToast: true, result };
 }
@@ -18487,18 +18487,18 @@ async function onProbeGraphLoad() {
   refreshPanelLiveState();
 
   if (graphPersistenceState.loadState === GRAPH_LOAD_STATES.LOADING) {
-    toastr.info("已重新探测Chat hiện tạiđồ thị，正在Đang chờCục bộLưu bền加载");
+    toastr.info("Đã thăm dò lại đồ thị của chat hiện tại, đang chờ tải lưu bền cục bộ");
     return { handledToast: true, result };
   }
 
   if (graphPersistenceState.loadState === GRAPH_LOAD_STATES.BLOCKED) {
     toastr.warning(
-      `đồ thị hiện tại仍处于保护模式: ${graphPersistenceState.reason || "metadata not ready"}`,
+      `Đồ thị hiện tại vẫn đang ở chế độ bảo vệ: ${graphPersistenceState.reason || "metadata not ready"}`,
     );
     return { handledToast: true, result };
   }
 
-  toastr.success("已重新探测Chat hiện tạiđồ thị");
+  toastr.success("Đã thăm dò lại đồ thị của chat hiện tại");
   return { handledToast: true, result };
 }
 
@@ -18506,7 +18506,7 @@ async function onRebuildLocalCacheFromLukerSidecar() {
   const context = getContext();
   const chatStateTarget = resolveCurrentChatStateTarget(context);
   if (!isLukerPrimaryPersistenceHost(context)) {
-    toastr.info("当前Host不是 Luker，Không需从主 sidecar Xây lại bộ đệm cục bộ");
+    toastr.info("Host hiện tại không có Luker, không cần xây lại bộ đệm cục bộ từ sidecar chính");
     return { handledToast: true, reason: "not-luker" };
   }
   const chatId = getCurrentChatId(context);
@@ -18522,7 +18522,7 @@ async function onRebuildLocalCacheFromLukerSidecar() {
   });
   if (!loadResult?.loaded || !currentGraph) {
     toastr.warning(
-      `Không法从 Luker 主 sidecar Xây lại bộ đệm cục bộ: ${loadResult?.reason || "sidecar not available"}`,
+      `Không thể xây lại bộ đệm cục bộ từ sidecar chính của Luker: ${loadResult?.reason || "sidecar not available"}`,
     );
     return { handledToast: true, result: loadResult };
   }
@@ -18538,7 +18538,7 @@ async function onRebuildLocalCacheFromLukerSidecar() {
     scheduleCloudUpload: false,
   });
   refreshPanelLiveState();
-  toastr.success("已开始从 Luker 主 sidecar Xây lại bộ đệm cục bộ");
+  toastr.success("Đã bắt đầu xây lại bộ đệm cục bộ từ sidecar chính của Luker");
   return { handledToast: true, result: loadResult };
 }
 
@@ -18546,7 +18546,7 @@ async function onRepairLukerSidecar() {
   const context = getContext();
   const chatStateTarget = resolveCurrentChatStateTarget(context);
   if (!isLukerPrimaryPersistenceHost(context)) {
-    toastr.info("当前Host不是 Luker，Không需修复主 sidecar");
+    toastr.info("Host hiện tại không có Luker, không cần sửa sidecar chính");
     return { handledToast: true, reason: "not-luker" };
   }
   const chatId = getCurrentChatId(context);
@@ -18563,7 +18563,7 @@ async function onRepairLukerSidecar() {
       chatStateTarget,
     }))?.loaded
   ) {
-    toastr.warning("当前Không法从 Luker 主 sidecar Khôi phục运行时đồ thị，暂时不能修复");
+    toastr.warning("Hiện tại không thể khôi phục đồ thị runtime từ sidecar chính của Luker, tạm thời không thể sửa");
     return { handledToast: true, reason: "sidecar-load-failed" };
   }
 
@@ -18582,11 +18582,11 @@ async function onRepairLukerSidecar() {
   });
   refreshPanelLiveState();
   if (result?.ok) {
-    toastr.success("Luker 主 sidecar 已重新修复并压实");
+    toastr.success("Sidecar chính của Luker đã được sửa và nén lại");
     return { handledToast: true, result };
   }
 
-  toastr.warning(`Luker 主 sidecar 修复Thất bại: ${result?.reason || "unknown"}`);
+  toastr.warning(`Sửa sidecar chính của Luker thất bại: ${result?.reason || "unknown"}`);
   return { handledToast: true, result };
 }
 
@@ -18594,12 +18594,12 @@ async function onCompactLukerSidecar() {
   const context = getContext();
   const chatStateTarget = resolveCurrentChatStateTarget(context);
   if (!isLukerPrimaryPersistenceHost(context)) {
-    toastr.info("当前Host不是 Luker，Không需压实主 sidecar");
+    toastr.info("Host hiện tại không có Luker, không cần nén sidecar chính");
     return { handledToast: true, reason: "not-luker" };
   }
   const chatId = getCurrentChatId(context);
   if (!chatId || !currentGraph) {
-    toastr.warning("Hiện không có可压实的đồ thị");
+    toastr.warning("Hiện không có đồ thị nào để nén");
     return { handledToast: true, reason: "missing-graph" };
   }
 
@@ -18618,10 +18618,10 @@ async function onCompactLukerSidecar() {
   });
   refreshPanelLiveState();
   if (result?.ok) {
-    toastr.success("Luker 主 sidecar 压实Hoàn tất");
+    toastr.success("Nén sidecar chính của Luker hoàn tất");
     return { handledToast: true, result };
   }
-  toastr.warning(`Luker 主 sidecar 压实Thất bại: ${result?.reason || "unknown"}`);
+  toastr.warning(`Nén sidecar chính của Luker thất bại: ${result?.reason || "unknown"}`);
   return { handledToast: true, result };
 }
 
@@ -18740,7 +18740,7 @@ async function onCompactLukerSidecar() {
     autoSyncOnVisibility(buildBmeSyncRuntimeOptions());
     scheduleMessageHideApply("init", 180);
 
-    // 注册Sự kiện钩子
+    // Đăng ký hook sự kiện
     registerCoreEventHooksController({
       console,
       eventSource,
@@ -18773,7 +18773,7 @@ async function onCompactLukerSidecar() {
       setCoreEventBindingState,
     });
 
-    // 加载Chat hiện tại的đồ thị
+    // Tải đồ thị của chat hiện tại
     scheduleBmeIndexedDbTask(async () => {
       const syncResult = await syncBmeChatManagerWithCurrentChat("initial-load");
       if (!syncResult?.chatId) {
@@ -18791,7 +18791,7 @@ async function onCompactLukerSidecar() {
       });
     });
   } catch (bootError) {
-    console.error("[ST-BME] 核心初始化阶段Thất bại（面板入口已保留）:", bootError);
+    console.error("[ST-BME] Giai đoạn khởi tạo lõi thất bại (đã giữ lại lối vào của bảng):", bootError);
   }
 
   schedulePersistedRecallMessageUiRefresh(120);
@@ -18809,7 +18809,8 @@ async function onCompactLukerSidecar() {
   } catch (error) {
     console.warn("[ST-BME] Ena Planner module load failed:", error);
   }
-  debugLog("[ST-BME] 初始化Hoàn tất");
+  debugLog("[ST-BME] khởi tạoHoàn tất");
 })();
+
 
 

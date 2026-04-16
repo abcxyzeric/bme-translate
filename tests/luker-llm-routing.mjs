@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import {
   installResolveHooks,
@@ -198,7 +198,7 @@ try {
   assert.equal(
     sendOpenAIRequestCalls,
     0,
-    "存在可用的 BME Toàn cục专用 LLM Cấu hình时，不应退回HostChat hiện tạiĐịnh tuyến",
+    "khi tồn tại cấu hình LLM dành riêng toàn cục của BME có thể dùng được, không nên lùi về định tuyến chat host hiện tại",
   );
   assert.equal(
     capturedFetchBody?.custom_url,
@@ -254,7 +254,7 @@ try {
   assert.equal(
     sendOpenAIRequestCalls,
     0,
-    "存在可用的 BME Toàn cục专用 LLM Cấu hình时，不应因为 Luker profile 名而劫持到Chat hiện tạiĐịnh tuyến",
+    "khi tồn tại cấu hình LLM dành riêng toàn cục của BME có thể dùng được, không nên vì tên profile Luker mà bị cướp sang định tuyến chat hiện tại",
   );
   assert.equal(
     capturedFetchBody?.custom_url,
@@ -281,3 +281,4 @@ try {
 }
 
 console.log("luker-llm-routing tests passed");
+

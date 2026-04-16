@@ -42,7 +42,7 @@ export function registerBeforeCombinePromptsController(runtime, listener) {
     );
   }
 
-  runtime.console.warn("[ST-BME] eventMakeFirst Không khả dụng，Lùi về到普通Sự kiện注册");
+  runtime.console.warn("[ST-BME] eventMakeFirst không khả dụng, lùi về đăng ký sự kiện thông thường");
   runtime.eventSource.on(
     runtime.eventTypes.GENERATE_BEFORE_COMBINE_PROMPTS,
     listener,
@@ -59,7 +59,7 @@ export function registerGenerationAfterCommandsController(runtime, listener) {
   }
 
   runtime.console.warn(
-    "[ST-BME] eventMakeFirst Không khả dụng，GENERATION_AFTER_COMMANDS Lùi về到普通Sự kiện注册",
+    "[ST-BME] eventMakeFirst không khả dụng, GENERATION_AFTER_COMMANDS lùi về đăng ký sự kiện thông thường",
   );
   runtime.eventSource.on(eventName, listener);
   return null;
@@ -80,7 +80,7 @@ export function installSendIntentHooksController(runtime) {
     try {
       cleanup();
     } catch (error) {
-      runtime.console.warn("[ST-BME] 清理发送意图钩子Thất bại:", error);
+      runtime.console.warn("[ST-BME] Dọn hook ý định gửi thất bại:", error);
     }
   }
 
@@ -134,7 +134,7 @@ export function registerCoreEventHooksController(runtime) {
   const registrationState = runtime.getCoreEventBindingState?.() || {};
 
   if (registrationState.registered) {
-    runtime.console?.warn?.("[ST-BME] 核心Sự kiện已注册，Bỏ qua重复绑定");
+    runtime.console?.warn?.("[ST-BME] Sự kiện cốt lõi đã được đăng ký, bỏ qua việc gắn trùng lặp");
     return registrationState;
   }
 
@@ -323,16 +323,16 @@ export function onMessageSentController(runtime, messageId) {
     resolvedMessageId,
     message.mes || "",
   );
-  // GENERATION_AFTER_COMMANDS 在 sendMessageAsUser 之前触发，此时新Người dùngtin nhắn
-  // 尚未进入 chat，recall 记录会被写到上一条 user 上。这里Người dùngtin nhắn刚入场，
-  // transaction 仍在桥接窗口内，立即把记录重新绑定到正确的tầng。
+  // GENERATION_AFTER_COMMANDS kích hoạt trước sendMessageAsUser, lúc này tin nhắn người dùng mới
+  // vẫn chưa đi vào chat, nên bản ghi recall sẽ bị ghi lên user trước đó. Ở đây tin nhắn người dùng vừa mới vào,
+  // transaction vẫn còn trong cửa sổ cầu nối, nên lập tức gắn lại bản ghi vào đúng tầng.
   runtime.rebindRecallRecordToNewUserMessage?.(resolvedMessageId);
   runtime.refreshPersistedRecallMessageUi?.();
 }
 
 export function onUserMessageRenderedController(runtime, messageId = null) {
-  // MESSAGE_SENT 早于实际 DOM 挂载；这里等HostXác nhận user tầng渲染Hoàn tất后，
-  // 再补一lần Recall Card 刷新，避免“当前tầng没卡片，下一楼才补出来”。
+  // MESSAGE_SENT xảy ra sớm hơn việc DOM được gắn lên thật; tại đây chờ host xác nhận việc kết xuất tầng user xong rồi,
+  // mới bù thêm một lượt làm mới Recall Card để tránh việc "tầng hiện tại chưa có thẻ, sang tầng tiếp theo mới hiện ra".
   runtime.refreshPersistedRecallMessageUi?.(40);
   return {
     messageId: Number.isFinite(Number(messageId)) ? Number(messageId) : null,
@@ -427,7 +427,7 @@ export function onMessageDeletedController(
   chatLengthOrMessageId,
   meta = null,
 ) {
-  runtime.invalidateRecallAfterHistoryMutation("tin nhắn已Xóa");
+  runtime.invalidateRecallAfterHistoryMutation("Tin nhắn đã bị xóa");
   runtime.scheduleHistoryMutationRecheck(
     "message-deleted",
     chatLengthOrMessageId,
@@ -442,7 +442,7 @@ export function onMessageEditedController(runtime, messageId, meta = null) {
     runtime.refreshPersistedRecallMessageUi?.();
     return;
   }
-  runtime.invalidateRecallAfterHistoryMutation("tin nhắn已Chỉnh sửa");
+  runtime.invalidateRecallAfterHistoryMutation("Tin nhắn đã được chỉnh sửa");
   runtime.scheduleHistoryMutationRecheck("message-edited", messageId, meta);
   runtime.refreshPersistedRecallMessageUi?.();
 }
@@ -462,7 +462,7 @@ export function onMessageUpdatedController(runtime, messageId, meta = null) {
 }
 
 export async function onMessageSwipedController(runtime, messageId, meta = null) {
-  runtime.invalidateRecallAfterHistoryMutation("已切换tầng swipe");
+  runtime.invalidateRecallAfterHistoryMutation("Đã chuyển đổi tầng swipe");
   const parsedFloor = Number(messageId);
   const fromFloor = Number.isFinite(parsedFloor) ? parsedFloor : undefined;
   let result = {
@@ -633,10 +633,10 @@ export async function onGenerationAfterCommandsController(
     );
   }
 
-  // immediate 模式下，runRecall → applyRecallInjection 内部已通过
-  // setExtensionPrompt Hoàn tất了Tiêm，此处直接返回Truy hồiKết quả。
-  // 后续 GENERATE_BEFORE_COMBINE_PROMPTS 阶段会通过
-  // applyFinalRecallInjectionForGeneration 做 deferred rewrite 兜底。
+  // Ở chế độ immediate, bên trong runRecall → applyRecallInjection đã thông qua
+  // setExtensionPrompt để hoàn tất việc tiêm, nên ở đây trả về trực tiếp kết quả truy hồi.
+  // Ở giai đoạn GENERATE_BEFORE_COMBINE_PROMPTS về sau sẽ thông qua
+  // applyFinalRecallInjectionForGeneration để làm deferred rewrite như một đường lùi.
   if (deliveryMode === "immediate") {
     runtime.ensurePersistedRecallRecordForGeneration?.({
       generationType: recallContext.generationType,
@@ -645,9 +645,9 @@ export async function onGenerationAfterCommandsController(
       recallOptions: runtimeRecallOptions,
       hookName: recallContext.hookName,
     });
-    // immediate 路径通常会在 runRecall 内Hoàn tấtLưu bền；如果当时 user tầng还没稳定，
-    // 上面的兜底补写会把 fresh recall 绑定回最终 user tầng。
-    // 这里再补一lần UI 刷新，避免需要等到tin nhắnChỉnh sửa/历史Khôi phục后才看到 Recall Card。
+    // Đường đi immediate thường sẽ hoàn tất lưu bền ngay trong runRecall; nếu lúc đó tầng user vẫn chưa ổn định,
+    // thì phần ghi bù theo đường lùi ở trên sẽ gắn fresh recall trở lại tầng user cuối cùng.
+    // Ở đây bù thêm một lượt làm mới UI để tránh phải đợi tới khi tin nhắn được chỉnh sửa/khôi phục lịch sử mới thấy Recall Card.
     runtime.refreshPersistedRecallMessageUi?.();
     return recallResult;
   }
@@ -916,7 +916,7 @@ export function onMessageReceivedController(
           triggerSource: "message-received",
         })
         .catch((error) => {
-        runtime.console.error("[ST-BME] 异步Tự độngTrích xuấtThất bại:", error);
+        runtime.console.error("[ST-BME] Tự động trích xuất bất đồng bộ thất bại:", error);
         runtime.notifyExtractionIssue(
           error?.message || String(error) || "Tự độngTrích xuấtThất bại",
         );

@@ -285,7 +285,7 @@ function encodeBase64Utf8(text) {
     return Buffer.from(normalizedText, "utf8").toString("base64");
   }
 
-  throw new Error("当前环境缺少 base64 编码能力");
+  throw new Error("Môi trường hiện tại thiếu khả năng mã hóa base64");
 }
 
 function decodeBase64Utf8(base64Text) {
@@ -301,13 +301,13 @@ function decodeBase64Utf8(base64Text) {
     return Buffer.from(normalizedBase64, "base64").toString("utf8");
   }
 
-  throw new Error("当前环境缺少 base64 解码能力");
+  throw new Error("Môi trường hiện tại thiếu khả năng giải mã base64");
 }
 
 function getFetch(options = {}) {
   const fetchImpl = options.fetch || globalThis.fetch;
   if (typeof fetchImpl !== "function") {
-    throw new Error("fetch Không khả dụng，Không法执行 ST-BME Đồng bộ请求");
+    throw new Error("fetch không khả dụng, không thể thực thi yêu cầu đồng bộ ST-BME");
   }
   return fetchImpl;
 }
@@ -730,7 +730,7 @@ export async function rollbackFromRestoreSafetySnapshot(chatId, options = {}) {
       }
     }
   } catch (error) {
-    console.warn("[ST-BME] 回滚Cục bộ安全snapshotThất bại:", error);
+    console.warn("[ST-BME] hoàn tácCục bộan toànsnapshotThất bại:", error);
     return {
       restored: false,
       chatId: normalizedChatId,
@@ -745,7 +745,7 @@ function getRequestHeadersSafe(options = {}) {
     try {
       return options.getRequestHeaders() || {};
     } catch (error) {
-      console.warn("[ST-BME] Đọc请求头Thất bại，Lùi về为空请求头:", error);
+      console.warn("[ST-BME] Đọc header yêu cầu thất bại, lùi về header rỗng:", error);
       return {};
     }
   }
@@ -889,7 +889,7 @@ function buildRemoteSyncEnvelopeV2(snapshot = {}, chatId = "", filename = "") {
 function markBackendVectorSnapshotDirty(
   snapshot = {},
   reason = "backend-sync-import-unverified",
-  warning = "BackendVector索引需要在当前环境重建",
+  warning = "Chỉ mục BackendVector cần được xây lại trong môi trường hiện tại",
 ) {
   if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
     return snapshot;
@@ -929,7 +929,7 @@ function markBackendVectorSnapshotDirty(
       stale: total,
       pending,
     },
-    lastWarning: String(warning || "BackendVector索引需要在当前环境重建"),
+    lastWarning: String(warning || "Chỉ mục BackendVector cần được xây lại trong môi trường hiện tại"),
   };
   return snapshot;
 }
@@ -1550,7 +1550,7 @@ function mergeRuntimeVectorMeta(localMeta = {}, remoteMeta = {}, options = {}) {
       pending,
     },
     lastWarning: hasMappingConflict
-      ? "Đồng bộ合并检测到Vector映射冲突，已标记待重建"
+      ? "Đồng bộ hợp nhất phát hiện xung đột ánh xạ vector, đã đánh dấu chờ xây lại"
       : String(remoteVector.lastWarning || localVector.lastWarning || ""),
   };
 }
@@ -1652,16 +1652,16 @@ function mergeRuntimeLastRecallResult(localSnapshot, remoteSnapshot) {
 async function getDb(chatId, options = {}) {
   const normalizedChatId = normalizeChatId(chatId);
   if (!normalizedChatId) {
-    throw new Error("chatId 不能为空");
+    throw new Error("chatId không thểtrống");
   }
 
   if (typeof options.getDb !== "function") {
-    throw new Error("Đồng bộ运行时缺少 getDb(chatId) 能力");
+    throw new Error("Đồng bộruntimethiếu getDb(chatId) năng lực");
   }
 
   const db = await options.getDb(normalizedChatId);
   if (!db || typeof db.exportSnapshot !== "function") {
-    throw new Error("getDb(chatId) 必须返回有效的 BmeDatabase 实例");
+    throw new Error("getDb(chatId) bắt buộc phải trả về một thể hiện BmeDatabase hợp lệ");
   }
 
   return db;
@@ -1707,7 +1707,7 @@ async function invokeSyncAppliedHook(options = {}, payload = {}) {
       ...(payload || {}),
     });
   } catch (error) {
-    console.warn("[ST-BME] Đồng bộ后运行时刷新回调Thất bại:", {
+    console.warn("[ST-BME] Callback làm mới runtime sau đồng bộ thất bại:", {
       chatId: String(payload?.chatId || ""),
       action: String(payload?.action || ""),
       error,
@@ -1779,7 +1779,7 @@ async function resolveLegacySyncFilename(chatId, options = {}) {
 async function resolveSyncFilename(chatId, options = {}) {
   const normalizedChatId = normalizeChatId(chatId);
   if (!normalizedChatId) {
-    throw new Error("chatId 不能为空");
+    throw new Error("chatId không thểtrống");
   }
 
   if (sanitizedFilenameByChatId.has(normalizedChatId)) {
@@ -1796,7 +1796,7 @@ async function resolveSyncFilename(chatId, options = {}) {
 async function resolveSyncFilenameCandidates(chatId, options = {}) {
   const normalizedChatId = normalizeChatId(chatId);
   if (!normalizedChatId) {
-    throw new Error("chatId 不能为空");
+    throw new Error("chatId không thểtrống");
   }
 
   const candidates = [];
@@ -1853,7 +1853,7 @@ async function readRemoteSnapshot(chatId, options = {}) {
         cache: "no-store",
       });
     } catch (error) {
-      console.warn("[ST-BME] Đọc远端Đồng bộ文件Thất bại:", error);
+      console.warn("[ST-BME] Đọctừ xaĐồng bộtệpThất bại:", error);
       return {
         exists: false,
         status: "network-error",
@@ -1871,7 +1871,7 @@ async function readRemoteSnapshot(chatId, options = {}) {
     if (!response.ok) {
       const errorText = await response.text().catch(() => response.statusText);
       const error = new Error(errorText || `HTTP ${response.status}`);
-      console.warn("[ST-BME] Đọc远端Đồng bộ文件Thất bại:", error);
+      console.warn("[ST-BME] Đọctừ xaĐồng bộtệpThất bại:", error);
       return {
         exists: false,
         status: "http-error",
@@ -1905,7 +1905,7 @@ async function readRemoteSnapshot(chatId, options = {}) {
         snapshot,
       };
     } catch (error) {
-      console.warn("[ST-BME] 解析远端Đồng bộ文件Thất bại:", error);
+      console.warn("[ST-BME] phân tíchtừ xaĐồng bộtệpThất bại:", error);
       return {
         exists: false,
         status: "invalid-json",
@@ -2094,7 +2094,7 @@ export function getOrCreateDeviceId() {
   try {
     storage?.setItem(BME_SYNC_DEVICE_ID_KEY, deviceId);
   } catch (error) {
-    console.warn("[ST-BME] 写入 deviceId 到 localStorage Thất bại:", error);
+    console.warn("[ST-BME] Ghi deviceId vào localStorage thất bại:", error);
   }
 
   return deviceId;
@@ -2117,7 +2117,7 @@ export async function getRemoteStatus(chatId, options = {}) {
   const remoteResult = await readRemoteSnapshot(normalizedChatId, options);
   if (!remoteResult.exists || !remoteResult.snapshot) {
     if (remoteResult.status !== "not-found" && remoteResult.status !== "missing-chat-id") {
-      console.warn("[ST-BME] 远端Đồng bộTrạng tháiĐọc异常，已Lùi về为可Khôi phụcTrạng thái:", {
+      console.warn("[ST-BME] Đọc trạng thái đồng bộ từ xa bất thường, đã lùi về trạng thái có thể khôi phục:", {
         chatId: normalizedChatId,
         status: remoteResult.status,
       });
@@ -2296,7 +2296,7 @@ export async function restoreFromServer(chatId, options = {}) {
         normalizedChatId,
       ),
       "backend-backup-restore-unverified",
-      "BackendVector索引Đã từ云备份Khôi phục，需要在当前环境重建",
+      "Chỉ mục BackendVector đã được khôi phục từ sao lưu đám mây, cần được xây lại trong môi trường hiện tại",
     );
     if (normalizeChatId(snapshot.meta?.chatId) !== normalizedChatId) {
       return {
@@ -2347,7 +2347,7 @@ export async function restoreFromServer(chatId, options = {}) {
       backupTime: normalizeTimestamp(envelope.createdAt, 0),
     };
   } catch (error) {
-    console.warn("[ST-BME] 从云端Khôi phục备份Thất bại:", error);
+    console.warn("[ST-BME] Khôi phục sao lưu từ đám mây thất bại:", error);
     return {
       restored: false,
       chatId: normalizedChatId,
@@ -2437,7 +2437,7 @@ export async function deleteServerBackup(chatId, options = {}) {
       };
     }
   } catch (error) {
-    console.warn("[ST-BME] Xóa服务端备份Thất bại:", error);
+    console.warn("[ST-BME] Xóaphía máy chủsao lưuThất bại:", error);
     return {
       deleted: false,
       chatId: normalizedChatId,
@@ -2488,7 +2488,7 @@ export async function upload(chatId, options = {}) {
       revision: normalizeRevision(localSnapshot.meta.revision),
     };
   } catch (error) {
-    console.warn("[ST-BME] 上传Đồng bộ文件Thất bại:", error);
+    console.warn("[ST-BME] Tải tệp đồng bộ lên thất bại:", error);
     return {
       uploaded: false,
       chatId: normalizedChatId,
@@ -2526,7 +2526,7 @@ export async function download(chatId, options = {}) {
     const remoteSnapshot = markBackendVectorSnapshotDirty(
       normalizeSyncSnapshot(remoteResult.snapshot, normalizedChatId),
       "backend-sync-download-unverified",
-      "BackendVector索引Đã từ远端Đồng bộKhôi phục，需要在当前环境重建",
+      "Chỉ mục BackendVector đã được khôi phục từ đồng bộ từ xa, cần được xây lại trong môi trường hiện tại",
     );
     const remoteRevision = normalizeRevision(remoteSnapshot.meta.revision);
 
@@ -2560,7 +2560,7 @@ export async function download(chatId, options = {}) {
       revision: remoteRevision,
     };
   } catch (error) {
-    console.warn("[ST-BME] 下载Đồng bộ文件Thất bại:", error);
+    console.warn("[ST-BME] Tải tệp đồng bộ xuống thất bại:", error);
     return {
       downloaded: false,
       exists: false,
@@ -2863,7 +2863,7 @@ export async function syncNow(chatId, options = {}) {
         chatId: normalizedChatId,
       }),
       "backend-sync-merge-unverified",
-      "BackendVector索引Đã từ远端合并Khôi phục，需要在当前环境重建",
+      "Chỉ mục BackendVector đã được khôi phục từ hợp nhất từ xa, cần được xây lại trong môi trường hiện tại",
     );
 
     await db.importSnapshot(mergedSnapshot, {
@@ -3095,7 +3095,7 @@ export async function deleteRemoteSyncFile(chatId, options = {}) {
       reason: "not-found",
     };
   } catch (error) {
-    console.warn("[ST-BME] Xóa远端Đồng bộ文件Thất bại:", error);
+    console.warn("[ST-BME] Xóatừ xaĐồng bộtệpThất bại:", error);
     return {
       deleted: false,
       chatId: normalizedChatId,

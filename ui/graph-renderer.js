@@ -1,5 +1,5 @@
-// ST-BME: Canvas đồ thị渲染器 — 分区「神经视图」布局
-// 零依赖：Khách quan层 / POV nhân vật / POV người dùng 分区内 Vogel 初值 + 一lần性力导向稳定，Không帧循环抖动
+// ST-BME: bộ kết xuất đồ thị Canvas — bố cục "góc nhìn thần kinh" theo phân khu
+// Không phụ thuộc bên ngoài: trong mỗi phân khu khách quan / POV nhân vật / POV người dùng, dùng giá trị khởi tạo Vogel + ổn định lực định hướng một lần, không rung do vòng lặp khung hình
 
 import { getNodeColors } from './themes.js';
 import {
@@ -36,15 +36,15 @@ const DEFAULT_LAYOUT_CONFIG = {
     labelFontSize: 10,
     gridSpacing: 48,
     gridColor: 'rgba(255,255,255,0.028)',
-    /** 主画布左侧Khách quan区占比（余下为右侧 POV 列） */
+    /** Tỷ lệ khu khách quan ở bên trái canvas chính (phần còn lại là cột POV bên phải) */
     objectiveWidthRatio: 0.62,
-    /** 分区内类神经布局：力导向迭代lần数（Không持续动画，仅一lần性稳定） */
+    /** Bố cục kiểu thần kinh trong phân khu: số vòng lặp lực định hướng (không hoạt họa liên tục, chỉ ổn định một lần) */
     neuralIterations: 120,
     neuralRepulsion: 2800,
     neuralSpringK: 0.048,
     neuralDamping: 0.88,
     neuralCenterGravity: 0.014,
-    /** nút最小间距（除半径外） */
+    /** Khoảng cách tối thiểu giữa các nút (không tính bán kính) */
     neuralMinGap: 12,
 };
 
@@ -94,7 +94,7 @@ function recordGraphLayoutDebugSnapshot(snapshot = null) {
     state.updatedAt = new Date().toISOString();
 }
 
-/** 兼容旧版 forceConfig（Truy hồi卡片等） */
+/** Tương thích forceConfig bản cũ (thẻ truy hồi, v.v.) */
 function layoutKeysFromForceConfig(fc) {
     if (!fc || typeof fc !== 'object') return {};
     const o = {};
@@ -148,7 +148,7 @@ function hashId(id) {
     return h;
 }
 
-/** 与 memory-scope Trung bình normalizeKey 一致，用于分区键（模块内未Xuất故Cục bộ复制） */
+/** Nhất quán với normalizeKey trong memory-scope, dùng cho khóa phân khu (không được export từ mô-đun nên sao chép cục bộ) */
 function normalizeKeyForPartition(value) {
     return String(value ?? '').trim().toLowerCase();
 }
@@ -188,7 +188,7 @@ function partitionNodesByScope(nodes, userPovAliasSet = null) {
             node.regionKey = 'objective';
             continue;
         }
-        // 优先：HostNgười dùng显示名与 ownerName/ownerId 一致时一律归POV người dùng（修正Trích xuất阶段误标 character）
+        // Ưu tiên: khi tên hiển thị người dùng của host khớp với ownerName/ownerId thì luôn quy về POV người dùng (sửa lỗi gắn nhầm thành character ở giai đoạn trích xuất)
         if (scopeMatchesHostUserAliases(scope, aliasSet)) {
             userPov.push(node);
             node.regionKey = 'user';
@@ -200,7 +200,7 @@ function partitionNodesByScope(nodes, userPovAliasSet = null) {
             continue;
         }
         if (scope.ownerType === 'character') {
-            // 与 UUID+姓名、仅姓名 等存法兼容：优先用展示名归并，避免同一Nhân vật拆成多个 POV 区
+            // Tương thích với các cách lưu như UUID+tên, chỉ tên...: ưu tiên gộp theo tên hiển thị để tránh một nhân vật bị tách thành nhiều khu POV
             const nameKey = normalizeKeyForPartition(scope.ownerName);
             const idKey = normalizeKeyForPartition(scope.ownerId);
             const key = nameKey || idKey || '·';
@@ -219,12 +219,12 @@ function partitionNodesByScope(nodes, userPovAliasSet = null) {
 export class GraphRenderer {
     /**
      * @param {HTMLCanvasElement} canvas
-     * @param {string|object} [options] - 主题Tên字符串（向后兼容）或Cấu hìnhđối tượng
-     *   options.theme {string} - 主题Tên
-     *   options.layoutConfig {object} - 布局参数覆盖
-     *   options.forceConfig {object} - 兼容旧力导向Cấu hình（仅Đọcnút半径、网格、局部松弛lần数等）
-     *   options.onNodeClick {function} - nút点击回调
-     *   options.onNodeDoubleClick {function} - nút双击回调
+     * @param {string|object} [options] - chuỗi tên chủ đề (tương thích ngược) hoặc đối tượng cấu hình
+     *   options.theme {string} - chủ đềTên
+     *   options.layoutConfig {object} - ghi đè tham số bố cục
+     *   options.forceConfig {object} - tương thích cấu hình lực định hướng cũ (chỉ đọc bán kính nút, lưới, số lần nới lỏng cục bộ...)
+     *   options.onNodeClick {function} - callback khi nhấn nút
+     *   options.onNodeDoubleClick {function} - callback khi double click nút
      */
     constructor(canvas, options = 'crimson') {
         const isLegacy = typeof options === 'string';
@@ -287,8 +287,8 @@ export class GraphRenderer {
     }
 
     /**
-     * 加载đồ thịDữ liệu
-     * @param {object} graph - 完整的 graph state
+     * tảiđồ thịDữ liệu
+     * @param {object} graph - trạng thái đồ thị hoàn chỉnh
      */
     /**
      * @param {object} graph
@@ -416,7 +416,7 @@ export class GraphRenderer {
                 }
             })
             .catch(() => {
-                // fail-open 路径由 bridge 内部控制
+                // Đường đi fail-open được bridge kiểm soát ở bên trong
             });
     }
 
@@ -457,7 +457,7 @@ export class GraphRenderer {
     }
 
     /**
-     * Cao亮指定nút
+     * Tô sáng nút được chỉ định
      */
     highlightNode(nodeId) {
         this.selectedNode = this.nodeMap.get(nodeId) || null;
@@ -507,7 +507,7 @@ export class GraphRenderer {
         }
     }
 
-    // ==================== 分区布局 ====================
+    // ==================== Bố cục phân khu ====================
 
     _computeRegionPanels(W, H, { objective, userPov, charMap }) {
         const pad = 14;
@@ -526,7 +526,7 @@ export class GraphRenderer {
                 (hasRight ? splitX : W) - pad * 2 - (hasRight ? gutter / 2 : 0),
             ),
             h: Math.max(0, H - pad * 2 - 6),
-            label: 'Khách quan层',
+            label: 'Tầng khách quan',
             tint: 'rgba(26, 35, 50, 0.42)',
             key: 'objective',
         };
@@ -676,7 +676,7 @@ export class GraphRenderer {
     }
 
     /**
-     * 椭圆 Vogel 螺旋初值：有机疏密，Deterministic，Không网格感
+     * Giá trị khởi tạo xoắn ốc Vogel hình elip: thưa dày tự nhiên, deterministic, không có cảm giác lưới
      */
     _seedNeuralCloudInRect(nodes, rect) {
         if (!rect || !nodes.length) return;
@@ -947,7 +947,7 @@ export class GraphRenderer {
     }
 
     /**
-     * 分区内一lần性力导向：斥力 + 同区边弹簧 + 弱向心，稳定后停止（Không帧循环）
+     * Lực định hướng một lần trong phân khu: lực đẩy + lò xo cạnh cùng khu + lực hướng tâm nhẹ, dừng sau khi ổn định (không vòng lặp khung hình)
      */
     _simulateNeuralWithinRegions(iterations) {
         const iters = Math.max(8, Math.min(220, iterations || 80));
@@ -1043,7 +1043,7 @@ export class GraphRenderer {
         node.y = Math.max(rect.y + r, Math.min(rect.y + rect.h - r, node.y));
     }
 
-    // ==================== 渲染 ====================
+    // ==================== kết xuất ====================
 
     _drawRegionPanels(ctx) {
         for (const p of this._regionPanels) {
@@ -1432,7 +1432,7 @@ export class GraphRenderer {
         }
     }
 
-    // ==================== 工具 ====================
+    // ==================== Công cụ ====================
 
     zoomIn() {
         if (!this.enabled) return;

@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -34,13 +34,13 @@ try {
       return {
         name1: "User",
         name2: "Alice",
-        name1_description: "旧 persona 字段",
+        name1_description: "trường persona cũ",
         powerUserSettings: {
-          persona_description: "桥接 persona",
+          persona_description: "cầu nối persona",
           persona_description_lorebook: "persona-book",
         },
         extensionSettings: {
-          persona_description: "扩展 persona",
+          persona_description: "extension persona",
           variables: {
             global: {
               score: 7,
@@ -52,7 +52,7 @@ try {
           {
             avatar: "alice.png",
             data: {
-              description: "Nhân vậtmô tả",
+              description: "Mô tả nhân vật",
               extensions: {
                 world: "char-book",
               },
@@ -66,25 +66,25 @@ try {
           },
         },
         chat: [
-          { is_user: true, mes: "第一句" },
+          { is_user: true, mes: "câu thứ nhất" },
           {
             is_user: false,
             is_system: true,
-            mes: "被 BME 隐藏的trợ lýtầng",
+            mes: "tầng trợ lý bị BME ẩn",
             extra: {
               __st_bme_hide_managed: true,
             },
           },
           {
             is_user: false,
-            mes: "回应",
+            mes: "phản hồi",
             variables: {
               0: {
                 mood: "calm",
               },
             },
           },
-          { is_user: true, mes: "最后一句" },
+          { is_user: true, mes: "câu cuối cùng" },
         ],
         onlineStatus: "gpt-test",
         selectedGroupId: 42,
@@ -104,22 +104,22 @@ try {
 
   const promptContext = getSTContextForPrompt();
   assert.deepEqual(promptContext, {
-    userPersona: "桥接 persona",
-    charDescription: "Nhân vậtmô tả",
+    userPersona: "cầu nối persona",
+    charDescription: "Mô tả nhân vật",
     charName: "Alice",
     userName: "User",
     currentTime: promptContext.currentTime,
   });
 
   const hostSnapshot = getSTContextSnapshot();
-  assert.equal(hostSnapshot.snapshot.persona.text, "桥接 persona");
-  assert.equal(hostSnapshot.snapshot.character.description, "Nhân vậtmô tả");
+  assert.equal(hostSnapshot.snapshot.persona.text, "cầu nối persona");
+  assert.equal(hostSnapshot.snapshot.character.description, "Mô tả nhân vật");
   assert.equal(hostSnapshot.snapshot.character.worldbook, "char-book");
   assert.equal(hostSnapshot.snapshot.worldbook.persona, "persona-book");
   assert.equal(hostSnapshot.snapshot.worldbook.chat, "chat-book");
   assert.equal(hostSnapshot.snapshot.variables.global.score, 7);
   assert.equal(hostSnapshot.snapshot.variables.local.location, "library");
-  assert.equal(hostSnapshot.snapshot.chat.lastUserMessage, "最后一句");
+  assert.equal(hostSnapshot.snapshot.chat.lastUserMessage, "câu cuối cùng");
   assert.equal(hostSnapshot.snapshot.chat.id, "chat-from-global");
   assert.equal(
     hostSnapshot.snapshot.chat.messages[1]?.is_system,
@@ -127,17 +127,17 @@ try {
   );
   assert.equal(
     hostSnapshot.snapshot.chat.messages[1]?.mes,
-    "被 BME 隐藏的trợ lýtầng",
+    "tầng trợ lý bị BME ẩn",
   );
   assert.equal(hostSnapshot.prompt.charName, "Alice");
-  assert.equal(hostSnapshot.prompt.userPersona, "桥接 persona");
+  assert.equal(hostSnapshot.prompt.userPersona, "cầu nối persona");
 
   const substitution = substituteTaskEjsParams(
     "{{charName}}|{{userPersona}}|{{hostSnapshot.worldbook.chat}}|{{stSnapshot.chat.lastUserMessage}}",
     {},
     { hostSnapshot },
   );
-  assert.equal(substitution, "Alice|桥接 persona|chat-book|最后一句");
+  assert.equal(substitution, "Alice|cầu nối persona|chat-book|câu cuối cùng");
 
   const compileCalls = [];
   globalThis.ejs = {
@@ -178,7 +178,7 @@ try {
       char: "AliasAlice",
       userName: "AliasUser",
       charName: "AliasAlice",
-      recentMessages: "Gần nhất上下文",
+      recentMessages: "Gần nhấtngữ cảnh",
       persona: "AliasPersona",
     },
   });
@@ -195,7 +195,7 @@ try {
   const rendered = await evalTaskEjsTemplate("<%= 1 %>", renderCtx);
   assert.equal(
     rendered,
-    "AliasAlice|AliasUser|persona-book|chat-book|7|library|最后一句|Gần nhất上下文|AliasPersona|char-book|最后一句|function",
+    "AliasAlice|AliasUser|persona-book|chat-book|7|library|câu cuối cùng|Gần nhấtngữ cảnh|AliasPersona|char-book|câu cuối cùng|function",
   );
   assert.deepEqual(compileCalls, ["<%= 1 %>", "<%= 1 %>"]);
 
@@ -224,3 +224,4 @@ try {
   globalThis.getCurrentChatId = originalGetCurrentChatId;
   globalThis.ejs = originalEjs;
 }
+

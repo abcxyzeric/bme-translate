@@ -11,7 +11,7 @@ function extractSnippet(startMarker, endMarker) {
   const start = indexSource.indexOf(startMarker);
   const end = indexSource.indexOf(endMarker, start);
   if (start < 0 || end < 0 || end <= start) {
-    throw new Error(`Không法Trích xuất index.js 片段: ${startMarker} -> ${endMarker}`);
+    throw new Error(`Không thểTrích xuất index.js đoạn: ${startMarker} -> ${endMarker}`);
   }
   return indexSource.slice(start, end).replace(/^export\s+/gm, "");
 }

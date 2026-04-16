@@ -1,5 +1,5 @@
-// ST-BME: Trích xuất编排控制器（纯函数）
-// 通过 runtime 依赖Tiêm，避免直接Lượt truy cập index.js 模块级Trạng thái。
+﻿// ST-BME: bộ điều phối trích xuất (hàm thuần)
+// Tiêm phụ thuộc qua runtime, tránh truy cập trực tiếp trạng thái cấp mô-đun của index.js.
 
 import { debugLog } from "../runtime/debug-logging.js";
 import {
@@ -149,7 +149,7 @@ function resolveRerunDialogueTask(chat = [], options = {}) {
     if (!Number.isFinite(Number(latestAssistantDialogueFloor))) {
       return {
         valid: false,
-        reason: "Hiện không có可重提的 AI Phản hồi",
+        reason: "Hiện không có phản hồi AI nào có thể trích xuất lại",
       };
     }
     const normalizedRange = normalizeDialogueFloorRange(
@@ -220,7 +220,7 @@ function buildRerunFallbackInfo(chat = [], targetDialogueRange = [-1, -1]) {
   if (!assistantRange.targeted.length) {
     return {
       valid: false,
-      reason: "目标Phạm vi内没有可重提的 AI Phản hồi",
+      reason: "Trong phạm vi mục tiêu không có phản hồi AI nào có thể trích xuất lại",
       fallbackToLatest: false,
       ...assistantRange,
     };
@@ -240,7 +240,7 @@ function buildRerunFallbackInfo(chat = [], targetDialogueRange = [-1, -1]) {
   return {
     valid: true,
     reason: fallbackToLatest
-      ? "đồ thị hiện tại对中段Phạm vi重提的后缀保留证据不足，已退化为从Tầng bắt đầu到最新重提"
+      ? "Đồ thị hiện tại không đủ bằng chứng giữ lại phần hậu tố cho việc trích xuất lại ở đoạn giữa, đã thoái lui thành trích xuất lại từ tầng bắt đầu tới mới nhất"
       : "",
     fallbackToLatest,
     ...assistantRange,
@@ -417,7 +417,7 @@ async function maybeRetryPendingPersistence(runtime, reason = "pending-persist-r
   return getPendingPersistenceGateInfo(runtime);
 }
 
-function formatPendingPersistenceGateMessage(runtime, operationLabel = "当前Trích xuất") {
+function formatPendingPersistenceGateMessage(runtime, operationLabel = "hiện tạiTrích xuất") {
   const gate = getPendingPersistenceGateInfo(runtime);
   if (!gate) return "";
   const reason = gate.reason ? ` · ${gate.reason}` : "";
@@ -425,7 +425,7 @@ function formatPendingPersistenceGateMessage(runtime, operationLabel = "当前Tr
     Number.isFinite(Number(gate.revision)) && Number(gate.revision) > 0
       ? ` · rev ${Number(gate.revision)}`
       : "";
-  return `${operationLabel}Đã tạm dừng：上一批Lưu bền尚Chưa xác nhận，请先使用“Thử lưu bền lại”或“Thăm dò lại đồ thị”${revision}${reason}`;
+  return `${operationLabel} đã tạm dừng: lô lưu bền trước vẫn chưa xác nhận, hãy dùng "Thử lưu bền lại" hoặc "Thăm dò lại đồ thị" trước${revision}${reason}`;
 }
 
 export function resolveAutoExtractionPlanController(
@@ -573,9 +573,9 @@ export async function executeExtractionBatchController(
   });
 
   debugLog(
-    `[ST-BME] 开始Trích xuất: tầng ${startIdx}-${endIdx}` +
+    `[ST-BME] bắt đầuTrích xuất: tầng ${startIdx}-${endIdx}` +
       (smartTriggerDecision?.triggered
-        ? ` [智能触发 score=${smartTriggerDecision.score}; ${smartTriggerDecision.reasons.join(" / ")}]`
+        ? ` [thông minhkích hoạt score=${smartTriggerDecision.score}; ${smartTriggerDecision.reasons.join(" / ")}]`
         : ""),
   );
 
@@ -594,8 +594,8 @@ export async function executeExtractionBatchController(
       const preview =
         previewText?.length > 60 ? "…" + previewText.slice(-60) : previewText || "";
       runtime.setLastExtractionStatus(
-        "AI 生成中",
-        `${preview}  [${receivedChars}字]`,
+        "AI đang sinh",
+        `${preview}  [${receivedChars} ký tự]`,
         "running",
         { noticeMarquee: true },
       );
@@ -607,13 +607,13 @@ export async function executeExtractionBatchController(
       batchStatus,
       "core",
       "failed",
-      result?.error || "Trích xuất阶段未返回有效Thao tác",
+      result?.error || "Trích xuấtgiai đoạnkhông trả vềhợp lệThao tác",
     );
     runtime.setBatchStageOutcome(
       batchStatus,
       "finalize",
       "failed",
-      "Trích xuất阶段Thất bại，未进入Lưu bền",
+      "Giai đoạn trích xuất thất bại, chưa đi vào lưu bền",
     );
     batchStatus.persistence = null;
     batchStatus.historyAdvanceAllowed = false;
@@ -625,7 +625,7 @@ export async function executeExtractionBatchController(
       result,
       effects: null,
       batchStatus,
-      error: result?.error || "Trích xuất阶段未返回有效Thao tác",
+      error: result?.error || "Trích xuấtgiai đoạnkhông trả vềhợp lệThao tác",
     };
   }
 
@@ -688,8 +688,8 @@ export async function executeExtractionBatchController(
     }
   } else if (!persistence.accepted) {
     runtime.setLastExtractionStatus(
-      "Trích xuất待Khôi phục",
-      `tầng ${startIdx}-${endIdx} 已抽取，但Trạng thái lưu bền为 ${persistence.outcome || "failed"}${persistence.reason ? ` · ${persistence.reason}` : ""}`,
+      "Trích xuất chờ khôi phục",
+      `Tầng ${startIdx}-${endIdx} đã được trích xuất, nhưng trạng thái lưu bền là ${persistence.outcome || "failed"}${persistence.reason ? ` · ${persistence.reason}` : ""}`,
       "warning",
       { syncRuntime: true },
     );
@@ -714,7 +714,7 @@ export async function executeExtractionBatchController(
       ? ""
       : effects?.vectorError ||
         finalizedBatchStatus.errors?.[0] ||
-        "批lần未Hoàn tất finalize 闭环",
+        "Lô hiện tại chưa hoàn tất vòng finalize",
   };
 }
 
@@ -751,7 +751,7 @@ export async function runExtractionController(runtime, options = {}) {
       strategy: plan.strategy,
     });
     runtime.setLastExtractionStatus(
-      "Đang chờđồ thị加载",
+      "Đang chờđồ thịtải",
       runtime.getGraphMutationBlockReason("Tự độngTrích xuất"),
       "warning",
       { syncRuntime: true },
@@ -812,8 +812,8 @@ export async function runExtractionController(runtime, options = {}) {
   const extractionController = runtime.beginStageAbortController("extraction");
   const extractionSignal = extractionController.signal;
   runtime.setLastExtractionStatus(
-    "Trích xuất中",
-    `tầng ${startIdx}-${endIdx}${smartTriggerDecision.triggered ? " · 智能触发" : ""}${triggerSource !== "auto" ? ` · ${triggerSource}` : ""}`,
+    "Đang trích xuất",
+    `tầng ${startIdx}-${endIdx}${smartTriggerDecision.triggered ? " · thông minhkích hoạt" : ""}${triggerSource !== "auto" ? ` · ${triggerSource}` : ""}`,
     "running",
     { syncRuntime: true },
   );
@@ -832,8 +832,8 @@ export async function runExtractionController(runtime, options = {}) {
       const message =
         batchResult.error ||
         batchResult?.result?.error ||
-        "Trích xuất批lần未返回有效Kết quả";
-      runtime.console.warn("[ST-BME] Trích xuất批lần未返回有效Kết quả:", message);
+        "Lô trích xuất không trả về kết quả hợp lệ";
+      runtime.console.warn("[ST-BME] Lô trích xuất không trả về kết quả hợp lệ:", message);
       runtime.notifyExtractionIssue(message);
       return;
     }
@@ -842,14 +842,14 @@ export async function runExtractionController(runtime, options = {}) {
     if (batchResult.historyAdvanceAllowed === false) {
       runtime.setLastExtractionStatus(
         "Trích xuấtHoàn tất，Lưu bềnChờ xác nhận",
-        `tầng ${startIdx}-${endIdx} · Tạo mới ${batchResult.result?.newNodes || 0} · Cập nhật ${batchResult.result?.updatedNodes || 0} · 新边 ${batchResult.result?.newEdges || 0}${persistence?.reason ? ` · ${persistence.reason}` : ""}`,
+        `tầng ${startIdx}-${endIdx} · Tạo mới ${batchResult.result?.newNodes || 0} · Cập nhật ${batchResult.result?.updatedNodes || 0} · cạnh mới ${batchResult.result?.newEdges || 0}${persistence?.reason ? ` · ${persistence.reason}` : ""}`,
         "warning",
         { syncRuntime: true },
       );
     } else {
       runtime.setLastExtractionStatus(
         "Trích xuấtHoàn tất",
-        `tầng ${startIdx}-${endIdx} · Tạo mới ${batchResult.result?.newNodes || 0} · Cập nhật ${batchResult.result?.updatedNodes || 0} · 新边 ${batchResult.result?.newEdges || 0}`,
+        `tầng ${startIdx}-${endIdx} · Tạo mới ${batchResult.result?.newNodes || 0} · Cập nhật ${batchResult.result?.updatedNodes || 0} · cạnh mới ${batchResult.result?.newEdges || 0}`,
         "success",
         { syncRuntime: true },
       );
@@ -858,7 +858,7 @@ export async function runExtractionController(runtime, options = {}) {
     if (runtime.isAbortError(e)) {
       runtime.setLastExtractionStatus(
         "Trích xuấtĐã chấm dứt",
-        e?.message || "已Thủ công终止当前Trích xuất",
+        e?.message || "Đã thủ công chấm dứt lần trích xuất hiện tại",
         "warning",
         {
           syncRuntime: true,
@@ -876,7 +876,7 @@ export async function runExtractionController(runtime, options = {}) {
 
 export async function onManualExtractController(runtime, options = {}) {
   if (runtime.getIsExtracting()) {
-    runtime.toastr.info("Ký ứcTrích xuất正在进行中，请稍候");
+    runtime.toastr.info("Trích xuất ký ức đang diễn ra, vui lòng chờ");
     return;
   }
   const taskLabel = String(options?.taskLabel || "Thủ côngTrích xuất").trim() || "Thủ côngTrích xuất";
@@ -901,7 +901,7 @@ export async function onManualExtractController(runtime, options = {}) {
         syncRuntime: true,
       },
     );
-    runtime.toastr.warning("上一批Lưu bền尚Chưa xác nhận，请先点“Thử lưu bền lại”或“Thăm dò lại đồ thị”");
+    runtime.toastr.warning("Lô lưu bền trước vẫn chưa xác nhận, hãy bấm "Thử lưu bền lại" hoặc "Thăm dò lại đồ thị" trước");
     return;
   }
   if (!(await runtime.recoverHistoryIfNeeded("manual-extract"))) return;
@@ -917,7 +917,7 @@ export async function onManualExtractController(runtime, options = {}) {
   const context = runtime.getContext();
   const chat = context.chat;
   if (!Array.isArray(chat) || chat.length === 0) {
-    runtime.toastr.info("Chat hiện tại为空，暂Không可Trích xuấtNội dung");
+    runtime.toastr.info("Chat hiện tại trống, chưa có nội dung có thể trích xuất");
     return;
   }
 
@@ -929,7 +929,7 @@ export async function onManualExtractController(runtime, options = {}) {
     return true;
   });
   if (pendingAssistantTurns.length === 0) {
-    runtime.toastr.info("没有待Trích xuất的新Phản hồi");
+    runtime.toastr.info("Không có phản hồi mới nào chờ trích xuất");
     return;
   }
 
@@ -949,10 +949,10 @@ export async function onManualExtractController(runtime, options = {}) {
   const extractionSignal = extractionController.signal;
   setExtractionProgressStatus(
     runtime,
-    `${taskLabel}中`,
+    `${taskLabel} đang chạy`,
     lockedEndFloor != null
-      ? `待Xử lý AI Phản hồi ${targetAssistantTurns.length} 条 · 截止 chatIndex ${lockedEndFloor}`
-      : `待Xử lý AI Phản hồi ${targetAssistantTurns.length} 条`,
+      ? `Có ${targetAssistantTurns.length} phản hồi AI đang chờ xử lý · đến chatIndex ${lockedEndFloor}`
+      : `Có ${targetAssistantTurns.length} phản hồi AI đang chờ xử lý`,
     "running",
     {
       syncRuntime: true,
@@ -986,7 +986,7 @@ export async function onManualExtractController(runtime, options = {}) {
         throw new Error(
           batchResult.error ||
             batchResult?.result?.error ||
-            "Thủ côngTrích xuất未返回有效Kết quả",
+            "Thủ côngTrích xuấtkhông trả vềhợp lệKết quả",
         );
       }
 
@@ -1006,10 +1006,10 @@ export async function onManualExtractController(runtime, options = {}) {
       );
       setExtractionProgressStatus(
         runtime,
-        `${taskLabel}中`,
+        `${taskLabel} đang chạy`,
         totalTurnsForDisplay > 0
-          ? `已Xử lý ${processedAssistantTurns}/${totalTurnsForDisplay} 条 AI Phản hồi · 当前tầng ${startIdx}-${endIdx} · 累计 ${totals.batches} 批`
-          : `当前tầng ${startIdx}-${endIdx} · 累计 ${totals.batches} 批`,
+          ? `Đã xử lý ${processedAssistantTurns}/${totalTurnsForDisplay} phản hồi AI · tầng hiện tại ${startIdx}-${endIdx} · cộng dồn ${totals.batches} lô`
+          : `Tầng hiện tại ${startIdx}-${endIdx} · cộng dồn ${totals.batches} lô`,
         "running",
         {
           syncRuntime: true,
@@ -1021,7 +1021,7 @@ export async function onManualExtractController(runtime, options = {}) {
       if (batchResult.historyAdvanceAllowed === false) {
         warnings.push(
           batchResult.batchStatus?.persistence?.reason ||
-            "当前批lầnLưu bền尚Chưa xác nhận",
+            "Lô lưu bền hiện tại vẫn chưa xác nhận",
         );
         break;
       }
@@ -1034,27 +1034,27 @@ export async function onManualExtractController(runtime, options = {}) {
     if (totals.batches === 0) {
       setExtractionProgressStatus(
         runtime,
-        "Không待Trích xuấtNội dung",
+        "Không có nội dung chờ trích xuất",
         lockedEndFloor != null
-          ? "指定Phạm vi内没有新的 assistant Phản hồi需要Xử lý"
-          : "没有新的 assistant Phản hồi需要Xử lý",
+          ? "Trong phạm vi được chỉ định không có phản hồi assistant mới nào cần xử lý"
+          : "không cómới assistant Phản hồicầnXử lý",
         "info",
         {
           syncRuntime: true,
         },
       );
-      runtime.toastr.info("没有待Trích xuất的新Phản hồi");
+      runtime.toastr.info("Không có phản hồi mới nào chờ trích xuất");
       return;
     }
 
     const pendingAfterRun = getPendingPersistenceGateInfo(runtime);
     if (pendingAfterRun) {
       runtime.toastr.warning(
-        `Trích xuấtHoàn tất但Lưu bềnChờ xác nhận：${pendingAfterRun.reason || pendingAfterRun.outcome || "unknown"}`,
+        `Trích xuất hoàn tất nhưng lưu bền đang chờ xác nhận: ${pendingAfterRun.reason || pendingAfterRun.outcome || "unknown"}`,
       );
       runtime.setLastExtractionStatus(
         `${taskLabel}Hoàn tất，Lưu bềnChờ xác nhận`,
-        `${totals.batches} 批 · Tạo mới ${totals.newNodes} · Cập nhật ${totals.updatedNodes} · 新边 ${totals.newEdges}${pendingAfterRun.reason ? ` · ${pendingAfterRun.reason}` : ""}`,
+        `${totals.batches} lô · tạo mới ${totals.newNodes} · cập nhật ${totals.updatedNodes} · cạnh mới ${totals.newEdges}${pendingAfterRun.reason ? ` · ${pendingAfterRun.reason}` : ""}`,
         "warning",
         {
           syncRuntime: true,
@@ -1064,11 +1064,11 @@ export async function onManualExtractController(runtime, options = {}) {
       );
     } else {
       runtime.toastr.success(
-        `Trích xuấtHoàn tất：${totals.batches} 批，Tạo mới ${totals.newNodes}, cập nhật ${totals.updatedNodes}，新边 ${totals.newEdges}`,
+        `Trích xuất hoàn tất: ${totals.batches} lô, tạo mới ${totals.newNodes}, cập nhật ${totals.updatedNodes}, cạnh mới ${totals.newEdges}`,
       );
       runtime.setLastExtractionStatus(
         `${taskLabel}Hoàn tất`,
-        `${totals.batches} 批 · Tạo mới ${totals.newNodes} · Cập nhật ${totals.updatedNodes} · 新边 ${totals.newEdges}`,
+        `${totals.batches} lô · tạo mới ${totals.newNodes} · cập nhật ${totals.updatedNodes} · cạnh mới ${totals.newEdges}`,
         "success",
         {
           syncRuntime: true,
@@ -1086,7 +1086,7 @@ export async function onManualExtractController(runtime, options = {}) {
     if (runtime.isAbortError(e)) {
       runtime.setLastExtractionStatus(
         `${taskLabel}Đã chấm dứt`,
-        e?.message || "已Thủ công终止当前Trích xuất",
+        e?.message || "Đã thủ công chấm dứt lần trích xuất hiện tại",
         "warning",
         {
           syncRuntime: true,
@@ -1129,7 +1129,7 @@ export async function onExtractionTaskController(runtime, options = {}) {
 
   const rerunTask = resolveRerunDialogueTask(chat, options);
   if (!rerunTask.valid) {
-    runtime.toastr?.info?.(rerunTask.reason || "Hiện không có可重提的Phạm vi");
+    runtime.toastr?.info?.(rerunTask.reason || "Hiện không có phạm vi nào có thể trích xuất lại");
     return {
       success: false,
       rerunPerformed: false,
@@ -1145,7 +1145,7 @@ export async function onExtractionTaskController(runtime, options = {}) {
     rerunTask.endFloor,
   ]);
   if (!fallbackInfo.valid) {
-    runtime.toastr?.info?.(fallbackInfo.reason || "目标Phạm vi内没有可重提的 AI Phản hồi");
+    runtime.toastr?.info?.(fallbackInfo.reason || "Trong phạm vi mục tiêu không có phản hồi AI nào có thể trích xuất lại");
     return {
       success: false,
       rerunPerformed: false,
@@ -1170,10 +1170,10 @@ export async function onExtractionTaskController(runtime, options = {}) {
 
   setExtractionProgressStatus(
     runtime,
-    "Trích xuất lại准备中",
+    "Trích xuất lạiđang chuẩn bị",
     fallbackInfo.fallbackToLatest
-      ? `Phạm vi ${rerunTask.startFloor} ~ ${rerunTask.endFloor} 命中旧批lần，但当前将退化为从 ${effectiveDialogueRange[0]} 到最新重提`
-      : `准备重提Phạm vi ${rerunTask.startFloor} ~ ${rerunTask.endFloor}`,
+      ? `Phạm vi ${rerunTask.startFloor} ~ ${rerunTask.endFloor} khớp với lô cũ, nhưng hiện tại sẽ thoái lui thành trích xuất lại từ ${effectiveDialogueRange[0]} tới mới nhất`
+      : `chuẩn bịtrích xuất lạiPhạm vi ${rerunTask.startFloor} ~ ${rerunTask.endFloor}`,
     fallbackInfo.fallbackToLatest ? "warning" : "running",
     {
       syncRuntime: true,
@@ -1191,8 +1191,8 @@ export async function onExtractionTaskController(runtime, options = {}) {
       rollbackResult?.error ||
         rollbackResult?.reason ||
         rollbackResult?.recoveryPath ||
-        "回滚Thất bại",
-    ).trim() || "回滚Thất bại";
+        "hoàn tácThất bại",
+    ).trim() || "hoàn tácThất bại";
     setExtractionProgressStatus(
       runtime,
       "Trích xuất lạiThất bại",
@@ -1205,7 +1205,7 @@ export async function onExtractionTaskController(runtime, options = {}) {
       },
     );
     runtime.toastr?.warning?.(
-      `Trích xuất lại未开始：${rollbackError}`,
+      `Trích xuất lại chưa bắt đầu: ${rollbackError}`,
       "ST-BME Trích xuất lại",
       {
         timeOut: 4500,
@@ -1228,11 +1228,11 @@ export async function onExtractionTaskController(runtime, options = {}) {
 
   const rollbackDesc =
     rollbackResult.effectiveFromFloor !== fallbackInfo.startAssistantChatIndex
-      ? `已按批lần边界回滚到tầng ${rollbackResult.effectiveFromFloor}，正在开始Trích xuất lại`
-      : `已回滚到tầng ${fallbackInfo.startAssistantChatIndex}，正在开始Trích xuất lại`;
+      ? `Đã hoàn tác tới tầng ${rollbackResult.effectiveFromFloor} theo ranh giới lô, đang bắt đầu trích xuất lại`
+      : `Đã hoàn tác tới tầng ${fallbackInfo.startAssistantChatIndex}, đang bắt đầu trích xuất lại`;
   setExtractionProgressStatus(
     runtime,
-    "Trích xuất lại中",
+    "Đang trích xuất lại",
     rollbackDesc,
     "running",
     {
@@ -1267,7 +1267,7 @@ export async function onExtractionTaskController(runtime, options = {}) {
 
 export async function onRerollController(runtime, { fromFloor } = {}) {
   if (runtime.getIsExtracting?.()) {
-    runtime.toastr?.info?.("Ký ứcTrích xuất正在进行中，请稍候");
+    runtime.toastr?.info?.("Trích xuất ký ức đang diễn ra, vui lòng chờ");
     return {
       success: false,
       rollbackPerformed: false,
@@ -1276,7 +1276,7 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
       effectiveFromFloor: null,
       recoveryPath: "busy",
       affectedBatchCount: 0,
-      error: "Ký ứcTrích xuất正在进行中",
+      error: "Trích xuất ký ức đang diễn ra",
     };
   }
 
@@ -1295,12 +1295,12 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
       error:
         typeof runtime.getGraphMutationBlockReason === "function"
           ? runtime.getGraphMutationBlockReason("Trích xuất lại")
-          : "Trích xuất lạiĐã tạm dừng：đồ thị尚未就绪。",
+          : "Trích xuất lạiĐã tạm dừng：đồ thịvẫn chưasẵn sàng。",
     };
   }
 
   if (!runtime.getCurrentGraph?.()) {
-    runtime.toastr?.info?.("đồ thị为空，Không需重 Roll");
+    runtime.toastr?.info?.("Đồ thị đang trống, không cần re-roll");
     return {
       success: false,
       rollbackPerformed: false,
@@ -1309,14 +1309,14 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
       effectiveFromFloor: null,
       recoveryPath: "empty-graph",
       affectedBatchCount: 0,
-      error: "đồ thị为空",
+      error: "đồ thịtrống",
     };
   }
 
   const context = runtime.getContext();
   const chat = context?.chat;
   if (!Array.isArray(chat) || chat.length === 0) {
-    runtime.toastr?.info?.("Chat hiện tại为空");
+    runtime.toastr?.info?.("Chat hiện tạitrống");
     return {
       success: false,
       rollbackPerformed: false,
@@ -1325,7 +1325,7 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
       effectiveFromFloor: null,
       recoveryPath: "empty-chat",
       affectedBatchCount: 0,
-      error: "Chat hiện tại为空",
+      error: "Chat hiện tạitrống",
     };
   }
 
@@ -1333,7 +1333,7 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
   if (targetFloor === null) {
     const assistantTurns = runtime.getAssistantTurns(chat);
     if (assistantTurns.length === 0) {
-      runtime.toastr?.info?.("聊天中没有 AI Phản hồi");
+      runtime.toastr?.info?.("Trong chat không có phản hồi AI");
       return {
         success: false,
         rollbackPerformed: false,
@@ -1342,7 +1342,7 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
         effectiveFromFloor: null,
         recoveryPath: "no-assistant-turn",
         affectedBatchCount: 0,
-        error: "聊天中没有 AI Phản hồi",
+        error: "Trong chat không có phản hồi AI",
       };
     }
     targetFloor = assistantTurns[assistantTurns.length - 1];
@@ -1350,15 +1350,15 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
 
   setExtractionProgressStatus(
     runtime,
-    "Trích xuất lại准备中",
+    "Trích xuất lạiđang chuẩn bị",
     Number.isFinite(targetFloor)
-      ? `准备从tầng ${targetFloor} 开始回滚并Trích xuất lại`
-      : "准备回滚最新 AI 楼并Trích xuất lại",
+      ? `Chuẩn bị bắt đầu hoàn tác và trích xuất lại từ tầng ${targetFloor}`
+      : "Chuẩn bị hoàn tác tầng AI mới nhất và trích xuất lại",
     "running",
     {
       syncRuntime: true,
       toastKind: "info",
-      toastTitle: "ST-BME 重 Roll",
+      toastTitle: "ST-BME Re-roll",
     },
   );
 
@@ -1366,7 +1366,7 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
   const alreadyExtracted = targetFloor <= lastProcessed;
 
   if (!alreadyExtracted) {
-    runtime.toastr?.info?.("该tầng尚未Trích xuất，直接执行Trích xuất…", "ST-BME 重 Roll", {
+    runtime.toastr?.info?.("Tầng này vẫn chưa được trích xuất, sẽ trực tiếp thực thi trích xuất...", "ST-BME Re-roll", {
       timeOut: 2000,
     });
     await runtime.onManualExtract();
@@ -1383,7 +1383,7 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
     };
   }
 
-  debugLog(`[ST-BME] 重 Roll 开始，目标tầng: ${targetFloor}`);
+  debugLog(`[ST-BME] Bắt đầu re-roll, tầng mục tiêu: ${targetFloor}`);
   let rollbackResult;
   try {
     rollbackResult = await runtime.rollbackGraphForReroll(targetFloor, context);
@@ -1391,8 +1391,8 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
     if (runtime.isAbortError(e)) {
       setExtractionProgressStatus(
         runtime,
-        "Trích xuất lại已Hủy",
-        e.message || "聊天已切换",
+        "Trích xuất lại đã bị hủy",
+        e.message || "Chat đã chuyển đổi",
         "warning",
         {
           syncRuntime: true,
@@ -1406,7 +1406,7 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
         effectiveFromFloor: null,
         recoveryPath: "aborted",
         affectedBatchCount: 0,
-        error: e.message || "聊天已切换，Trích xuất lại已Hủy",
+        error: e.message || "Chat đã chuyển đổi, trích xuất lại đã bị hủy",
       };
     }
     throw e;
@@ -1416,33 +1416,33 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
     setExtractionProgressStatus(
       runtime,
       "Trích xuất lạiThất bại",
-      rollbackResult.error || "回滚Thất bại",
+      rollbackResult.error || "hoàn tácThất bại",
       "error",
       {
         syncRuntime: true,
       },
     );
-    runtime.toastr?.error?.(rollbackResult.error, "ST-BME 重 Roll");
+    runtime.toastr?.error?.(rollbackResult.error, "ST-BME Re-roll");
     return rollbackResult;
   }
 
   const rerollDesc =
     rollbackResult.effectiveFromFloor !== targetFloor
-      ? `已按批lần边界回滚到tầng ${rollbackResult.effectiveFromFloor} 开始Trích xuất lại…`
-      : `已回滚到tầng ${targetFloor} 开始Trích xuất lại…`;
-  runtime.toastr?.info?.(rerollDesc, "ST-BME 重 Roll", {
+      ? `Đã hoàn tác tới tầng ${rollbackResult.effectiveFromFloor} theo ranh giới lô, chuẩn bị bắt đầu trích xuất lại...`
+      : `Đã hoàn tác tới tầng ${targetFloor}, chuẩn bị bắt đầu trích xuất lại...`;
+  runtime.toastr?.info?.(rerollDesc, "ST-BME Re-roll", {
     timeOut: 2500,
   });
 
   setExtractionProgressStatus(
     runtime,
-    "Trích xuất lại中",
+    "Đang trích xuất lại",
     rerollDesc,
     "running",
     {
       syncRuntime: true,
       toastKind: "",
-      toastTitle: "ST-BME 重 Roll",
+      toastTitle: "ST-BME Re-roll",
     },
   );
 
@@ -1454,3 +1454,4 @@ export async function onRerollController(runtime, { fromFloor } = {}) {
     extractionStatus: runtime.getLastExtractionStatusLevel?.() || "idle",
   };
 }
+

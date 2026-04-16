@@ -41,7 +41,7 @@ function resolveProviderCandidate(candidate, options = {}) {
       const resolved = candidate(options);
       return isObjectLike(resolved) ? resolved : null;
     } catch (error) {
-      debugDebug("[ST-BME] host-adapter/worldbook provider 解析Thất bại", error);
+      debugDebug("[ST-BME] host-adapter/worldbook provider phân tíchThất bại", error);
       return null;
     }
   }
@@ -204,19 +204,19 @@ function detectWorldbookMode(apiMap = {}) {
 
 function buildFallbackReason(sourceRecord, available, mode) {
   if (!available) {
-    return "未检测到世界书HostGiao diện";
+    return "Không phát hiện giao diện host World Info";
   }
 
   if (sourceRecord?.fallback && mode === "partial") {
-    return `当前通过 ${sourceRecord.label} fallback 提供部分世界书能力`;
+    return `Hiện tại đang cung cấp một phần năng lực World Info qua fallback ${sourceRecord.label}`;
   }
 
   if (sourceRecord?.fallback) {
-    return `当前通过 ${sourceRecord.label} fallback 提供世界书能力`;
+    return `Hiện tại đang cung cấp năng lực World Info qua fallback ${sourceRecord.label}`;
   }
 
   if (mode === "partial") {
-    return `世界书桥接仅发现部分Giao diện，Nguồn: ${sourceRecord?.label || "unknown"}`;
+    return `Cầu nối World Info chỉ phát hiện được một phần giao diện, nguồn: ${sourceRecord?.label || "unknown"}`;
   }
 
   return "";

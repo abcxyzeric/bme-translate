@@ -8,7 +8,7 @@ const DEFAULT_TYPE_LABELS = Object.freeze({
   location: "Địa điểm",
   rule: "Quy tắc",
   thread: "tuyến chính",
-  synopsis: "Toàn cục概要（旧）",
+  synopsis: "Tóm lược toàn cục (cũ)",
   reflection: "Phản tư",
   pov_memory: "Ký ức chủ quan",
 });
@@ -103,7 +103,7 @@ export function buildGraphOverview(
   schema = [],
   relevantReferenceMap = null,
   {
-    relevantHeading = "与当前Tác vụ最相关的既有nút",
+    relevantHeading = "Các nút đã có liên quan nhất tới tác vụ hiện tại",
   } = {},
 ) {
   const activeNodes = graph?.nodes
@@ -115,7 +115,7 @@ export function buildGraphOverview(
 
   const typeLabelMap = createTypeLabelMap(schema);
   const typeCounts = listGraphTypeCounts(activeNodes, schema, typeLabelMap);
-  const lines = ["### Nút đồ thị统计"];
+  const lines = ["### Nút đồ thịthống kê"];
 
   for (const entry of typeCounts) {
     lines.push(`  - ${entry.label}: ${entry.count}`);
@@ -125,7 +125,7 @@ export function buildGraphOverview(
     ? relevantReferenceMap.references
     : [];
   if (references.length > 0) {
-    lines.push("", `### ${String(relevantHeading || "与当前Tác vụ最相关的既有nút").trim() || "与当前Tác vụ最相关的既有nút"}`);
+    lines.push("", `### ${String(relevantHeading || "Các nút đã có liên quan nhất tới tác vụ hiện tại").trim() || "Các nút đã có liên quan nhất tới tác vụ hiện tại"}`);
     for (const reference of references) {
       const typeLabel =
         String(reference?.meta?.typeLabel || reference?.meta?.type || "nút").trim() ||
@@ -155,7 +155,7 @@ export async function buildTaskGraphStats({
   signal,
   activeNodes = null,
   rankingOptions = {},
-  relevantHeading = "与当前Tác vụ最相关的既有nút",
+  relevantHeading = "Các nút đã có liên quan nhất tới tác vụ hiện tại",
   maxRelevantNodes = 6,
   prefix = "G",
   maxLabelLength = 28,

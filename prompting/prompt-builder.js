@@ -1,5 +1,5 @@
 // ST-BME: Prompt Builder
-// 统一负责Preset tác vụ块排序、变量渲染，以及世界书/EJS 上下文接入。
+// Chịu trách nhiệm thống nhất cho việc sắp xếp khối preset tác vụ, kết xuất biến, cùng với việc nối World Info/EJS vào ngữ cảnh.
 
 import { debugLog, debugWarn } from "../runtime/debug-logging.js";
 import { getActiveTaskProfile, getLegacyPromptForTask } from "./prompt-profiles.js";
@@ -494,11 +494,11 @@ function isPromptMessageArray(value) {
 }
 
 export const EXTRACTION_CONTEXT_REVIEW_HEADER =
-  "--- 以下是上下文回顾（已Trích xuất过），仅供理解剧情 ---";
+  "--- Dưới đây là ngữ cảnh nhìn lại (đã từng được trích xuất), chỉ dùng để hiểu cốt truyện ---";
 export const EXTRACTION_TARGET_CONTENT_HEADER =
-  "--- 以下是本lần需要Trích xuấtKý ức的新对话Nội dung ---";
+  "--- sau đây là phầnlầncầnTrích xuấtKý ứcmới củahội thoạiNội dung ---";
 export const RECALL_TARGET_CONTENT_HEADER =
-  "--- 以下是本lần需要Truy hồiKý ức的新对话Nội dung ---";
+  "--- sau đây là phầnlầncầnTruy hồiKý ứcmới củahội thoạiNội dung ---";
 
 function getPromptMessageContextGroup(value) {
   const descriptor = getPromptMessageLikeDescriptor(value);

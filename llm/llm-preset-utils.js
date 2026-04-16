@@ -17,8 +17,8 @@ function normalizeLlmConfigValue(value) {
    nanogpt: "NanoGPT",
    chutes: "Chutes",
    electronhub: "ElectronHub",
-   "volcengine-ark": "火山方舟 Ark",
-   "custom-openai-compatible": "自định nghĩa OpenAI 兼容渠道",
+   "volcengine-ark": "Volcano Ark",
+   "custom-openai-compatible": "Kênh tương thích OpenAI tự định nghĩa",
  };
 
  function tryParseLlmUrl(value) {
@@ -129,7 +129,7 @@ function normalizeLlmConfigValue(value) {
        providerId: "custom-openai-compatible",
        providerLabel: OPENAI_COMPATIBLE_PROVIDER_LABELS["custom-openai-compatible"],
        transportId: "dedicated-openai-compatible",
-       transportLabel: "专用 OpenAI 兼容Giao diện",
+       transportLabel: "dành riêng OpenAI tương thíchGiao diện",
        hostSource: "custom",
        hostSourceConst: "CUSTOM",
        routeMode: "custom",
@@ -191,7 +191,7 @@ function normalizeLlmConfigValue(value) {
        OPENAI_COMPATIBLE_PROVIDER_LABELS[providerId] ||
        OPENAI_COMPATIBLE_PROVIDER_LABELS["custom-openai-compatible"],
      transportId: "dedicated-openai-compatible",
-     transportLabel: "专用 OpenAI 兼容Giao diện",
+     transportLabel: "dành riêng OpenAI tương thíchGiao diện",
      hostSource: "custom",
      hostSourceConst: "CUSTOM",
      routeMode: "custom",

@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -118,7 +118,7 @@ function extractSnippet(startMarker, endMarker) {
   const start = indexSource.indexOf(startMarker);
   const end = indexSource.indexOf(endMarker);
   if (start < 0 || end < 0 || end <= start) {
-    throw new Error(`Không法Trích xuất index.js 片段: ${startMarker} -> ${endMarker}`);
+    throw new Error(`Không thểTrích xuất index.js đoạn: ${startMarker} -> ${endMarker}`);
   }
   return indexSource.slice(start, end).replace(/^export\s+/gm, "");
 }
@@ -1417,7 +1417,7 @@ result = {
         mes: "Người dùngtầng",
         extra: {
           bme_recall: buildPersistedRecallRecord({
-            injectionText: "已Lưu bền的Truy hồiTiêm",
+            injectionText: "Khối truy hồi đã lưu bền được tiêm",
             selectedNodeIds: [],
             nowIso: "2026-01-01T00:00:00.000Z",
           }),
@@ -1437,7 +1437,7 @@ result = {
 
   assert.equal(result.synced, true);
   assert.equal(harness.api.getGraphPersistenceState().dbReady, true);
-  assert.equal(harness.api.getLastInjectionContent(), "已Lưu bền的Truy hồiTiêm");
+  assert.equal(harness.api.getLastInjectionContent(), "Khối truy hồi đã lưu bền được tiêm");
   assert.equal(harness.api.getLastRecalledItems().length, 1);
   assert.equal(harness.api.getLastRecalledItems()[0]?.id, "restore-node");
 }
@@ -1589,7 +1589,7 @@ result = {
   assert.equal(
     harness.api.getIndexedDbSnapshotForChat(repairedChatId)?.nodes?.length > 0,
     true,
-    "metadata 暂载đồ thị应Tự động回填到Cục bộ存储",
+    "đồ thị tạm nạp từ metadata nên tự động bù lại vào lưu trữ cục bộ",
   );
 }
 
@@ -1652,12 +1652,12 @@ result = {
   assert.equal(
     result.loadState,
     "loading",
-    "Khôngđồ thịDữ liệu时应进入 IndexedDB 探测Đang chờ态",
+    "khi không có dữ liệu đồ thị thì nên vào trạng thái chờ thăm dò IndexedDB",
   );
   assert.equal(
     result.reason,
     "indexeddb-probe-pending",
-    "应继续Đang chờ IndexedDB 探测Kết quả",
+    "nên tiếp tục chờ kết quả thăm dò IndexedDB",
   );
   assert.equal(live.writesBlocked, true);
 }
@@ -1678,7 +1678,7 @@ result = {
   assert.equal(
     harness.api.getGraphPersistenceLiveState().writesBlocked,
     true,
-    "Không IndexedDB 命中时应维持 loading Đang chờ探测Kết quả",
+    "khi không khớp IndexedDB thì nên giữ loading để chờ kết quả thăm dò",
   );
 }
 
@@ -1730,7 +1730,7 @@ result = {
   assert.equal(harness.runtimeContext.__globalSaveCalls, 0);
 
   const shadow = harness.api.readGraphShadowSnapshot("chat-blocked");
-  assert.equal(shadow, null, "IndexedDB 主路径不再依赖会话Snapshot bóng");
+  assert.equal(shadow, null, "đường chính IndexedDB không còn phụ thuộc vào snapshot bóng");
   assert.equal(
     harness.api.readRuntimeDebugSnapshot().graphPersistence
       ?.queuedPersistRevision,
@@ -1764,7 +1764,7 @@ result = {
   assert.equal(
     harness.api.readGraphShadowSnapshot("chat-empty"),
     null,
-    "空图不应污染Snapshot bóng",
+    "đồ thị rỗng không nên làm bẩn snapshot bóng",
   );
 }
 
@@ -1787,13 +1787,13 @@ result = {
   assert.equal(
     harness.runtimeContext.__chatContext.chatMetadata,
     undefined,
-    "onMessageReceived 不应在 loading 期间写回 chat metadata",
+    "onMessageReceived không nên ghi ngược metadata chat trong lúc loading",
   );
   assert.equal(harness.runtimeContext.__contextSaveCalls, 0);
   assert.equal(
     harness.api.readGraphShadowSnapshot("chat-message"),
     null,
-    "onMessageReceived 不再依赖 shadow snapshot 兜底",
+    "onMessageReceived không còn lấy shadow snapshot làm đường lui",
   );
 }
 
@@ -1887,7 +1887,7 @@ result = {
   assert.equal(
     harness.api.getCurrentGraph().nodes[0]?.fields?.title,
     "Sự kiện-fresh-indexeddb",
-    "download/merge 后应刷新当前运行时đồ thị",
+    "sau download/merge nên làm mới đồ thị runtime hiện tại",
   );
 }
 
@@ -1932,7 +1932,7 @@ result = {
   assert.equal(
     harness.api.getCurrentGraph().nodes[0]?.fields?.title,
     "Sự kiện-fresh-indexeddb-merge",
-    "merge 后应刷新当前运行时đồ thị",
+    "sau merge nên làm mới đồ thị runtime hiện tại",
   );
 }
 
@@ -1967,7 +1967,7 @@ result = {
   assert.equal(
     harness.api.getCurrentGraph().nodes[0]?.fields?.title,
     "Sự kiện-active-runtime",
-    "active chat 与 sync payload chat 不一致时不应覆盖当前运行时đồ thị",
+    "khi chat đang hoạt động và chat của sync payload không nhất quán thì không nên phủ lên đồ thị runtime hiện tại",
   );
 }
 
@@ -2002,7 +2002,7 @@ result = {
   assert.equal(
     result.synced,
     false,
-    "hostChatId 与 integrity 只是同一聊天的不同身份时，不应误判为需要重新加载",
+    "khi hostChatId và integrity chỉ là hai danh tính khác nhau của cùng một chat thì không nên phán nhầm là cần tải lại",
   );
   assert.equal(result.reason, "no-sync-needed");
 }
@@ -2057,17 +2057,17 @@ result = {
   assert.equal(
     result.staleDetail?.reason,
     "runtime-revision-newer",
-    "同聊天较旧的 IndexedDB snapshot应被识别为过期",
+    "snapshot IndexedDB cũ hơn của cùng chat nên bị nhận diện là đã hết hạn",
   );
   assert.equal(
     harness.api.getCurrentGraph().nodes[0]?.fields?.title,
     "Sự kiện-runtime-newer",
-    "较旧的 IndexedDB snapshot不得覆盖当前更近的运行时đồ thị",
+    "snapshot IndexedDB cũ hơn không được phủ lên đồ thị runtime mới hơn hiện tại",
   );
   assert.equal(
     harness.api.getGraphPersistenceLiveState().loadState,
     "loaded",
-    "拒绝旧snapshot后不应把đồ thị hiện tại重新打回 loading",
+    "sau khi từ chối snapshot cũ thì không nên đẩy đồ thị hiện tại trở lại loading",
   );
 }
 
@@ -2103,7 +2103,7 @@ result = {
   assert.equal(
     result.synced,
     false,
-    "hostChatId 与 integrity 只是同一聊天的不同身份时，面板打开不应误判成要重新Đồng bộ",
+    "khi hostChatId và integrity chỉ là hai danh tính khác nhau của cùng một chat thì lúc mở bảng không nên phán nhầm là cần đồng bộ lại",
   );
   assert.equal(result.reason, "no-sync-needed");
 }
@@ -2142,7 +2142,7 @@ result = {
   assert.equal(
     plan.shouldRefresh,
     false,
-    "健康态的面板打开不应每lần都强刷Engine cục bộ绑定",
+    "bảng mở ở trạng thái khỏe không nên mỗi lần đều cưỡng ép làm tươi engine gắn cục bộ",
   );
   assert.equal(Array.isArray(plan.reasons), true);
   assert.equal(plan.reasons.length, 0);
@@ -2223,7 +2223,7 @@ result = {
   assert.equal(
     plan.reasons.includes("capability-retryable-failure"),
     true,
-    "可Khôi phục的 OPFS 探测Thất bại应在面板打开时触发重新探测",
+    "khi thăm dò OPFS có thể khôi phục bị lỗi thì lúc mở bảng nên kích hoạt thăm dò lại",
   );
 }
 
@@ -2258,7 +2258,7 @@ result = {
   assert.equal(
     result.reason,
     "luker-chat-state-probe-pending",
-    "Luker 面板打开时应进入 chat-state probe，而不是抛出未định nghĩa变量异常",
+    "khi mở bảng trong Luker nên đi vào chat-state probe, thay vì ném lỗi biến chưa định nghĩa",
   );
   assert.equal(result.attemptIndex, 0);
   assert.equal(harness.api.getGraphPersistenceState().loadState, "loading");
@@ -2311,7 +2311,7 @@ result = {
   assert.equal(
     harness.api.getCurrentGraph().nodes[0]?.fields?.title,
     "Sự kiện-runtime-newer",
-    "较旧的 metadata 兼容图不得把当前运行时đồ thị盖回去",
+    "đồ thị tương thích metadata cũ hơn không được đè ngược đồ thị runtime hiện tại",
   );
 }
 
@@ -2388,7 +2388,7 @@ result = {
   assert.equal(
     reader.api.readGraphShadowSnapshot("chat-official")?.reason,
     "stale-shadow",
-    "metadata 兼容加载时保留Snapshot bóng仅作为兼容Dữ liệu，不参与主链路",
+    "khi tải metadata tương thích, snapshot bóng chỉ nên được giữ làm dữ liệu tương thích, không tham gia luồng xử lý chính",
   );
 }
 
@@ -2450,7 +2450,7 @@ result = {
   assert.equal(
     reader.api.readGraphShadowSnapshot("chat-shadow-newer")?.reason,
     "pagehide-refresh",
-    "metadata 兼容加载后Snapshot bóng可保留，但不作为主链路Khôi phụcNguồn",
+    "sau khi tải metadata tương thích, snapshot bóng có thể được giữ lại nhưng không được dùng làm nguồn khôi phục của luồng chính",
   );
   const live = reader.api.getGraphPersistenceLiveState();
   assert.equal(live.shadowSnapshotRevision, 9);
@@ -2568,17 +2568,17 @@ result = {
   assert.equal(
     harness.runtimeContext.__contextImmediateSaveCalls,
     0,
-    "空聊天的被动Đồng bộ不应触发立即Lưu",
+    "đồng bộ thụ động của chat rỗng không nên kích hoạt lưu ngay",
   );
   assert.equal(
     harness.runtimeContext.__contextSaveCalls,
     0,
-    "空聊天的被动Đồng bộ不应触发防抖Lưu",
+    "đồng bộ thụ động của chat rỗng không nên kích hoạt lưu chống rung",
   );
   assert.equal(
     harness.runtimeContext.__chatContext.chatMetadata?.st_bme_graph,
     undefined,
-    "loading Trạng thái下不能把空图被动写回 metadata",
+    "ở trạng thái loading không được bị động ghi đồ thị rỗng ngược về metadata",
   );
 }
 
@@ -2602,7 +2602,7 @@ result = {
   assert.equal(
     harness.api.getGraphPersistenceState().loadState,
     "blocked",
-    "IndexedDB manager Không khả dụng时，重试耗尽后不应永久停留在 loading",
+    "khi IndexedDB manager không khả dụng, sau khi dùng hết lượt thử lại thì không nên kẹt loading vĩnh viễn",
   );
   assert.equal(
     harness.api.getGraphPersistenceState().reason,
@@ -2702,7 +2702,7 @@ result = {
   assert.equal(
     harness.api.getGraphPersistenceState().loadState,
     "blocked",
-    "IndexedDB ĐọcThất bại时，重试耗尽后不应永久停留在 loading",
+    "khi đọc IndexedDB thất bại, sau khi dùng hết lượt thử lại thì không nên kẹt loading vĩnh viễn",
   );
   assert.equal(
     harness.api.getGraphPersistenceState().reason,
@@ -2741,7 +2741,7 @@ result = {
    assert.equal(
      harness.api.getGraphPersistenceState().loadState,
      "empty-confirmed",
-     "当 accepted commit marker 已成孤儿且Cục bộ不存在可Khôi phụcđồ thị源时，应Tự động降级为 empty-confirmed",
+     "khi accepted commit marker đã thành mồ côi và cục bộ không còn nguồn đồ thị có thể khôi phục, nên tự động hạ cấp về empty-confirmed",
    );
    assert.match(
      String(harness.api.getGraphPersistenceState().reason || ""),
@@ -2855,7 +2855,7 @@ result = {
     harness.runtimeContext.__chatContext.chatMetadata?.integrity ===
       "integrity-before-first-save",
     true,
-    "插件Lưuđồ thị时不能改写Host metadata.integrity",
+    "khi plugin lưu đồ thị thì không được viết lại host metadata.integrity",
   );
   assert.equal(
     harness.runtimeContext.__chatContext.chatMetadata?.st_bme_graph,
@@ -2940,21 +2940,21 @@ result = {
   assert.notEqual(
     persistedGraph,
     harness.api.getCurrentGraph(),
-    "写入 metadata 时必须使用独立 graph snapshot",
+    "khi ghi vào metadata bắt buộc phải dùng graph snapshot độc lập",
   );
 
   persistedGraph.nodes[0].fields.title = "metadata-mutated";
   assert.equal(
     harness.api.getCurrentGraph().nodes[0].fields.title,
     "Sự kiện-runtime",
-    "metadata 修改不能反向污染运行时 graph",
+    "chỉnh sửa metadata không được làm bẩn ngược runtime graph",
   );
 
   harness.api.getCurrentGraph().nodes[0].fields.title = "runtime-mutated";
   assert.equal(
     persistedGraph.nodes[0].fields.title,
     "metadata-mutated",
-    "运行时修改不能反向污染已Lưu metadata",
+    "chỉnh sửa runtime không được làm bẩn ngược metadata đã lưu",
   );
 }
 
@@ -2988,14 +2988,14 @@ result = {
   assert.notEqual(
     runtimeGraph,
     persistedGraph,
-    "从 official metadata Khôi phục到运行时必须使用独立đối tượng",
+    "khôi phục từ official metadata vào runtime bắt buộc phải dùng đối tượng độc lập",
   );
 
   runtimeGraph.nodes[0].fields.title = "runtime-after-load";
   assert.equal(
     persistedGraph.nodes[0].fields.title,
     "Sự kiện-official",
-    "official metadata 不应被运行时修改污染",
+    "official metadata không nên bị chỉnh sửa runtime làm bẩn",
   );
 }
 
@@ -3055,7 +3055,7 @@ result = {
   assert.notEqual(
     runtimeGraph,
     persistedGraph,
-    "从 shadow snapshot 提升后，运行时与 metadata 也必须解耦",
+    "sau khi nâng từ shadow snapshot, runtime và metadata cũng bắt buộc phải tách rời",
   );
 
   runtimeGraph.nodes[0].fields.title = "runtime-shadow-mutated";
@@ -3066,7 +3066,7 @@ result = {
   assert.equal(
     persistedGraph.nodes[0].fields.title,
     "Sự kiện-official-older",
-    "metadata 兼容加载后的运行时修改不能污染已Lưu metadata",
+    "chỉnh sửa runtime sau khi tải metadata tương thích không được làm bẩn metadata đã lưu",
   );
 }
 
@@ -3099,7 +3099,7 @@ result = {
   assert.equal(
     firstPersistedGraph.nodes[0].fields.title,
     "Sự kiện-first",
-    "第一lầnLưu后的 metadata 不应被后续运行时修改污染",
+    "metadata sau lần lưu thứ nhất không nên bị các chỉnh sửa runtime về sau làm bẩn",
   );
 
   harness.api.setGraphPersistenceState({ revision: 2 });
@@ -3115,24 +3115,24 @@ result = {
   assert.notEqual(
     secondPersistedGraph,
     firstPersistedGraph,
-    "第二lầnLưu应生成新的 metadata graph snapshot",
+    "lần lưu thứ hai nên tạo mới metadata graph snapshot",
   );
   assert.equal(
     secondPersistedGraph.nodes[0].fields.title,
     "runtime-between-saves",
-    "第二lầnLưu应反映第二轮运行时修改",
+    "lần lưu thứ hai nên phản ánh các chỉnh sửa runtime của vòng hai",
   );
   harness.api.getCurrentGraph().nodes[0].fields.title =
     "runtime-after-second-save";
   assert.equal(
     firstPersistedGraph.nodes[0].fields.title,
     "Sự kiện-first",
-    "第二轮运行时修改仍不能污染第一lần已Lưu metadata",
+    "các chỉnh sửa runtime của vòng hai vẫn không được làm bẩn metadata đã lưu ở lần thứ nhất",
   );
   assert.equal(
     secondPersistedGraph.nodes[0].fields.title,
     "runtime-between-saves",
-    "第二lần已Lưu metadata 也不能被后续运行时修改污染",
+    "metadata đã lưu ở lần thứ hai cũng không được bị các chỉnh sửa runtime về sau làm bẩn",
   );
 }
 
@@ -3170,7 +3170,7 @@ result = {
   assert.equal(
     harness.api.getIndexedDbSnapshot().meta.revision,
     7,
-    "附属步骤Thất bại时，IndexedDB 主写仍应视为成功",
+    "khi bước phụ bị lỗi, lượt ghi chính vào IndexedDB vẫn nên được xem là thành công",
   );
   const persistDeltaDiagnostics = harness.api.getGraphPersistenceState().persistDelta;
   assert.equal(Boolean(persistDeltaDiagnostics), true);
@@ -3197,7 +3197,7 @@ result = {
       integrity: "meta-pending-persist-retry",
     },
     chat: [
-      { is_user: true, mes: "Người dùng发言" },
+      { is_user: true, mes: "Người dùng nói" },
       { is_user: false, mes: "trợ lýPhản hồi" },
     ],
   });
@@ -3268,12 +3268,12 @@ result = {
   assert.equal(
     harness.api.getGraphPersistenceState().pendingPersist,
     false,
-    "pendingPersist 在补存成功后应被清除",
+    "pendingPersist nên được xóa sau khi lưu bù thành công",
   );
   assert.equal(
     harness.api.getCurrentGraph().historyState.lastProcessedAssistantFloor,
     1,
-    "补存成功后应推进 lastProcessedAssistantFloor",
+    "sau khi lưu bù thành công nên đẩy lastProcessedAssistantFloor tiến lên",
   );
   assert.equal(
     harness.api.getCurrentGraph().historyState.lastBatchStatus.historyAdvanceAllowed,
@@ -3286,7 +3286,7 @@ result = {
   assert.equal(
     harness.api.getCurrentGraph().batchJournal?.length,
     1,
-    "pending persist retry 应把 authoritative batch journal 回填到 runtime graph",
+    "lần retry của pending persist nên bù authoritative batch journal trở lại runtime graph",
   );
   assert.equal(
     harness.api.getCurrentGraph().batchJournal?.[0]?.id,
@@ -3325,16 +3325,16 @@ result = {
   assert.equal(
     harness.runtimeContext.__chatContext.chatMetadata?.st_bme_graph,
     undefined,
-    "跨 chat 的 queued persist 不得 flush 到当前 metadata",
+    "queued persist xuyên chat không được flush vào metadata hiện tại",
   );
   assert.equal(
     harness.api.getGraphPersistenceLiveState().queuedPersistChatId,
     "chat-a",
-    "发生 chat mismatch 时应保留原始 queued chat 绑定",
+    "khi xảy ra chat mismatch thì nên giữ nguyên gắn kết chat đã xếp hàng",
   );
 }
 
-// === Fix 2c: assertRecoveryChatStillActive 跨 chat 守卫 ===
+// === Fix 2c: assertRecoveryChatStillActive chốt chặn xuyên chat ===
 {
   const harness = await createGraphPersistenceHarness({
     chatId: "chat-recovery-a",
@@ -3344,10 +3344,10 @@ result = {
     },
   });
 
-  // 同一 chat 不应抛出
+  // cùng một chat thì không nên ném lỗi
   harness.api.assertRecoveryChatStillActive("chat-recovery-a", "test-same");
 
-  // 切换到 chat-b
+  // chuyển sang chat-b
   harness.runtimeContext.__globalChatId = "chat-recovery-b";
   harness.runtimeContext.__chatContext.chatId = "chat-recovery-b";
 
@@ -3360,19 +3360,19 @@ result = {
   assert.equal(
     abortCaught,
     true,
-    "chat 切换后 assertRecoveryChatStillActive 应抛出 AbortError",
+    "sau khi chuyển chat, assertRecoveryChatStillActive nên ném AbortError",
   );
 
-  // 空 expectedChatId 不应抛出
+  // expectedChatId rỗng thì không nên ném lỗi
   harness.api.assertRecoveryChatStillActive("", "test-empty");
   harness.api.assertRecoveryChatStillActive(undefined, "test-undefined");
 }
 
-// === Fix 2e: resolveDirtyFloorFromMutationMeta 候选Lọc ===
-// 此Kiểm thử需要 resolveDirtyFloorFromMutationMeta 与 getAssistantTurns，
-// 它们均在 persistencePrelude Phạm vi内，通过 vm 上下文执行。
-// 这里使用间接方式验证：构造一个只有晚期 assistant 的 chat，
-// 然后检查 inspectHistoryMutation 不会对早期 floor 误判。
+// === Fix 2e: resolveDirtyFloorFromMutationMeta ứng viênLọc ===
+// Bài test này cần resolveDirtyFloorFromMutationMeta và getAssistantTurns,
+// cả hai đều nằm trong phạm vi persistencePrelude và được thực thi qua ngữ cảnh vm.
+// ở đây dùng cách xác thực gián tiếp: dựng một chat chỉ có assistant ở giai đoạn muộn,
+// sau đó kiểm tra inspectHistoryMutation sẽ không phán nhầm với các floor sớm.
 {
   const harness = await createGraphPersistenceHarness({
     chatId: "chat-dirty-floor",
@@ -3405,17 +3405,17 @@ result = {
     writesBlocked: false,
   });
 
-  // 模拟：meta 指向 floor=1（早于最小可Trích xuất floor=4）的XóaSự kiện
-  // 使用间接方式：graph 的 lastProcessedAssistantFloor=4，
-  // 如果 resolveDirtyFloorFromMutationMeta 正确Lọc了 floor<4 的候选，
-  // 那么 inspectHistoryMutation 不会标记为 dirty（因为没有有效候选）。
-  // 注意：这里不直接Kiểm thử内部函数，而是验证整体Hành vi。
+  // Mô phỏng: meta trỏ tới sự kiện xóa ở floor=1 (sớm hơn floor tối thiểu có thể trích xuất là 4)
+  // Dùng cách gián tiếp: lastProcessedAssistantFloor của graph = 4,
+  // nếu resolveDirtyFloorFromMutationMeta lọc đúng các ứng viên floor < 4,
+  // thì inspectHistoryMutation sẽ không đánh dấu là dirty (vì không có ứng viên hợp lệ).
+  // lưu ý: ở đây không kiểm thử trực tiếp hàm nội bộ, mà là xác thực hành vi tổng thể.
   const graph2 = harness.api.getCurrentGraph();
-  assert.ok(graph2, "graph 应存在");
+  assert.ok(graph2, "graph nên tồn tại");
   assert.equal(
     graph2.historyState.lastProcessedAssistantFloor,
     4,
-    "lastProcessedAssistantFloor 应为 4",
+    "lastProcessedAssistantFloor nên bằng 4",
   );
 }
 
@@ -3518,7 +3518,7 @@ result = {
   assert.equal(
     harness.api.getIndexedDbSnapshot().meta.revision,
     9,
-    "shadow Khôi phục后应回补 IndexedDB 修正旧snapshot",
+    "sau khi khôi phục shadow nên bù lại IndexedDB để sửa snapshot cũ",
   );
 }
 
@@ -3708,7 +3708,7 @@ result = {
   assert.equal(
     harness.runtimeContext.__chatContext.__chatStateStore.size,
     0,
-    "generic ST 主写成功后不应再常驻 mirror 到 chat-state",
+    "sau khi lượt ghi chính của generic ST thành công thì không nên thường trú mirror sang chat-state nữa",
   );
 }
 
@@ -3770,7 +3770,7 @@ result = {
   assert.equal(
     Number(harness.api.getIndexedDbSnapshot()?.meta?.revision || 0) >= result.revision,
     true,
-    "Luker Lưu trữ chính成功后应异步补写Bộ đệm cục bộ",
+    "sau khi lưu trữ chính của Luker thành công thì nên ghi bù bộ đệm cục bộ một cách bất đồng bộ",
   );
   assert.equal(
     harness.api.getGraphPersistenceState().acceptedStorageTier,
@@ -3981,7 +3981,7 @@ result = {
   assert.equal(
     result.revision,
     2,
-    "Luker sidecar 应基于已接受 head 连续推进，而不是沿用跳号 revision",
+    "Luker sidecar nên tiến liên tục dựa trên head đã chấp nhận, thay vì tiếp tục dùng revision nhảy số",
   );
   const manifest = await harness.runtimeContext.__chatContext.getChatState(
     LUKER_GRAPH_MANIFEST_NAMESPACE,
@@ -4053,7 +4053,7 @@ result = {
   assert.equal(
     manifest ?? null,
     null,
-    "bootstrap journal reset Thất bại时不应继续写 manifest 假装 accepted",
+    "khi reset bootstrap journal thất bại thì không nên tiếp tục ghi manifest như thể đã accepted",
   );
   assert.equal(Number(checkpoint?.revision || 0), 5);
 }
@@ -4111,8 +4111,9 @@ result = {
   );
   assert.ok(
     targetedCalls.length >= 3,
-    "显式 chatStateTarget 写入 Luker sidecar 时应把 target 传给 manifest/journal/checkpoint 链路",
+    "khi ghi chatStateTarget tường minh vào Luker sidecar thì nên truyền target vào chuỗi xử lý manifest/journal/checkpoint",
   );
 }
 
 console.log("graph-persistence tests passed");
+

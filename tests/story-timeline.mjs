@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import { createEmptyGraph, createNode } from "../graph/graph.js";
 import {
@@ -15,7 +15,7 @@ const graph = createEmptyGraph();
 
 const night = upsertTimelineSegment(
   graph,
-  { label: "昨夜冲突", relation: "same", confidence: "high" },
+  { label: "Xung đột đêm qua", relation: "same", confidence: "high" },
   { source: "extract" },
 );
 assert.equal(night.created, true);
@@ -40,7 +40,7 @@ assert.equal(graph.historyState.lastExtractedStorySegmentId, morningBatch.extrac
 const future = upsertTimelineSegment(
   graph,
   {
-    label: "明天夜里",
+    label: "Đêm mai",
     relation: "after",
     confidence: "medium",
     tense: "future",
@@ -51,7 +51,7 @@ assert.equal(graph.timelineState.segments.length, 3);
 
 const currentNode = createNode({
   type: "event",
-  fields: { title: "当前Sự kiện" },
+  fields: { title: "hiện tạiSự kiện" },
   seq: 10,
 });
 currentNode.storyTime = {
@@ -65,12 +65,12 @@ currentNode.storyTime = {
 };
 const flashbackNode = createNode({
   type: "event",
-  fields: { title: "旧回忆" },
+  fields: { title: "Ký ức cũ" },
   seq: 8,
 });
 flashbackNode.storyTime = {
   segmentId: night.storyTime.segmentId,
-  label: "昨夜冲突",
+  label: "Xung đột đêm qua",
   tense: "flashback",
   relation: "before",
   anchorLabel: "",
@@ -79,7 +79,7 @@ flashbackNode.storyTime = {
 };
 const futureNode = createNode({
   type: "event",
-  fields: { title: "未来计划" },
+  fields: { title: "kế hoạch tương lai" },
   seq: 12,
 });
 futureNode.storyTime = future.storyTime;
@@ -104,16 +104,17 @@ assert.equal(futureBucket.bucket, "future");
 assert.equal(futureBucket.suppressed, true);
 
 const span = deriveStoryTimeSpanFromNodes(graph, [flashbackNode, currentNode], "derived");
-assert.equal(span.startLabel, "昨夜冲突");
+assert.equal(span.startLabel, "Xung đột đêm qua");
 assert.equal(span.endLabel, "Sáng sớm ngày thứ hai");
 assert.equal(span.mixed, true);
 
-const manualResult = setManualActiveStorySegment(graph, { label: "昨夜冲突" });
+const manualResult = setManualActiveStorySegment(graph, { label: "Xung đột đêm qua" });
 assert.equal(manualResult.ok, true);
-assert.equal(resolveActiveStoryContext(graph).activeStoryTimeLabel, "昨夜冲突");
+assert.equal(resolveActiveStoryContext(graph).activeStoryTimeLabel, "Xung đột đêm qua");
 
 const cleared = clearManualActiveStorySegment(graph);
 assert.equal(cleared.ok, true);
 assert.equal(resolveActiveStoryContext(graph).activeStoryTimeLabel, "Sáng sớm ngày thứ hai");
 
 console.log("story-timeline tests passed");
+

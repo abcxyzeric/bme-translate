@@ -362,7 +362,7 @@ export function upsertTimelineSegment(
   }
 
   const createdSegment = createDefaultTimelineSegment({
-    label: normalizedStoryTime.label || normalizedStoryTime.anchorLabel || "未命名时间段",
+    label: normalizedStoryTime.label || normalizedStoryTime.anchorLabel || "Đoạn thời gian chưa đặt tên",
     order: desiredOrder,
     aliases: [normalizedStoryTime.label],
     parentId:
@@ -700,10 +700,10 @@ export function resolveStoryCueMode(userMessage = "", recentMessages = []) {
     .filter(Boolean)
     .join("\n");
   if (!text) return "";
-  if (/(曾经|以前|当年|从前|回忆|过去|背景|来历|小时候|往事)/i.test(text)) {
+  if (/(từng|trước đây|năm ấy|ngày xưa|hồi ức|quá khứ|bối cảnh|lai lịch|thời thơ ấu|chuyện cũ)/i.test(text)) {
     return "flashback";
   }
-  if (/(未来|以后|之后会|将要|明天|预告|计划|打算|准备|承诺)/i.test(text)) {
+  if (/(tương lai|sau này|sẽ về sau|sắp|ngày mai|báo trước|kế hoạch|dự tính|chuẩn bị|lời hứa)/i.test(text)) {
     return "future";
   }
   return "";

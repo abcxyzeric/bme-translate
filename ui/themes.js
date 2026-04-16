@@ -1,5 +1,5 @@
-// ST-BME: 主题配色系统
-// 多套 CSS 变量主题，通过 data-bme-theme 属性切换
+// ST-BME: hệ thống phối màu chủ đề
+// Nhiều bộ biến CSS cho chủ đề, chuyển đổi qua thuộc tính data-bme-theme
 
 export const THEMES = {
     crimson: {
@@ -21,7 +21,7 @@ export const THEMES = {
         onSurfaceDim: 'rgba(228, 225, 230, 0.6)',
         border: 'rgba(255, 255, 255, 0.08)',
         borderActive: 'rgba(233, 69, 96, 0.4)',
-        // nút颜色
+        // Màu của nút
         nodeCharacter: '#e94560',
         nodeEvent: '#4fc3f7',
         nodeLocation: '#66bb6a',
@@ -111,7 +111,7 @@ export const THEMES = {
         nodeSynopsis: '#ce93d8',
         nodeReflection: '#80deea',
     },
-    /** 亮色 · Giấy sáng ban mai（暖纸面 + 青绿主色 + 琥珀强调） */
+    /** Chủ đề sáng · Giấy sáng ban mai (nền giấy ấm + màu chủ đạo xanh ngọc + nhấn hổ phách) */
     paperDawn: {
         name: 'Giấy sáng ban mai',
         primary: '#0d9488',
@@ -139,7 +139,7 @@ export const THEMES = {
         nodeSynopsis: '#0d9488',
         nodeReflection: '#64748b',
     },
-    /** 亮色 · Bầu trời băng hà（冷灰底 + 蓝主色 + 青/紫辅色） */
+    /** Chủ đề sáng · Bầu trời băng hà (nền xám lạnh + màu chủ đạo xanh lam + màu phụ xanh cyan/tím) */
     glacierSky: {
         name: 'Bầu trời băng hà',
         primary: '#2563eb',
@@ -169,13 +169,13 @@ export const THEMES = {
     },
 };
 
-/** 使用亮色 color-scheme 的Chủ đề bảng（原生 number/select 等控件配色） */
+/** Chủ đề bảng dùng color-scheme sáng (phối màu các control gốc như number/select...) */
 export const LIGHT_PANEL_THEMES = new Set(['paperDawn', 'glacierSky']);
 
 /**
- * 将主题配色应用为 CSS 变量
+ * Áp dụng bảng phối màu của chủ đề thành các biến CSS
  * @param {string} themeName - crimson | cyan | amber | violet | paperDawn | glacierSky
- * @param {HTMLElement} [root] - 目标元素，Mặc định document.documentElement
+ * @param {HTMLElement} [root] - phần tử đích, mặc định là document.documentElement
  */
 export function applyTheme(themeName, root = null) {
     const theme = THEMES[themeName] || THEMES.crimson;
@@ -219,7 +219,7 @@ export function applyTheme(themeName, root = null) {
 }
 
 /**
- * 获取当前主题的nút颜色映射
+ * Lấy ánh xạ màu nút của chủ đề hiện tại
  * @param {string} themeName
  * @returns {Object<string, string>}
  */

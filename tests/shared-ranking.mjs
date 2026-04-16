@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -68,8 +68,8 @@ const confession = addNode(
     seq: 10,
     importance: 8,
     fields: {
-      title: "中文告白",
-      summary: "她认真地说喜欢你，并Yêu cầu你再说一遍。",
+      title: "Tỏ tình bằng tiếng Trung",
+      summary: "cô ấy nghiêm túc nói rằng thích bạn và yêu cầu bạn nói lại một lần nữa.",
     },
   }),
 );
@@ -80,8 +80,8 @@ const dateEvent = addNode(
     seq: 11,
     importance: 4,
     fields: {
-      title: "节日约会",
-      summary: "她们一起逛街吃饭。",
+      title: "Hẹn hò ngày lễ",
+      summary: "họ cùng đi dạo phố và ăn cơm.",
     },
   }),
 );
@@ -92,8 +92,8 @@ const relationship = addNode(
     seq: 12,
     importance: 7,
     fields: {
-      title: "感情升温",
-      summary: "两人的恋爱关系快速升温。",
+      title: "Tình cảm ấm lên",
+      summary: "Quan hệ yêu đương của hai người nhanh chóng ấm lên.",
     },
   }),
 );
@@ -136,7 +136,7 @@ try {
   };
   const first = await rankNodesForTaskContext({
     graph,
-    userMessage: "[user]: 中文告白后的关系进展",
+    userMessage: "",
     embeddingConfig: config,
     options: {
       enableContextQueryBlend: false,
@@ -146,7 +146,7 @@ try {
   });
   const second = await rankNodesForTaskContext({
     graph,
-    userMessage: "[user]: 中文告白后的关系进展",
+    userMessage: "",
     embeddingConfig: config,
     options: {
       enableContextQueryBlend: false,
@@ -173,3 +173,5 @@ try {
 }
 
 console.log("shared-ranking tests passed");
+
+

@@ -1,5 +1,5 @@
-// ST-BME: Tác vụ级 EJS / 世界书渲染引擎
-// 仅用于世界书条目渲染，不开放给Người dùng自định nghĩa prompt 块。
+// ST-BME: engine kết xuất EJS / World Info cấp tác vụ
+// Chỉ dùng cho việc kết xuất mục World Info, không mở cho khối prompt tự định nghĩa của người dùng.
 
 import { getSTContextSnapshot } from "../host/st-context.js";
 
@@ -92,7 +92,7 @@ async function ensureEjsRuntime() {
       await import("../vendor/ejs.js");
     } catch (error) {
       importError = error;
-      console.warn("[ST-BME] task-ejs 加载 ../vendor/ejs.js Thất bại:", error);
+      console.warn("[ST-BME] task-ejs tải ../vendor/ejs.js Thất bại:", error);
     } finally {
       if (!hadWindow) {
         delete globalThis.window;
@@ -453,7 +453,7 @@ async function ensureWorldbookEntriesLoaded(renderCtx, worldbookName) {
       `lazy load worldbook failed: ${normalizedWorldbook}`,
     );
     console.warn(
-      `[ST-BME] task-ejs 懒加载世界书Thất bại: ${normalizedWorldbook}`,
+      `[ST-BME] task-ejs tải lười World Info thất bại: ${normalizedWorldbook}`,
       error,
     );
   }
@@ -684,7 +684,7 @@ async function getwi(
       `recursive getwi blocked: ${entry.comment || entry.name}`,
     );
     console.warn(
-      `[ST-BME] task-ejs 检测到循环 getwi: ${entry.comment || entry.name}`,
+      `[ST-BME] task-ejs phát hiện vòng lặp getwi: ${entry.comment || entry.name}`,
     );
     return "";
   }
@@ -695,7 +695,7 @@ async function getwi(
       `getwi recursion limit reached: ${entry.comment || entry.name}`,
     );
     console.warn(
-      `[ST-BME] task-ejs 超过最大递归深度: ${renderCtx.maxRecursion}`,
+      `[ST-BME] task-ejs vượt quá độ sâu đệ quy tối đa: ${renderCtx.maxRecursion}`,
     );
     return "";
   }
@@ -1149,7 +1149,7 @@ export async function evalTaskEjsTemplate(content, renderCtx, extraEnv = {}) {
     if (error?.code === "st_bme_task_ejs_unsupported_helper") {
       throw error;
     }
-    console.warn("[ST-BME] task-ejs 渲染Thất bại:", error);
+    console.warn("[ST-BME] task-ejs kết xuấtThất bại:", error);
     throw error;
   }
 }

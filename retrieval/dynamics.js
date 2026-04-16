@@ -1,10 +1,10 @@
-// ST-BME: Ký ức动力学模块
-// 实现Lượt truy cập强化、时间衰减、Chấm điểm hỗn hợp — 来自 PeroCore 的核心创新
+// ST-BME: mô-đun động lực học ký ức
+// Hiện thực tăng cường truy cập, suy giảm theo thời gian và chấm điểm hỗn hợp — lấy từ đổi mới cốt lõi của PeroCore
 
 /**
- * Lượt truy cập强化：nút被Truy hồi/Tiêm时调用
+ * Tăng cường truy cập: được gọi khi nút bị truy hồi/tiêm
  * - accessCount += 1
- * - importance += 0.1（上限 10）
+ * - importance += 0.1 (giới hạn trên là 10)
  * - lastAccessTime Cập nhật
  *
  * @param {object} node
@@ -16,20 +16,20 @@ export function reinforceAccess(node) {
 }
 
 /**
- * 计算时间衰减因子
- * 使用对数衰减（PeroCore 方式）而非指数衰减：
+ * Tính toán hệ số suy giảm theo thời gian
+ * Dùng suy giảm logarit (kiểu PeroCore) thay vì suy giảm mũ:
  * factor = 0.8 + 0.2 / (1 + ln(1 + Δt_days))
  *
- * 特点：久远但重要的Ký ức不会快速消失
- * - Δt = 0天 → factor = 1.0
- * - Δt = 1天 → factor ≈ 0.93
- * - Δt = 7天 → factor ≈ 0.89
- * - Δt = 30天 → factor ≈ 0.85
- * - Δt = 365天 → factor ≈ 0.83
+ * Đặc điểm: ký ức cũ nhưng quan trọng sẽ không biến mất quá nhanh
+ * - Δt = 0 ngày → factor = 1.0
+ * - Δt = 1 ngày → factor ≈ 0.93
+ * - Δt = 7 ngày → factor ≈ 0.89
+ * - Δt = 30 ngày → factor ≈ 0.85
+ * - Δt = 365 ngày → factor ≈ 0.83
  *
- * @param {number} createdTime - 创建时间戳(ms)
- * @param {number} [now] - 当前时间戳(ms)
- * @returns {number} 衰减因子 [0.8, 1.0]
+ * @param {number} createdTime - dấu thời gian tạo (ms)
+ * @param {number} [now] - dấu thời gian hiện tại (ms)
+ * @returns {number} hệ số suy giảm [0.8, 1.0]
  */
 export function timeDecayFactor(createdTime, now = Date.now()) {
     const deltaDays = Math.max(0, (now - createdTime) / (1000 * 60 * 60 * 24));
@@ -37,18 +37,18 @@ export function timeDecayFactor(createdTime, now = Date.now()) {
 }
 
 /**
- * Chấm điểm hỗn hợp公式
+ * Công thức chấm điểm hỗn hợp
  * FinalScore = (GraphScore×α + VecScore×β + ImportanceNorm×γ) × TimeDecay
  *
- * Mặc định权重：α=0.6, β=0.3, γ=0.1
+ * Mặc địnhtrọng số：α=0.6, β=0.3, γ=0.1
  *
  * @param {object} params
- * @param {number} params.graphScore - Khuếch tán đồ thị能量得分 [0, 2]
- * @param {number} params.vectorScore - Vector相似度 [0, 1]
- * @param {number} params.importance - nút重要性 [0, 10]
- * @param {number} params.createdTime - nút创建时间
- * @param {object} [weights] - 权重Cấu hình
- * @returns {number} 最终得分
+ * @param {number} params.graphScore - điểm năng lượng khuếch tán đồ thị [0, 2]
+ * @param {number} params.vectorScore - Vectorđộ tương đồng [0, 1]
+ * @param {number} params.importance - độ quan trọng của nút [0, 10]
+ * @param {number} params.createdTime - thời gian tạo nút
+ * @param {object} [weights] - trọng sốCấu hình
+ * @returns {number} điểm cuối cùng
  */
 export function hybridScore({
     graphScore = 0,
@@ -62,8 +62,8 @@ export function hybridScore({
     const gamma = weights.importanceWeight ?? 0.1;
     const delta = weights.lexicalWeight ?? 0;
 
-    // 归一化
-    const normGraph = Math.max(0, Math.min(1, graphScore / 2.0)); // PEDSA 能量Phạm vi [-2, 2] → [0, 1]
+    // Chuẩn hóa
+    const normGraph = Math.max(0, Math.min(1, graphScore / 2.0)); // phạm vi năng lượng PEDSA [-2, 2] → [0, 1]
     const normVec = Math.max(0, Math.min(1, vectorScore));
     const normLexical = Math.max(0, Math.min(1, lexicalScore));
     const normImportance = Math.max(0, Math.min(1, importance / 10.0));
@@ -84,28 +84,28 @@ export function hybridScore({
 }
 
 /**
- * 边权衰减：长期未被激活的边降低强度
- * 只降低到Thấp nhất 0.1，不会归零
+ * Suy giảm trọng số cạnh: cạnh lâu không được kích hoạt sẽ giảm cường độ
+ * Chỉ giảm tới mức thấp nhất 0.1, không về 0
  *
  * @param {object[]} edges
- * @param {Set<string>} activatedEdgeIds - Gần nhất被激活（出现在扩散路径上）的边 ID
- * @param {number} [decayRate=0.02] - 每lần调用的衰减量
+ * @param {Set<string>} activatedEdgeIds - ID các cạnh vừa được kích hoạt gần đây (xuất hiện trên đường khuếch tán)
+ * @param {number} [decayRate=0.02] - lượng suy giảm mỗi lần gọi
  */
 export function decayEdgeWeights(edges, activatedEdgeIds = new Set(), decayRate = 0.02) {
     for (const edge of edges) {
         if (activatedEdgeIds.has(edge.id)) {
-            // 被激活的边轻微加强
+            // Cạnh được kích hoạt sẽ được tăng nhẹ
             edge.strength = Math.min(1.0, edge.strength + decayRate * 0.5);
         } else {
-            // 未被激活的边轻微衰减
+            // Cạnh chưa được kích hoạt sẽ suy giảm nhẹ
             edge.strength = Math.max(0.1, edge.strength - decayRate);
         }
     }
 }
 
 /**
- * 批量对选中nút执行Lượt truy cập强化
- * @param {object[]} nodes - 被Truy hồi的nút列表
+ * Thực thi tăng cường truy cập theo lô cho các nút đã chọn
+ * @param {object[]} nodes - danh sách nút đã được truy hồi
  */
 export function reinforceAccessBatch(nodes) {
     for (const node of nodes) {

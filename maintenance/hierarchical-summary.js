@@ -416,7 +416,7 @@ export async function generateSmallSummary({
     return {
       created: false,
       skipped: true,
-      reason: `当前只累计了 ${deltaCount} lần未总结Trích xuất，未到Tóm tắt ngắn门槛 ${threshold}`,
+      reason: `Hiện tại mới chỉ tích lũy ${deltaCount} lần trích xuất chưa được tổng kết, chưa tới ngưỡng tạo tóm tắt ngắn ${threshold}`,
     };
   }
 
@@ -432,7 +432,7 @@ export async function generateSmallSummary({
     return {
       created: false,
       skipped: true,
-      reason: "Hiện không có可用于Tạo tóm tắt ngắn的Trích xuất批lần",
+      reason: "Hiện không có lô trích xuất nào dùng được để tạo tóm tắt ngắn",
     };
   }
 
@@ -451,7 +451,7 @@ export async function generateSmallSummary({
     return {
       created: false,
       skipped: true,
-      reason: "Tóm tắt ngắn原文窗口为空，Đã bỏ qua",
+      reason: "Cửa sổ nguyên văn cho tóm tắt ngắn đang trống, đã bỏ qua",
     };
   }
 
@@ -483,10 +483,10 @@ export async function generateSmallSummary({
       currentRange: `Tầng ${messageRange[0]} ~ ${messageRange[1]}`,
     },
     fallbackSystemPrompt: [
-      "你是Tóm tắt ngắn生成器。",
-      "请基于Gần nhấtCửa sổ chat nguyên văn为主、关键nút为辅，生成一条贴近当前局面的短总结。",
-      '输出 JSON：{"summary":"总结文本（80-220字）"}',
-      "不要写未来预测，不要脱离原文杜撰，不要把多段时间线硬糅在一起。",
+      "Bạn là bộ sinh tóm tắt ngắn.",
+      "Hãy dựa chủ yếu vào cửa sổ chat nguyên văn gần nhất, kết hợp bổ trợ từ các nút then chốt, để tạo một bản tóm tắt ngắn bám sát cục diện hiện tại.",
+      'đầu ra JSON: {"summary":"văn bản tóm tắt (80-220 ký tự)"}',
+      "Đừng viết dự đoán tương lai, đừng bịa thêm ngoài nguyên văn, và đừng trộn cứng nhiều tuyến thời gian vào với nhau.",
     ].join("\n"),
     fallbackUserPrompt: [
       "## Cửa sổ chat nguyên văn",
@@ -495,7 +495,7 @@ export async function generateSmallSummary({
       "## Nút then chốt hỗ trợ",
       nodeDigest,
       "",
-      "## 当前Tiền tuyến tóm tắt hoạt động",
+      "## hiện tạiTiền tuyến tóm tắt hoạt động",
       buildFrontierHint(graph),
     ].join("\n"),
     signal,
@@ -506,7 +506,7 @@ export async function generateSmallSummary({
     return {
       created: false,
       skipped: true,
-      reason: "Tóm tắt ngắnTác vụ未返回有效 summary",
+      reason: "Tác vụ tóm tắt ngắn không trả về summary hợp lệ",
     };
   }
 
@@ -534,7 +534,7 @@ export async function generateSmallSummary({
   });
   summaryState.lastSummarizedExtractionCount = lastSlice.extractionCountAfter;
   summaryState.lastSummarizedAssistantFloor = messageRange[1];
-  debugLog("[ST-BME] 已Tạo tóm tắt ngắn", {
+  debugLog("[ST-BME] Đã tạo tóm tắt ngắn", {
     entryId: entry.id,
     extractionRange: entry.extractionRange,
     messageRange: entry.messageRange,
@@ -621,10 +621,10 @@ export async function rollupSummaryFrontier({
         }`,
       },
       fallbackSystemPrompt: [
-        "你是Gộp tóm tắt器。",
-        "请把多条同层Tóm tắt hoạt động折叠成一条更稳定、更高层的总结。",
-        '输出 JSON：{"summary":"折叠后的总结文本（120-260字）"}',
-        "不要重复原句，不要丢掉当前仍然生效的局面，不要打乱先后顺序。",
+        "Bạn là bộ gộp tóm tắt.",
+        "Hãy gộp nhiều bản tóm tắt đang hoạt động ở cùng tầng thành một bản tổng kết ổn định hơn và ở tầng cao hơn.",
+        'đầu ra JSON: {"summary":"văn bản tổng kết sau khi gộp (120-260 ký tự)"}',
+        "Đừng lặp lại nguyên câu, đừng làm mất cục diện vẫn còn hiệu lực ở hiện tại, và đừng phá vỡ thứ tự trước sau.",
       ].join("\n"),
       fallbackUserPrompt: [
         "## Tóm tắt chờ gộp",
@@ -641,7 +641,7 @@ export async function rollupSummaryFrontier({
         createdCount: createdEntries.length,
         foldedCount,
         skipped: createdEntries.length === 0,
-        reason: "Gộp tóm tắtTác vụ未返回有效 summary",
+        reason: "Tác vụ gộp tóm tắt không trả về summary hợp lệ",
         createdEntries,
       };
     }
@@ -699,7 +699,7 @@ export async function rollupSummaryFrontier({
       ownerHints: nodeHints.ownerHints,
     });
     createdEntries.push(createdEntry);
-    debugLog("[ST-BME] 已Hoàn tấtGộp tóm tắt", {
+    debugLog("[ST-BME] Đã hoàn tất gộp tóm tắt", {
       createdEntryId: createdEntry.id,
       sourceSummaryIds: createdEntry.sourceSummaryIds,
     });
@@ -716,8 +716,8 @@ export async function rollupSummaryFrontier({
     reason:
       createdEntries.length === 0
         ? requireExcess
-          ? `Hiện không có超过 ${fanIn} 条同层Tóm tắt hoạt động的折叠候选`
-          : `Hiện không có达到 ${fanIn} 条同层Tóm tắt hoạt động的折叠候选`
+          ? `Hiện không có ứng viên gộp nào có số lượng tóm tắt hoạt động cùng tầng vượt quá ${fanIn} mục`
+          : `Hiện không có ứng viên gộp nào đạt ${fanIn} mục tóm tắt hoạt động cùng tầng`
         : "",
   };
 }
@@ -738,7 +738,7 @@ export async function runHierarchicalSummaryPostProcess({
       smallSummary: null,
       rollup: null,
       created: false,
-      reason: "Tóm tắt phân tầng开关已Tắt",
+      reason: "Tóm tắt phân tầngcông tắcĐã tắt",
     };
   }
 
@@ -905,7 +905,7 @@ export async function rebuildHierarchicalSummaryState({
       rebuilt: false,
       smallSummaryCount: 0,
       rollupCount: 0,
-      reason: "Hiện vẫn chưa có成功Trích xuất批lần",
+      reason: "Hiện vẫn chưa có lô trích xuất nào thành công",
     };
   }
 
@@ -916,7 +916,7 @@ export async function rebuildHierarchicalSummaryState({
         rebuilt: false,
         smallSummaryCount: 0,
         rollupCount: 0,
-        reason: "Xây lại theo phạm vi必须填写Tầng bắt đầu",
+        reason: "Khi xây lại theo phạm vi thì bắt buộc phải điền tầng bắt đầu",
       };
     }
     const latestDialogueFloor = buildDialogueFloorMap(chat).latestDialogueFloor;
@@ -939,7 +939,7 @@ export async function rebuildHierarchicalSummaryState({
       rebuilt: false,
       smallSummaryCount: 0,
       rollupCount: 0,
-      reason: "Hiện không có可重建的总结Phạm vi",
+      reason: "Hiện không có phạm vi tổng kết nào có thể xây lại",
     };
   }
 
@@ -953,7 +953,7 @@ export async function rebuildHierarchicalSummaryState({
       rebuilt: false,
       smallSummaryCount: 0,
       rollupCount: 0,
-      reason: "目标Phạm vi内没有命中的总结切片",
+      reason: "Trong phạm vi mục tiêu không có lát cắt tổng kết nào khớp",
       targetDialogueRange,
     };
   }
@@ -1015,8 +1015,8 @@ export async function rebuildHierarchicalSummaryState({
           }`,
         },
         fallbackSystemPrompt: [
-          "你是Tóm tắt ngắn生成器。",
-          '输出 JSON：{"summary":"总结文本（80-220字）"}',
+          "Bạn là bộ sinh tóm tắt ngắn.",
+          'đầu ra JSON: {"summary":"văn bản tóm tắt (80-220 ký tự)"}',
         ].join("\n"),
         fallbackUserPrompt: [
           "## Cửa sổ chat nguyên văn",
@@ -1077,7 +1077,7 @@ export async function rebuildHierarchicalSummaryState({
     reason:
       smallSummaryCount > 0 || rollupCount > 0
         ? ""
-        : "根据现有Trích xuất批lần未能重建出新的总结链",
+        : "Không thể xây lại chuỗi tổng kết mới từ các lô trích xuất hiện có",
   };
 }
 

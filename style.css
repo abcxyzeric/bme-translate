@@ -1,4 +1,4 @@
-/* ST-BME 样式 */
+/* Kiểu dáng ST-BME */
 
 /* --- Overlay --- */
 #st-bme-panel-overlay {
@@ -41,7 +41,7 @@
   transform: translateY(12px) scale(0.98);
   transition: transform 0.25s ease;
   resize: both;
-  /* Mặc định暗色表单范式；亮色主题见 :root[data-bme-color-scheme="light"] */
+  /* Mặc định theo mẫu biểu mẫu tối; chủ đề sáng xem ở :root[data-bme-color-scheme="light"] */
   color-scheme: dark;
 }
 
@@ -618,7 +618,7 @@
   display: flex;
 }
 
-/* ==================== Task-Mode (对称 config-mode) ==================== */
+/* ==================== Task-Mode (đối xứng với config-mode) ==================== */
 
 #st-bme-panel.task-mode .bme-tab-content {
   display: none;
@@ -2903,7 +2903,7 @@
   cursor: not-allowed;
 }
 
-/* Host样式 / WebKit Mặc định易把 select、Tự động填充 input 画成黑底 — 在面板内强制用主题色 */
+/* Kiểu host / WebKit mặc định dễ vẽ select và input tự động điền thành nền đen — trong bảng sẽ cưỡng chế dùng màu của chủ đề */
 #st-bme-panel input.bme-config-input,
 #st-bme-panel textarea.bme-config-textarea,
 #st-bme-panel input.bme-search-input,
@@ -2936,7 +2936,7 @@
   color: var(--bme-on-surface) !important;
   cursor: pointer;
   padding-right: 36px;
-  /* 影响原生下拉列表用亮色还是暗色绘制（否则在浅色面板下 option 可能出现黑底） */
+  /* Ảnh hưởng tới danh sách xổ xuống gốc ở cả cách vẽ sáng lẫn tối (nếu không thì option có thể hiện nền đen trên bảng sáng) */
   color-scheme: dark;
 }
 
@@ -2954,7 +2954,7 @@
   color: var(--bme-on-surface);
 }
 
-/* 原生 option 在部分浏览器/系统上不用 CSS 变量；亮色主题用实色保证每项都是浅底深字 */
+/* Option gốc trên vài trình duyệt/hệ thống không dùng biến CSS; ở chủ đề sáng dùng màu đặc để đảm bảo mỗi mục đều có nền sáng và chữ đậm */
 :root[data-bme-color-scheme="light"] #st-bme-panel select option {
   background-color: #ffffff !important;
   color: #1c1917 !important;
@@ -2979,7 +2979,7 @@
   color: #f4f4f5 !important;
 }
 
-/* --- 压制HostTiêm的原生对号 (SillyTavern Toàn cục checkbox::before) --- */
+/* --- Ép tắt dấu tick gốc do host tiêm vào (checkbox::before toàn cục của SillyTavern) --- */
 #st-bme-panel input[type="checkbox"]::before,
 #st-bme-panel-overlay input[type="checkbox"]::before {
   content: "" !important;
@@ -4538,7 +4538,7 @@
   margin-bottom: 12px;
 }
 
-/* ── 滑动条组件 ── */
+/* ── Thành phần thanh trượt ── */
 
 .bme-range-group {
   display: flex;
@@ -4831,7 +4831,7 @@
   margin-bottom: 2px;
 }
 
-/* --- Node detail：桌面右侧抽屉 / 移动端đồ thị内居中悬浮 + 遮罩 --- */
+/* --- Chi tiết nút: ngăn kéo bên phải trên desktop / hộp nổi giữa trong đồ thị trên di động + lớp phủ --- */
 .bme-node-detail-scrim {
   position: absolute;
   inset: 0;
@@ -4849,7 +4849,7 @@
   display: none !important;
 }
 
-/* 桌面đồ thị工作区（主画布）：Chi tiết nút仍为右侧滑出面板 */
+/* Khu vực làm việc đồ thị trên desktop (canvas chính): chi tiết nút vẫn là bảng trượt ra bên phải */
 #bme-node-detail {
   position: absolute;
   top: 0;
@@ -4876,7 +4876,7 @@
   transform: translateX(0);
 }
 
-/* 移动端「đồ thị」Tab：Chi tiết nút居中悬浮窗 */
+/* Tab "đồ thị" trên di động: chi tiết nút là cửa sổ nổi ở giữa */
 #bme-mobile-node-detail {
   position: absolute;
   left: 50%;
@@ -5082,7 +5082,7 @@
   border-radius: 2px;
 }
 
-/* 移动端đồ thị预览 - 桌面端Mặc định隐藏（旧组件已移除） */
+/* Xem trước đồ thị trên di động - mặc định ẩn ở desktop (thành phần cũ đã bị gỡ) */
 .bme-mobile-graph-preview,
 .bme-mobile-graph-status {
   display: none;
@@ -5240,7 +5240,7 @@
   overflow-y: auto;
 }
 
-/* ═══════ ⑤ 高级设置折叠 (desktop+mobile) ═══════ */
+/* ═══════ ⑤ Gộp cài đặt nâng cao (desktop+mobile) ═══════ */
 
 .bme-advanced-settings {
   margin-top: 16px;
@@ -5282,7 +5282,7 @@
   color: var(--bme-primary);
 }
 
-/* ==================== 响应式 ==================== */
+/* ==================== Responsive ==================== */
 
 @media (max-width: 768px) {
   #st-bme-panel {
@@ -5339,7 +5339,7 @@
     gap: 4px;
   }
 
-  /* ② 底部 Tabbar safe-area + 6 列 icon-only */
+  /* ② Tabbar đáy với safe-area + 6 cột chỉ có icon */
   .bme-panel-tabbar {
     display: flex;
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -5365,7 +5365,7 @@
     display: none !important;
   }
 
-  /* ④ 设置导航 pill + scroll-snap */
+  /* ④ Pill điều hướng cài đặt + scroll-snap */
   .bme-config-nav-mobile {
     display: flex;
     overflow-x: auto;
@@ -5392,7 +5392,7 @@
     font-weight: 600;
   }
 
-  /* ⑦ Config mode 移动端 */
+  /* ⑦ Config mode thiết bị di động */
   .bme-config-workspace-header {
     padding: 14px 14px 8px;
     flex-direction: column;
@@ -5477,7 +5477,7 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* ③ 通用触控目标 44px */
+  /* ③ Mục tiêu chạm dùng chung 44px */
   .bme-config-input,
   .bme-config-textarea,
   .bme-filter-select {
@@ -5557,7 +5557,7 @@
     margin-bottom: 14px;
   }
 
-  /* ⑧ Không gian preset tác vụ触控优化 */
+  /* ⑧ Tối ưu chạm cho khu preset tác vụ */
   .bme-task-toolbar-row,
   .bme-task-header-actions,
   .bme-task-inline-actions,
@@ -5636,7 +5636,7 @@
     margin-left: 28px;
   }
 
-  /* Dashboard 统计卡片横向滚动 */
+  /* Dashboard: thẻ thống kê cuộn ngang */
   .bme-stats-grid {
     display: flex;
     gap: 6px;
@@ -5655,7 +5655,7 @@
     flex-shrink: 0;
   }
 
-  /* Tìm kiếm栏 */
+  /* Thanh tìm kiếm */
   .bme-search-bar {
     flex-direction: column;
   }
@@ -5664,7 +5664,7 @@
     width: 100%;
   }
 
-  /* Thao tác按钮增大 */
+  /* Phóng to nút thao tác */
   .bme-action-btn {
     padding: 18px 8px;
     font-size: 12px;
@@ -5675,20 +5675,20 @@
     font-size: 22px;
   }
 
-  /* 移动端đồ thị内悬浮窗略收窄（桌面 #bme-node-detail 在窄屏下不可见） */
+  /* Cửa sổ nổi trong đồ thị trên di động được thu hẹp nhẹ (ở màn hẹp, #bme-node-detail của desktop không hiển thị được) */
   #bme-mobile-node-detail {
     width: min(400px, calc(100% - 16px));
     max-height: min(82vh, 680px);
   }
 
-  /* 图例 */
+  /* Chú giải */
   .bme-graph-legend {
     font-size: 9px;
   }
 
 }
 
-/* ═══════ Help Tip (? 图标 + 气泡) ═══════ */
+/* ═══════ Help Tip (? biểu tượng + bong bóng) ═══════ */
 .bme-help-tip {
   position: relative;
   display: inline-flex;
@@ -6334,7 +6334,7 @@
     gap: 10px;
   }
 
-  /* P1: 能力卡片 toggle 移动端Phóng to */
+  /* P1: năng lựcthẻ toggle thiết bị di độngPhóng to */
   .bme-capability-card input[type="checkbox"] {
     width: 44px;
     height: 24px;
@@ -6350,7 +6350,7 @@
     transform: translateX(20px);
   }
 
-  /* P2: 能力卡片文字 / icon 移动端微调 */
+  /* P2: tinh chỉnh nhẹ chữ/icon của thẻ năng lực trên di động */
   .bme-cap-icon {
     width: 38px;
     height: 38px;

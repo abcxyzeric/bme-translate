@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,7 +14,7 @@ function extractSnippet(startMarker, endMarker) {
   const start = indexSource.indexOf(startMarker);
   const end = indexSource.indexOf(endMarker);
   if (start < 0 || end < 0 || end <= start) {
-    throw new Error(`Không法Trích xuất index.js 片段: ${startMarker} -> ${endMarker}`);
+    throw new Error(`Không thểTrích xuất index.js đoạn: ${startMarker} -> ${endMarker}`);
   }
   return indexSource.slice(start, end).replace(/^export\s+/gm, "");
 }
@@ -177,7 +177,7 @@ async function testManualExtractNoBatchesDoesNotStayRunning() {
       return { signal: {} };
     },
     async executeExtractionBatch() {
-      throw new Error("不应进入批lần执行");
+      throw new Error("không nên đi vào thực thi theo lô");
     },
     async retryPendingGraphPersist() {
       return {
@@ -201,8 +201,8 @@ async function testManualExtractNoBatchesDoesNotStayRunning() {
 
   await context.result.onManualExtract();
   assert.equal(context.isExtracting, false);
-  assert.equal(context.lastExtractionStatus.text, "Không待Trích xuấtNội dung");
-  assert.equal(context.runtimeStatus.text, "Không待Trích xuấtNội dung");
+  assert.equal(context.lastExtractionStatus.text, "Không có nội dung chờ trích xuất");
+  assert.equal(context.runtimeStatus.text, "Không có nội dung chờ trích xuất");
   assert.notEqual(context.runtimeStatus.level, "running");
 }
 
@@ -571,3 +571,4 @@ await testManualExtractIgnoresFailedBatchWithoutPersistenceAttempt();
 await testManualRebuildSetsTerminalRuntimeStatus();
 
 console.log("mobile-status-regressions tests passed");
+

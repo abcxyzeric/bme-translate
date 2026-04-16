@@ -1,6 +1,6 @@
-// ST-BME: LLM Ký ứcTrích xuấtPipeline（写入路径）
-// 分析对话 → Trích xuấtnút和关系 → Cập nhậtđồ thị
-// v2: 融合 Mem0 精确对照 + Graphiti 时序边 + MemoRAG Toàn cục概要
+﻿// ST-BME: LLM Ký ứcTrích xuấtPipeline（ghi vàođường đi）
+// Phân tích hội thoại → trích xuất nút và quan hệ → cập nhật đồ thị
+// v2: hòa trộn đối chiếu chính xác kiểu Mem0 + cạnh thời gian kiểu Graphiti + tóm lược toàn cục kiểu MemoRAG
 
 import { embedBatch } from "../vector/embedding.js";
 import { debugLog, debugWarn } from "../runtime/debug-logging.js";
@@ -108,7 +108,7 @@ function buildActiveSummariesText(graph) {
     .map((entry, index) => {
       const rangeLabel = Array.isArray(entry.messageRange) && entry.messageRange.length >= 2
           && entry.messageRange[0] >= 0 && entry.messageRange[1] >= 0
-        ? `楼${entry.messageRange[0]}~${entry.messageRange[1]}`
+        ? `Tầng ${entry.messageRange[0]}~${entry.messageRange[1]}`
         : "";
       const levelLabel = entry.level ? `L${entry.level}` : "";
       const prefix = [rangeLabel, levelLabel].filter(Boolean).join(" ");
@@ -123,14 +123,14 @@ function buildStoryTimeContextText(graph) {
   if (!storyCtx?.resolved) return "";
   const parts = [];
   if (storyCtx.activeStoryTimeLabel) {
-    parts.push(`当前活跃剧情时间：${storyCtx.activeStoryTimeLabel}`);
+    parts.push(`Thời gian cốt truyện đang hoạt động: ${storyCtx.activeStoryTimeLabel}`);
   }
   if (storyCtx.source) {
     parts.push(`Nguồn：${storyCtx.source}`);
   }
   const seg = storyCtx.segment;
   if (seg?.tense && seg.tense !== "unknown") {
-    parts.push(`时态：${seg.tense}`);
+    parts.push(`Thì thời gian：${seg.tense}`);
   }
   return parts.join(" | ");
 }
@@ -181,9 +181,9 @@ function buildReflectionRankingQueryText({
 } = {}) {
   return [
     eventSummary ? `Gần nhấtSự kiện:\n${eventSummary}` : "",
-    characterSummary ? `近期Nhân vậtTrạng thái:\n${characterSummary}` : "",
-    threadSummary ? `当前tuyến chính:\n${threadSummary}` : "",
-    contradictionSummary ? `已知矛盾:\n${contradictionSummary}` : "",
+    characterSummary ? `Trạng thái nhân vật gần đây:\n${characterSummary}` : "",
+    threadSummary ? `hiện tạituyến chính:\n${threadSummary}` : "",
+    contradictionSummary ? `đã biếtmâu thuẫn:\n${contradictionSummary}` : "",
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -247,8 +247,8 @@ function isPlainObject(value) {
 }
 
 /**
- * 判断一个đối tượng是否像一个 extraction Thao tác
- * (包含 action/op/operation/type 中的至少一个)
+ * Phán định xem một đối tượng có trông như một thao tác extraction hay không
+ * (bao gồm ít nhất một trong các trường action/op/operation/type)
  */
 function looksLikeSingleOperation(obj) {
   if (!isPlainObject(obj)) return false;
@@ -261,7 +261,7 @@ function looksLikeSingleOperation(obj) {
 }
 
 function extractOperationsPayload(result) {
-  // 直接是数组 → 直接返回
+  // Nếu trực tiếp là mảng thì trả về luôn
   if (Array.isArray(result)) {
     return result;
   }
@@ -269,14 +269,14 @@ function extractOperationsPayload(result) {
     return null;
   }
 
-  // 1. 优先匹配已知容器键
+  // 1. Ưu tiên khớp khóa container đã biết
   for (const key of EXTRACTION_RESULT_CONTAINER_KEYS) {
     if (Array.isArray(result[key])) {
       return result[key];
     }
   }
 
-  // 2. 智能探测：扫描đối tượng中第一个值为非空数组且元素看起来像Thao tác的键
+  // 2. Thăm dò thông minh: quét khóa đầu tiên có giá trị là mảng không rỗng và phần tử trông như thao tác
   for (const [key, value] of Object.entries(result)) {
     if (
       Array.isArray(value) &&
@@ -284,16 +284,16 @@ function extractOperationsPayload(result) {
       value.some((item) => looksLikeSingleOperation(item))
     ) {
       debugLog(
-        `[ST-BME] Tự động探测到非标准容器键: "${key}" (${value.length} 项)`,
+        `[ST-BME] Tự động dò thấy khóa container không chuẩn: "${key}" (${value.length} mục)`,
       );
       return value;
     }
   }
 
-  // 3. 单个Thao tácđối tượng兜底：如果整个Kết quả看起来像一条Thao tác，包装成数组
+  // 3. Đường lùi cho đối tượng thao tác đơn: nếu toàn bộ kết quả trông như một thao tác thì bọc thành mảng
   if (looksLikeSingleOperation(result)) {
     debugLog(
-      "[ST-BME] LLM 返回了单个Thao tácđối tượng，Tự động包装为数组",
+      "[ST-BME] LLM đã trả về một đối tượng thao tác đơn, tự động bọc thành mảng",
     );
     return [result];
   }
@@ -844,18 +844,18 @@ function applyOperationStoryTimeToNode(
 }
 
 /**
- * 对未Xử lý的对话tầng执行Ký ứcTrích xuất
+ * Thực thi trích xuất ký ức cho các tầng hội thoại chưa xử lý
  *
  * @param {object} params
- * @param {object} params.graph - 当前图Trạng thái
- * @param {Array<{seq?: number, role: string, content: string}>} params.messages - 要Xử lý的对话tin nhắn
- * @param {number} params.startSeq - 本批Xử lý的首个 assistant tin nhắn chat 索引
- * @param {number} params.endSeq - 本批Xử lý的末个 assistant tin nhắn chat 索引
- * @param {number} [params.lastProcessedSeq] - 上lầnXử lý到的 chat 索引
+ * @param {object} params.graph - trạng thái đồ thị hiện tại
+ * @param {Array<{seq?: number, role: string, content: string}>} params.messages - tin nhắn hội thoại cần xử lý
+ * @param {number} params.startSeq - chỉ mục chat của tin nhắn assistant đầu tiên được xử lý trong lô này
+ * @param {number} params.endSeq - chỉ mục chat của tin nhắn assistant cuối cùng được xử lý trong lô này
+ * @param {number} [params.lastProcessedSeq] - chỉ mục chat đã xử lý tới ở lần trước
  * @param {object[]} params.schema - nútLoại Schema
  * @param {object} params.embeddingConfig - Embedding Cấu hình API
- * @param {string} [params.extractPrompt] - 自định nghĩaTrích xuất提示词
- * @param {object} [params.v2Options] - v2 增强选项
+ * @param {string} [params.extractPrompt] - prompt trích xuất tự định nghĩa
+ * @param {object} [params.v2Options] - v2 tăng cườngtùy chọn
  * @returns {Promise<{success: boolean, newNodes: number, updatedNodes: number, newEdges: number, newNodeIds: string[], processedRange: [number, number]}>}
  */
 export async function extractMemories({
@@ -899,7 +899,7 @@ export async function extractMemories({
   };
 
   debugLog(
-    `[ST-BME] Trích xuất开始: chat[${effectiveStartSeq}..${effectiveEndSeq}], ${messages.length}  tin nhắn`,
+    `[ST-BME] Trích xuấtbắt đầu: chat[${effectiveStartSeq}..${effectiveEndSeq}], ${messages.length}  tin nhắn`,
   );
 
   const extractionInput = buildExtractionInputContext(messages, {
@@ -956,13 +956,13 @@ export async function extractMemories({
       enableMultiIntent: true,
       maxTextLength: 1200,
     },
-    relevantHeading: "与当前Trích xuất片段最相关的既有nút",
+    relevantHeading: "Các nút đã có liên quan nhất tới đoạn trích xuất hiện tại",
   });
   const extractGraphRanking = extractGraphStats.ranking;
   const extractGraphRelevantNodes = extractGraphStats.relevantReferenceMap;
   const graphOverview = extractGraphStats.graphStats;
 
-  // 构建 Schema mô tả
+  // xây dựng Schema mô tả
   const schemaDescription = buildSchemaDescription(schema);
   const currentRange =
     messages.length > 0
@@ -1010,7 +1010,7 @@ export async function extractMemories({
     ...getSTContextForPrompt(),
   });
 
-  // 系统提示词
+  // prompt hệ thống
   const extractRegexInput = { entries: [] };
   const systemPrompt = applyTaskRegex(
     settings,
@@ -1023,38 +1023,38 @@ export async function extractMemories({
     "system",
   );
 
-  // Người dùng提示词 — Phase 3 分层信息Cấu trúc
+  // Prompt người dùng — Cấu trúc thông tin phân tầng của Phase 3
   const userPromptSections = [];
 
-  // Layer 1: 当前对话切片（区分上下文回顾 vs Trích xuất目标）
+  // Layer 1: lát cắt hội thoại hiện tại (phân biệt ngữ cảnh nhìn lại và mục tiêu trích xuất)
   {
     const hasContextMessages = structuredMessages.some((m) => m?.isContextOnly === true);
     const hasTargetMessages = structuredMessages.some((m) => m?.isContextOnly !== true);
     if (dialogueText) {
       if (hasContextMessages && hasTargetMessages) {
         userPromptSections.push(
-          "## 对话Nội dung",
-          "以下对话包含两部分：已Trích xuất过的上下文回顾（仅供理解前情）和本lần需要Trích xuấtKý ức的新Nội dung。" +
-            "请**只从新Nội dung中Trích xuấtKý ức**，不要重复Trích xuất上下文回顾中已有的信息。",
+          "## hội thoạiNội dung",
+          "Hội thoại dưới đây gồm hai phần: ngữ cảnh nhìn lại đã từng được trích xuất (chỉ để hiểu tiền cảnh) và nội dung mới cần trích xuất ký ức ở lượt này." +
+            "Hãy **chỉ trích xuất ký ức từ phần nội dung mới**, đừng lặp lại thông tin đã có trong phần ngữ cảnh nhìn lại.",
           dialogueText,
           "",
         );
       } else {
-        userPromptSections.push("## 当前对话Nội dung（需Trích xuấtKý ức）", dialogueText, "");
+        userPromptSections.push("## Nội dung hội thoại hiện tại (cần trích xuất ký ức)", dialogueText, "");
       }
     } else if (structuredMode === "structured" && structuredMessages.length > 0) {
       if (hasContextMessages && hasTargetMessages) {
         userPromptSections.push(
-          "## 对话Nội dung（Cấu trúc化tin nhắn）",
-          "以下Cấu trúc化tin nhắn包含两部分：标记为 isContextOnly 的是已Trích xuất过的上下文回顾（仅供理解前情），" +
-            "其余是本lần需要Trích xuấtKý ức的新Nội dung。请**只从 isContextOnly 为 false 的tin nhắn中Trích xuấtKý ức**。" +
-            "(Cấu trúc化tin nhắn已通过 profile blocks Tiêm，请参考上方 recentMessages 块。)",
+          "## Nội dung hội thoại (tin nhắn có cấu trúc)",
+          "Tin nhắn có cấu trúc dưới đây gồm hai phần: phần được đánh dấu isContextOnly là ngữ cảnh nhìn lại đã từng được trích xuất (chỉ để hiểu tiền cảnh)," +
+            "phần còn lại là nội dung mới cần trích xuất ký ức ở lượt này. Hãy **chỉ trích xuất ký ức từ các tin nhắn có isContextOnly = false**." +
+            "(Tin nhắn có cấu trúc đã được tiêm qua profile blocks, hãy tham khảo khối recentMessages ở phía trên.)",
           "",
         );
       } else {
         userPromptSections.push(
-          "## 当前对话Nội dung（Cấu trúc化tin nhắn，需Trích xuấtKý ức）",
-          "(Cấu trúc化tin nhắn已通过 profile blocks Tiêm，请参考上方 recentMessages 块。)",
+          "## Nội dung hội thoại hiện tại (tin nhắn có cấu trúc, cần trích xuất ký ức)",
+          "(Tin nhắn có cấu trúc đã được tiêm qua profile blocks, hãy tham khảo khối recentMessages ở phía trên.)",
           "",
         );
       }
@@ -1064,23 +1064,23 @@ export async function extractMemories({
   // Layer 2: đồ thị hiện tạiTrạng thái
   userPromptSections.push(
     "## đồ thị hiện tạiTrạng thái",
-    graphOverview || "(空đồ thị，尚Không có nút)",
+    graphOverview || "(Đồ thị trống, chưa có nút)",
     "",
   );
 
-  // Layer 3: 已有总结snapshot（帮助避免重复Trích xuất）
+  // Layer 3: snapshot tổng kết đã có (giúp tránh trích xuất lặp)
   if (activeSummaries) {
     userPromptSections.push(
-      "## 近期局面总结（已有覆盖，避免重复）",
+      "## Tóm tắt cục diện gần đây (đã bao phủ, tránh trùng lặp)",
       activeSummaries,
       "",
     );
   }
 
-  // Layer 4: Thời gian cốt truyện线位置
+  // Layer 4: vị trí trên trục thời gian cốt truyện
   if (storyTimeContext) {
     userPromptSections.push(
-      "## 当前Thời gian cốt truyện",
+      "## hiện tạiThời gian cốt truyện",
       storyTimeContext,
       "",
     );
@@ -1089,7 +1089,7 @@ export async function extractMemories({
   // Layer 5: nútLoạiđịnh nghĩa
   userPromptSections.push("## nútLoạiđịnh nghĩa", schemaDescription, "");
 
-  userPromptSections.push("请分析对话，按 JSON 格式输出Thao tác列表。");
+  userPromptSections.push("Hãy phân tích hội thoại và xuất danh sách thao tác theo định dạng JSON.");
   const userPrompt = userPromptSections.join("\n");
   const promptPayload = resolveTaskPromptPayload(promptBuild, userPrompt);
   const extractionAugmentPrompt = buildCognitiveExtractAugmentPrompt();
@@ -1114,7 +1114,7 @@ export async function extractMemories({
     systemPrompt,
   );
 
-  // 诊断：Theo dõi promptPayload
+  // chẩn đoán：Theo dõi promptPayload
   {
     const pm = Array.isArray(promptPayload.promptMessages) ? promptPayload.promptMessages : [];
     const pmUser = pm.filter((m) => m?.role === "user");
@@ -1151,7 +1151,7 @@ export async function extractMemories({
     }
   }
 
-  // 调用 LLM
+  // gọi LLM
   const llmResult = await callLLMForJSON({
     systemPrompt: llmSystemPrompt,
     userPrompt: promptPayload.userPrompt,
@@ -1206,7 +1206,7 @@ export async function extractMemories({
       ? result.slice(0, 120)
       : "";
     console.warn(
-      `[ST-BME] Trích xuất LLM 未返回有效Thao tác ` +
+      `[ST-BME] Trích xuất LLM không trả vềhợp lệThao tác ` +
         `[type=${diagType}]` +
         (diagKeys ? ` [keys=${diagKeys}]` : "") +
         (diagPreview ? ` [preview=${diagPreview}]` : "") +
@@ -1224,8 +1224,8 @@ export async function extractMemories({
     return {
       success: false,
       error: failureReason
-        ? `Trích xuất LLM 未返回有效Thao tác: ${failureReason}`
-        : "Trích xuất LLM 未返回有效Thao tác",
+        ? `Trích xuất LLM không trả vềhợp lệThao tác: ${failureReason}`
+        : "Trích xuất LLM không trả vềhợp lệThao tác",
       newNodes: 0,
       updatedNodes: 0,
       newEdges: 0,
@@ -1234,9 +1234,9 @@ export async function extractMemories({
     };
   }
 
-  // 执行Thao tác
+  // thực thiThao tác
   const stats = { newNodes: 0, updatedNodes: 0, newEdges: 0 };
-  const newNodeIds = []; // v2: 收集新建nút ID（用于进化引擎）
+  const newNodeIds = []; // v2: thu thập ID nút mới tạo (dùng cho engine tiến hóa)
   const updatedNodeIds = [];
   const refMap = new Map();
   const operationErrors = [];
@@ -1280,7 +1280,7 @@ export async function extractMemories({
           handleDelete(graph, op, stats);
           break;
         case "_skip":
-          // Mem0 对照判定为重复，Bỏ qua
+          // Đối chiếu kiểu Mem0 phán định là trùng lặp, bỏ qua
           break;
         default: {
           const message = `[ST-BME] Thao tác không rõLoại: ${op?.action ?? "<missing>"}`;
@@ -1290,7 +1290,7 @@ export async function extractMemories({
         }
       }
     } catch (e) {
-      console.error(`[ST-BME] Thao tác执行Thất bại:`, op, e);
+      console.error(`[ST-BME] Thao tácthực thiThất bại:`, op, e);
       operationErrors.push(e?.message || String(e));
     }
   }
@@ -1305,17 +1305,17 @@ export async function extractMemories({
     };
   }
 
-  // 为新建nút生成 embedding。Thất bại不应回滚整批đồ thị写入。
+  // Sinh embedding cho nút mới. Nếu thất bại thì không nên hoàn tác cả lô ghi vào đồ thị.
   try {
     await generateNodeEmbeddings(graph, embeddingConfig, signal);
   } catch (error) {
     if (isAbortError(error)) {
       throw error;
     }
-    console.error("[ST-BME] nút embedding Sinh thất bại，保留đồ thị写入:", error);
+    console.error("[ST-BME] nút embedding Sinh thất bại，giữ lạiđồ thịghi vào:", error);
   }
 
-  // Cập nhậtXử lý进度：统一记录为已Xử lý到的末个 chat 索引
+  // Cập nhật tiến độ xử lý: thống nhất ghi lại chỉ mục chat cuối cùng đã xử lý
   graph.lastProcessedSeq = Math.max(
     graph.lastProcessedSeq ?? -1,
     effectiveEndSeq,
@@ -1323,7 +1323,7 @@ export async function extractMemories({
   const changedNodeIds = [...new Set([...newNodeIds, ...updatedNodeIds])];
   if (ownershipWarnings.length > 0) {
     debugWarn(
-      `[ST-BME] Đã bỏ qua ${ownershipWarnings.length} 条缺少具体人物 owner 的Ký ức chủ quan或认知Cập nhật`,
+      `[ST-BME] Đã bỏ qua ${ownershipWarnings.length} mục ký ức chủ quan hoặc cập nhật nhận thức bị thiếu owner nhân vật cụ thể`,
     );
   }
   applyCognitionUpdates(graph, normalizedCognitionUpdates, {
@@ -1344,7 +1344,7 @@ export async function extractMemories({
   updateRuntimeScopeState(graph, newNodeIds, scopeRuntime, extractionOwnerContext);
 
   debugLog(
-    `[ST-BME] Trích xuấtHoàn tất: Tạo mới ${stats.newNodes}, Cập nhật ${stats.updatedNodes}, 新边 ${stats.newEdges}, lastProcessedSeq=${graph.lastProcessedSeq}`,
+    `[ST-BME] Trích xuấtHoàn tất: Tạo mới ${stats.newNodes}, Cập nhật ${stats.updatedNodes}, cạnh mới ${stats.newEdges}, lastProcessedSeq=${graph.lastProcessedSeq}`,
   );
 
   return {
@@ -1399,7 +1399,7 @@ function handleCreate(
   }
   const nodeScope = scopeDecision.scope;
 
-  // latestOnly Loại：检查是否已存在同名nút
+  // Với loại latestOnly: kiểm tra xem đã tồn tại nút cùng tên hay chưa
   if (typeDef.latestOnly && op.fields?.name) {
     const existing = findLatestNode(
       graph,
@@ -1409,14 +1409,14 @@ function handleCreate(
       nodeScope,
     );
     if (existing) {
-      // 转为Cập nhậtThao tác
+      // Chuyển thành thao tác cập nhật
       updateNode(graph, existing.id, { fields: op.fields, seq, scope: nodeScope });
       applyOperationStoryTimeToNode(graph, existing, op, batchStoryTime);
       stats.updatedNodes++;
 
       if (op.ref) refMap.set(op.ref, existing.id);
 
-      // Xử lýLiên kết边
+      // Xử lý cạnh liên kết
       if (op.links) {
         handleLinks(graph, existing.id, op.links, refMap, stats);
       }
@@ -1424,7 +1424,7 @@ function handleCreate(
     }
   }
 
-  // 创建新nút
+  // Tạo nút mới
   const node = createNode({
     type: op.type,
     fields: normalizedFields,
@@ -1438,12 +1438,12 @@ function handleCreate(
   addNode(graph, node);
   stats.newNodes++;
 
-  // Lưu ref 用于同批lần引用
+  // Lưu ref để tham chiếu trong cùng lô
   if (op.ref) {
     refMap.set(op.ref, node.id);
   }
 
-  // Xử lýLiên kết边
+  // Xử lý cạnh liên kết
   if (op.links) {
     handleLinks(graph, node.id, op.links, refMap, stats);
   }
@@ -1465,13 +1465,13 @@ function handleUpdate(
   batchStoryTime = null,
 ) {
   if (!op.nodeId) {
-    console.warn("[ST-BME] update Thao tác缺少 nodeId");
+    console.warn("[ST-BME] update Thao tácthiếu nodeId");
     return "";
   }
 
   const previousNode = getNode(graph, op.nodeId);
   if (!previousNode) {
-    console.warn(`[ST-BME] update 目标nút不存在: ${op.nodeId}`);
+    console.warn(`[ST-BME] Nút mục tiêu của update không tồn tại: ${op.nodeId}`);
     return "";
   }
 
@@ -1519,7 +1519,7 @@ function handleUpdate(
       ];
     }
 
-    // v2 Graphiti: 标记旧的 updates/temporal_update 边为失效
+    // v2 Graphiti: đánh dấu các cạnh updates/temporal_update cũ là mất hiệu lực
     const oldEdges = graph.edges.filter(
       (e) =>
         !e.invalidAt &&
@@ -1603,8 +1603,8 @@ function buildFieldChangeSummary(previousFields = {}, nextFields = {}) {
     const after = nextFields[key];
     if (before === after) continue;
 
-    const beforeText = before == null || before === "" ? "空" : String(before);
-    const afterText = after == null || after === "" ? "空" : String(after);
+    const beforeText = before == null || before === "" ? "rỗng" : String(before);
+    const afterText = after == null || after === "" ? "rỗng" : String(after);
     changes.push(`${key}: ${beforeText} -> ${afterText}`);
   }
 
@@ -1618,12 +1618,12 @@ function handleDelete(graph, op, stats) {
   if (!op.nodeId) return;
   const node = graph.nodes.find((n) => n.id === op.nodeId);
   if (node) {
-    node.archived = true; // 软Xóa
+    node.archived = true; // xóa mềm
   }
 }
 
 /**
- * Xử lýLiên kết边
+ * Xử lý cạnh liên kết
  */
 function handleLinks(graph, sourceId, links, refMap, stats) {
   const sourceNode = getNode(graph, sourceId);
@@ -1631,14 +1631,14 @@ function handleLinks(graph, sourceId, links, refMap, stats) {
   for (const link of links) {
     let targetId = link.targetNodeId || null;
 
-    // 通过 ref 解析目标nút
+    // thông qua ref phân tíchmục tiêunút
     if (!targetId && link.targetRef) {
       targetId = refMap.get(link.targetRef);
     }
 
     if (!targetId) continue;
 
-    // 验证关系Loại
+    // xác thựcquan hệLoại
     const relation = RELATION_TYPES.includes(link.relation)
       ? link.relation
       : "related";
@@ -1811,7 +1811,7 @@ function updateRuntimeScopeState(
 }
 
 /**
- * 为缺少 embedding 的nút生成Vector
+ * Sinh vector cho các nút thiếu embedding
  */
 async function generateNodeEmbeddings(graph, embeddingConfig, signal) {
   if (!isDirectVectorConfig(embeddingConfig)) return;
@@ -1828,7 +1828,7 @@ async function generateNodeEmbeddings(graph, embeddingConfig, signal) {
     (node) => buildNodeVectorText(node) || node.type,
   );
 
-  debugLog(`[ST-BME] 为 ${texts.length}  nút生成 embedding`);
+  debugLog(`[ST-BME] Sinh embedding cho ${texts.length} nút`);
 
   const embeddings = await embedBatch(texts, embeddingConfig, { signal });
 
@@ -1840,13 +1840,13 @@ async function generateNodeEmbeddings(graph, embeddingConfig, signal) {
 }
 
 /**
- * 构建 Schema mô tả文本
+ * xây dựng Schema mô tảvăn bản
  */
 function buildSchemaDescription(schema) {
   return schema
     .map((t) => {
       const cols = t.columns
-        .map((c) => `${c.name}${c.required ? "(必填)" : ""}: ${c.hint}`)
+         .map((c) => `${c.name}${c.required ? "(bắt buộc)" : ""}: ${c.hint}`)
         .join("\n    ");
       return `Loại "${t.id}" (${t.label}):\n    ${cols}`;
     })
@@ -1854,24 +1854,24 @@ function buildSchemaDescription(schema) {
 }
 
 /**
- * 构建Mặc địnhTrích xuất提示词
+ * xây dựngMặc địnhTrích xuấtprompt
  */
 function buildDefaultExtractPrompt(schema) {
   const typeNames = schema.map((s) => `${s.id}(${s.label})`).join(", ");
 
   return [
-    "你是一个Ký ứcTrích xuất分析器。从对话中Trích xuấtCấu trúc化Ký ứcnút并存入知识đồ thị。",
+    "Bạn là bộ phân tích trích xuất ký ức. Hãy trích xuất các nút ký ức có cấu trúc từ hội thoại và lưu vào đồ thị tri thức.",
     "",
-    `支持的nútLoại：${typeNames}`,
+    `Các loại nút được hỗ trợ: ${typeNames}`,
     "",
-    "这轮必须同时考虑三层信息：",
-    "- Khách quan事实：继续写入 event / character / location / thread / rule / synopsis / reflection",
-    '- Ký ức chủ quan：统一写入 pov_memory，使用 scope.layer = "pov"',
-    "- 地区归属：能判断时写入 scope.regionPrimary / regionPath / regionSecondary，判断不出来就留空",
+    "Ở lượt này bắt buộc phải đồng thời xét ba tầng thông tin:",
+    "- Sự thật khách quan: tiếp tục ghi vào event / character / location / thread / rule / synopsis / reflection",
+    '- Ký ức chủ quan: thống nhất ghi vào pov_memory, dùng scope.layer = "pov"',
+    "- Quy thuộc khu vực: nếu phán định được thì ghi vào scope.regionPrimary / regionPath / regionSecondary, không phán định được thì để trống",
     "",
-    "Định dạng đầu ra为严格 JSON：",
+    "Đầu ra phải là JSON nghiêm ngặt:",
     "{",
-    '  "thought": "你对本段对话的分析（Sự kiện/Nhân vật变化/新信息/谁如何理解）",',
+    '  "thought": "Phân tích của bạn về đoạn hội thoại này (sự kiện/thay đổi nhân vật/thông tin mới/ai hiểu điều gì như thế nào)",',
     '  "batchStoryTime": {"label": "Sáng sớm ngày thứ hai", "tense": "ongoing", "relation": "after", "anchorLabel": "Sau xung đột đêm qua", "confidence": "high", "advancesActiveTimeline": true},',
     '  "operations": [',
     "    {",
@@ -1890,14 +1890,14 @@ function buildDefaultExtractPrompt(schema) {
     "    {",
     '      "action": "create",',
     '      "type": "pov_memory",',
-    '      "fields": {"summary": "Nhân vật怎么记住这件事", "belief": "Cô ấy cho rằng đã xảy ra chuyện gì", "emotion": "Cảm xúc", "attitude": "Thái độ", "certainty": "unsure", "about": "evt1"},',
+    '      "fields": {"summary": "Nhân vật ghi nhớ chuyện này như thế nào", "belief": "Cô ấy cho rằng đã xảy ra chuyện gì", "emotion": "Cảm xúc", "attitude": "Thái độ", "certainty": "unsure", "about": "evt1"},',
     '      "scope": {"layer": "pov", "ownerType": "character", "ownerId": "Tên nhân vật", "ownerName": "Tên nhân vật", "regionPrimary": "Khu vực chính", "regionPath": ["Khu vực cấp trên", "Khu vực chính"]}',
     "    },",
     "    {",
     '      "action": "create",',
     '      "type": "pov_memory",',
-    '      "fields": {"summary": "Người dùng怎么记住这件事", "belief": "Người dùng视角判断", "emotion": "Cảm xúc", "attitude": "Thái độ", "certainty": "certain", "about": "evt1"},',
-    '      "scope": {"layer": "pov", "ownerType": "user", "ownerId": "Người dùng名", "ownerName": "Người dùng名"}',
+    '      "fields": {"summary": "Người dùng ghi nhớ chuyện này như thế nào", "belief": "Phán định từ góc nhìn người dùng", "emotion": "Cảm xúc", "attitude": "Thái độ", "certainty": "certain", "about": "evt1"},',
+    '      "scope": {"layer": "pov", "ownerType": "user", "ownerId": "Tên người dùng", "ownerName": "Tên người dùng"}',
     "    }",
     "  ],",
     '  "cognitionUpdates": [',
@@ -1921,55 +1921,55 @@ function buildDefaultExtractPrompt(schema) {
     "  }",
     "}",
     "",
-    "Quy tắc：",
-    "- 每批对话最多创建 1 个Sự kiệnnút，多个子Sự kiện合并为一条",
-    "- batchStoryTime 表示这批对话主叙事所处的剧情时间；普通当前场景尽量填写，推不出来就留空",
-    "- operations[].storyTime 用于nút自己的剧情时间；不写时系统会继承 batchStoryTime",
-    "- 必须区分聊天顺序和剧情顺序，不要把“后说到”误当成“后发生”",
-    "- flashback / hypothetical / future 可以写 storyTime，但通常不要把 advancesActiveTimeline 设为 true",
-    "- 涉及到的Nhân vật都尽量尝试生成对应 POV Ký ức和 cognitionUpdates；不必强行覆盖全图所有Nhân vật",
-    "- cognitionUpdates 用来表达谁确定知道、谁误解了什么、谁只是模糊可见",
-    "- 多Nhân vật场景里，pov_memory 和 cognitionUpdates 必须写清具体人物；不要把Nhân vật卡名当作 POV owner",
-    "- 只有在这一批明显只涉及一个具体Nhân vật实体时，才允许省略 character POV 的 owner 并让系统安全归属",
-    "- knownRefs / mistakenRefs 优先引用同批 ref；没有 ref 再引用现有 nodeId",
-    "- regionUpdates 只有在对话里明确出现地区Manh mối时才写；不确定就留空",
-    "- Nhân vật/Địa điểmnút：如果图中已有同名同Phạm vi tác dụngnút，用 update 而非 create",
-    `- 关系Loại限定：${RELATION_TYPES.join(", ")}`,
-    "- contradicts 关系用于矛盾/冲突信息",
-    "- evolves 关系用于新信息揭示旧Ký ức需修正的情况",
-    "- temporal_update 关系用于实体Trạng thái的时序变化",
-    "- 不要虚构Nội dung，只Trích xuất对话中有证据支持的信息",
-    "- POV người dùng 不等于Nhân vật已知事实，不要把Người dùng想法伪装成Khách quan事实",
-    "- pov_memory 只能用于Ký ức chủ quan，不要拿 character/location/event 去伪装第一视角Ký ức",
-    "- 地区不确定就留空，不要硬编",
-    "- importance Phạm vi 1-10，普通Sự kiện 5，关键转折 8+",
-    "- event.fields.title 需要是Tên sự kiện ngắn，建议 6-10 字，只用于đồ thị和列表显示",
-    "- summary 应该是tóm tắt抽象，不要复制原文",
+    "Quy tắc:",
+    "- Mỗi lô hội thoại tối đa chỉ tạo 1 nút sự kiện; nhiều tiểu sự kiện phải hợp nhất thành một mục",
+    "- batchStoryTime biểu thị thời gian cốt truyện của tuyến tự sự chính trong lô hội thoại này; thông thường hãy cố điền cảnh hiện tại, nếu không suy ra được thì để trống",
+    "- operations[].storyTime dùng cho thời gian cốt truyện riêng của nút; nếu không ghi thì hệ thống sẽ kế thừa batchStoryTime",
+    "- Bắt buộc phải phân biệt thứ tự chat và thứ tự cốt truyện; đừng nhầm "được nhắc sau" thành "xảy ra sau"",
+    "- Flashback / hypothetical / future có thể ghi storyTime, nhưng thông thường đừng đặt advancesActiveTimeline = true",
+    "- Với các nhân vật có liên quan, hãy cố gắng sinh POV memory và cognitionUpdates tương ứng; không cần ép bao phủ toàn bộ nhân vật trong đồ thị",
+    "- cognitionUpdates dùng để thể hiện ai biết chắc điều gì, ai hiểu sai điều gì, ai chỉ thấy mơ hồ",
+    "- Trong cảnh nhiều nhân vật, pov_memory và cognitionUpdates bắt buộc phải ghi rõ nhân vật cụ thể; đừng dùng tên thẻ nhân vật làm POV owner",
+    "- Chỉ khi lô này rõ ràng chỉ liên quan tới một thực thể nhân vật cụ thể thì mới được phép bỏ owner của character POV và để hệ thống quy thuộc an toàn",
+    "- knownRefs / mistakenRefs ưu tiên tham chiếu ref trong cùng lô; nếu không có ref thì mới dùng nodeId hiện có",
+    "- Chỉ ghi regionUpdates khi trong hội thoại xuất hiện manh mối khu vực một cách rõ ràng; không chắc thì để trống",
+    "- Với nút nhân vật/địa điểm: nếu trong đồ thị đã có nút cùng tên và cùng phạm vi tác dụng thì dùng update thay vì create",
+    `- Loại quan hệ bị giới hạn trong: ${RELATION_TYPES.join(", ")}`,
+    "- Quan hệ contradicts dùng cho thông tin mâu thuẫn/xung đột",
+    "- Quan hệ evolves dùng cho trường hợp thông tin mới tiết lộ rằng ký ức cũ cần sửa",
+    "- Quan hệ temporal_update dùng cho thay đổi trạng thái của thực thể theo thời gian",
+    "- Đừng bịa nội dung, chỉ trích xuất thông tin có bằng chứng hỗ trợ trong hội thoại",
+    "- POV của người dùng không đồng nghĩa với việc nhân vật đã biết sự thật; đừng ngụy trang suy nghĩ của người dùng thành sự thật khách quan",
+    "- pov_memory chỉ được dùng cho ký ức chủ quan; đừng dùng character/location/event để ngụy trang ký ức ở góc nhìn ngôi thứ nhất",
+    "- Nếu khu vực không chắc chắn thì để trống, đừng cố bịa",
+    "- importance nằm trong phạm vi 1-10; sự kiện thông thường là 5, bước ngoặt then chốt là 8+",
+    "- event.fields.title cần là tên sự kiện ngắn, khuyến nghị 6-10 ký tự, chỉ dùng cho đồ thị và danh sách hiển thị",
+    "- summary nên là phần tóm tắt mang tính khái quát, đừng chép nguyên văn",
   ].join("\n");
 }
 
 function buildCognitiveExtractAugmentPrompt() {
   return [
-    "增强Yêu cầu：这一轮Trích xuất除了 operations，还要尽量补 cognitionUpdates 与 regionUpdates。",
-    "- cognitionUpdates 表达谁明确知道哪些Khách quannút、谁产生了误解、谁只是低置信可见。",
-    "- 本批涉及到的Nhân vật都尽量尝试生成 POV 和Ký ức认知Cập nhật，不必覆盖全图Tất cảNhân vật。",
-    "- ownerType 只能是 character 或 user；ownerName 必须写清楚Tên nhân vật或Người dùng名。",
-    "- 不要把Nhân vật卡名、旁白身份或群像统称当成 POV owner；多Nhân vật时一定写具体人物。",
-    "- knownRefs / mistakenRefs 优先引用同批 ref，没有 ref 再用现有 nodeId。",
-    "- visibility.score 取 0..1，1 表示亲历或明确得知，0.5 左右表示间接听闻。",
-    "- regionUpdates.activeRegionHint 只在这批对话明确落到某个地区时填写。",
-    "- regionUpdates.adjacency 只在文本里明确出现邻接关系时填写，不要猜。",
-    "- batchStoryTime.label 尽量写成可复用的剧情时间标签，例如“Sáng sớm ngày thứ hai”“昨夜之后”“回忆里的童年时期”。",
-    "- advancesActiveTimeline 只有在这批确实推动当前主叙事时间线时才写 true。",
-    "- 若没有认知或空间变化，可返回空数组或空đối tượng，但不要返回Không效Cấu trúc。",
+    "Yêu cầu tăng cường: ở lượt trích xuất này, ngoài operations còn phải cố gắng bổ sung cognitionUpdates và regionUpdates.",
+    "- cognitionUpdates thể hiện ai biết rõ nút khách quan nào, ai sinh ra hiểu sai và ai chỉ có khả năng nhìn thấy với độ tin cậy thấp.",
+    "- Với các nhân vật liên quan trong lô này, hãy cố gắng sinh POV và cập nhật nhận thức ký ức, không cần bao phủ tất cả nhân vật trong đồ thị.",
+    "- ownerType chỉ được là character hoặc user; ownerName bắt buộc phải ghi rõ tên nhân vật hoặc tên người dùng.",
+    "- Đừng lấy tên thẻ nhân vật, danh xưng lời dẫn hay tên gọi tập thể làm POV owner; khi có nhiều nhân vật thì nhất định phải ghi rõ người cụ thể.",
+    "- knownRefs / mistakenRefs ưu tiên tham chiếu ref trong cùng lô; nếu không có ref thì mới dùng nodeId hiện có.",
+    "- visibility.score lấy trong khoảng 0..1; 1 biểu thị trực tiếp trải qua hoặc biết chắc, khoảng 0.5 biểu thị nghe gián tiếp.",
+    "- regionUpdates.activeRegionHint chỉ điền khi lô hội thoại này rơi rõ ràng vào một khu vực nào đó.",
+    "- regionUpdates.adjacency chỉ điền khi trong văn bản có quan hệ kề cận được nêu rõ, đừng đoán.",
+    "- batchStoryTime.label nên được viết thành nhãn thời gian cốt truyện có thể tái sử dụng, ví dụ "Sáng sớm ngày thứ hai", "Sau đêm qua", "Thời thơ ấu trong hồi ức".",
+    "- advancesActiveTimeline chỉ được viết là true khi lô này thực sự đẩy tuyến thời gian tự sự chính hiện tại tiến về phía trước.",
+    "- Nếu không có thay đổi về nhận thức hoặc không gian thì có thể trả về mảng rỗng hoặc đối tượng rỗng, nhưng đừng trả về cấu trúc không hợp lệ.",
   ].join("\n");
 }
 
-// ==================== v2 增强功能 ====================
+// ==================== Chức năng tăng cường v2 ====================
 
 /**
- * Toàn cục故事概要生成（MemoRAG 启发）
- * 基于图中Sự kiện/Nhân vật/tuyến chínhTự động生成/Cập nhật synopsis nút
+ * Sinh tóm lược câu chuyện toàn cục (lấy cảm hứng từ MemoRAG)
+ * Tự động sinh/cập nhật nút synopsis dựa trên sự kiện/nhân vật/tuyến chính trong đồ thị
  *
  * @param {object} params
  * @param {object} params.graph
@@ -1994,7 +1994,7 @@ export async function generateSynopsis({
   const eventSummaries = eventNodes
     .map((n) => {
       const storyLabel = describeNodeStoryTime(n);
-      return `[楼${n.seq}]${storyLabel ? ` [${storyLabel}]` : ""} ${n.fields.summary || "(Không)"}`;
+      return `[Tầng ${n.seq}]${storyLabel ? ` [${storyLabel}]` : ""} ${n.fields.summary || "(Không)"}`;
     })
     .join("\n");
 
@@ -2032,22 +2032,22 @@ export async function generateSynopsis({
     synopsisPromptBuild.systemPrompt ||
       customPrompt ||
       [
-        "你是故事概要生成器。根据Sự kiện线、Nhân vật和tuyến chính生成简洁的前情提要。",
-        '输出 JSON：{"summary": "前情提要文本（200字以内）"}',
-        "Yêu cầu：涵盖核心冲突、关键转折、主要Nhân vậtTrạng thái hiện tại。",
+        "Bạn là bộ sinh tóm lược câu chuyện. Hãy dựa trên tuyến sự kiện, nhân vật và tuyến chính để tạo ra bản tóm lược bối cảnh trước đó ngắn gọn.",
+        'đầu ra JSON: {"summary": "văn bản tóm lược bối cảnh trước đó (không quá 200 ký tự)"}',
+        "Yêu cầu: bao phủ xung đột cốt lõi, bước ngoặt then chốt và trạng thái hiện tại của các nhân vật chính.",
       ].join("\n"),
     synopsisRegexInput,
     "system",
   );
 
   const synopsisUserPrompt = [
-      "## Sự kiện时间线",
+      "## Trục thời gian sự kiện",
       eventSummaries,
       "",
       "## Nhân vậtTrạng thái",
       charSummary || "(Không)",
       "",
-      "## 活跃tuyến chính",
+      "## Tuyến chính đang hoạt động",
       threadSummary || "(Không)",
     ].join("\n");
   const synopsisPromptPayload = resolveTaskPromptPayload(
@@ -2089,7 +2089,7 @@ export async function generateSynopsis({
       Math.max(existingSynopsis.seqRange?.[1] ?? currentSeq, currentSeq),
     ];
     existingSynopsis.embedding = null;
-    debugLog("[ST-BME] Toàn cục概要Đã cập nhật");
+    debugLog("[ST-BME] Đã cập nhật tóm lược toàn cục");
   } else {
     const node = createNode({
       type: "synopsis",
@@ -2099,7 +2099,7 @@ export async function generateSynopsis({
     });
     node.storyTimeSpan = synopsisStoryTimeSpan;
     addNode(graph, node);
-    debugLog("[ST-BME] Toàn cục概要已创建");
+    debugLog("[ST-BME] Đã tạo tóm lược toàn cục");
   }
 }
 
@@ -2134,7 +2134,7 @@ export async function generateReflection({
   const eventSummary = recentEvents
     .map((n) => {
       const storyLabel = describeNodeStoryTime(n);
-      return `[楼${n.seq}]${storyLabel ? ` [${storyLabel}]` : ""} ${n.fields.summary || "(Không)"}`;
+      return `[Tầng ${n.seq}]${storyLabel ? ` [${storyLabel}]` : ""} ${n.fields.summary || "(Không)"}`;
     })
     .join("\n");
   const characterSummary = recentCharacters
@@ -2176,7 +2176,7 @@ export async function generateReflection({
       enableMultiIntent: true,
       maxTextLength: 1200,
     },
-    relevantHeading: "与当前Phản tư最相关的既有nút",
+    relevantHeading: "Các nút đã có liên quan nhất tới lần phản tư hiện tại",
   });
 
   const reflectionPromptBuild = await buildTaskPrompt(settings, "reflection", {
@@ -2196,28 +2196,28 @@ export async function generateReflection({
     reflectionPromptBuild.systemPrompt ||
       customPrompt ||
       [
-        "你是 RP 长期Ký ức系统的Phản tư生成器。",
-        '输出严格 JSON：{"insight":"...","trigger":"...","suggestion":"...","importance":1-10}',
-        "insight 应总结Gần nhất情节中最值得长期保留的变化、关系趋势或潜在Manh mối。",
-        "trigger 说明触发这条Phản tư的关键Sự kiện或矛盾。",
-        "suggestion 给出后续检索或叙事上值得关注的提示。",
-        "不要复述Tất cảSự kiện，要提炼高层结论。",
+        "Bạn là bộ sinh phản tư cho hệ thống ký ức dài hạn của RP.",
+        'đầu ra JSON nghiêm ngặt: {"insight":"...","trigger":"...","suggestion":"...","importance":1-10}',
+        "insight nên tổng kết thay đổi, xu hướng quan hệ hoặc manh mối tiềm ẩn đáng để giữ lại lâu dài nhất trong diễn biến gần đây.",
+        "trigger mô tả sự kiện then chốt hoặc mâu thuẫn đã kích hoạt dòng phản tư này.",
+        "suggestion đưa ra lời nhắc đáng chú ý cho việc truy xuất hoặc tự sự về sau.",
+        "Đừng kể lại toàn bộ sự kiện, hãy chắt lọc kết luận ở tầng cao hơn.",
       ].join("\n"),
     reflectionRegexInput,
     "system",
   );
 
   const reflectionUserPrompt = [
-      "## Gần nhấtSự kiện",
+      "## Sự kiện gần nhất",
       eventSummary,
       "",
-      "## 近期Nhân vậtTrạng thái",
+      "## Trạng thái nhân vật gần đây",
       characterSummary || "(Không)",
       "",
-      "## 当前tuyến chính",
+      "## Tuyến chính hiện tại",
       threadSummary || "(Không)",
       "",
-      "## 已知矛盾",
+      "## Mâu thuẫn đã biết",
       contradictionSummary || "(Không)",
     ].join("\n");
   const reflectionPromptPayload = resolveTaskPromptPayload(
@@ -2271,6 +2271,7 @@ export async function generateReflection({
     addEdge(graph, edge);
   }
 
-  debugLog("[ST-BME] Phản tư条目已生成");
+  debugLog("[ST-BME] Đã sinh mục phản tư");
   return reflectionNode.id;
 }
+

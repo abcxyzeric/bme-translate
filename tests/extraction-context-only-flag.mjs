@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   buildExtractionMessages,
 } from "../maintenance/chat-history.js";
@@ -95,10 +95,10 @@ const chat = [
     },
   ];
   const transcript = formatExtractionTranscript(mixed);
-  assert.match(transcript, /已Trích xuất过/, "transcript should contain context review header");
-  assert.match(transcript, /本lần需要Trích xuất/, "transcript should contain extraction target header");
+  assert.match(transcript, /đã trích xuất/, "transcript should contain context review header");
+  assert.match(transcript, /lần này cần trích xuất/, "transcript should contain extraction target header");
   assert.ok(
-    transcript.indexOf("已Trích xuất过") < transcript.indexOf("本lần需要Trích xuất"),
+    transcript.indexOf("đã trích xuất") < transcript.indexOf("lần này cần trích xuất"),
     "context header should appear before target header",
   );
   assert.match(transcript, /#1.*context user/, "context message should appear");
@@ -114,8 +114,8 @@ const chat = [
     { seq: 4, role: "assistant", content: "ai msg", speaker: "B", isContextOnly: false },
   ];
   const transcript = formatExtractionTranscript(allTarget);
-  assert.doesNotMatch(transcript, /已Trích xuất过/, "no context header when all are target");
-  assert.doesNotMatch(transcript, /本lần需要Trích xuất/, "no target header when all are target");
+  assert.doesNotMatch(transcript, /đã trích xuất/, "no context header when all are target");
+  assert.doesNotMatch(transcript, /lần này cần trích xuất/, "no target header when all are target");
   console.log("  ✓ formatExtractionTranscript: no dividers when all messages are targets");
 }
 
@@ -125,8 +125,8 @@ const chat = [
     { seq: 2, role: "assistant", content: "ai msg", speaker: "B", isContextOnly: true },
   ];
   const transcript = formatExtractionTranscript(allContext);
-  assert.doesNotMatch(transcript, /已Trích xuất过/, "no dividers when all are context-only");
-  assert.doesNotMatch(transcript, /本lần需要Trích xuất/, "no dividers when all are context-only");
+  assert.doesNotMatch(transcript, /đã trích xuất/, "no dividers when all are context-only");
+  assert.doesNotMatch(transcript, /lần này cần trích xuất/, "no dividers when all are context-only");
   console.log("  ✓ formatExtractionTranscript: no dividers when all messages are context-only");
 }
 
@@ -158,11 +158,12 @@ const chat = [
     false,
     "user label should remain visible",
   );
-  assert.match(result.filteredTranscript, /已Trích xuất过/, "transcript includes context header");
-  assert.match(result.filteredTranscript, /本lần需要Trích xuất/, "transcript includes target header");
+  assert.match(result.filteredTranscript, /đã trích xuất/, "transcript includes context header");
+  assert.match(result.filteredTranscript, /lần này cần trích xuất/, "transcript includes target header");
   assert.match(result.filteredTranscript, /#2 \[assistant\]: old answer/, "assistant transcript should hide character name");
   assert.doesNotMatch(result.filteredTranscript, /#2 \[assistant\|B\]:/, "assistant transcript should not show character name");
   console.log("  ✓ buildExtractionInputContext: isContextOnly propagated to filteredMessages and transcript");
 }
 
 console.log("extraction-context-only-flag tests passed");
+

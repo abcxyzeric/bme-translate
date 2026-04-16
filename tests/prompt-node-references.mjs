@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 const {
   createPromptNodeReferenceMap,
@@ -15,7 +15,7 @@ const map = createPromptNodeReferenceMap(
         id: rawNodeId,
         type: "event",
         fields: {
-          title: "这是一个非常非常长的nút标题，用于Kiểm thửTrích xuất提示里的标签截断Hành vi",
+          title: "Đây là một tiêu đề nút rất rất dài, dùng để kiểm thử hành vi cắt ngắn nhãn trong nhắc trích xuất",
         },
       },
       score: 0.91,
@@ -25,7 +25,7 @@ const map = createPromptNodeReferenceMap(
         id: "node-2",
         type: "thread",
         fields: {
-          summary: "关系持续升温",
+          summary: "quan hệ tiếp tục ấm lên",
         },
       },
       score: 0.77,
@@ -45,10 +45,11 @@ assert.equal(map.keyToNodeId.G1, rawNodeId);
 assert.equal(map.nodeIdToKey[rawNodeId], "G1");
 assert.equal(resolvePromptNodeId({ nodeId: rawNodeId }), rawNodeId);
 assert.equal(resolvePromptNodeId({ node: { id: "node-2" } }), "node-2");
-assert.equal(getPromptNodeLabel({ id: "node-3", fields: { title: "短标题" } }), "短标题");
+assert.equal(getPromptNodeLabel({ id: "node-3", fields: { title: "Tiêu đề ngắn" } }), "Tiêu đề ngắn");
 assert.equal(map.keyToMeta.G1.score, 0.91);
-assert.match(map.keyToMeta.G1.label, /^这是一个非常非常长的节…$/);
-assert.equal(map.keyToMeta.G2.label, "关系持续升温");
+assert.match(map.keyToMeta.G1.label, /^Đây là một tiêu đề nút rất…$/);
+assert.equal(map.keyToMeta.G2.label, "quan hệ tiếp tục ấm lên");
 assert.equal(map.keyToMeta.G1.nodeId, rawNodeId);
 
 console.log("prompt-node-references tests passed");
+

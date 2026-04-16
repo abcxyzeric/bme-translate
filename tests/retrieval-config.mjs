@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,7 +31,7 @@ function createGraph() {
       importance: 9,
       createdTime: 1,
       archived: false,
-      fields: { title: "Quy tắc一" },
+      fields: { title: "Quy tắc 1" },
       seqRange: [1, 1],
     },
     {
@@ -40,7 +40,7 @@ function createGraph() {
       importance: 7,
       createdTime: 2,
       archived: false,
-      fields: { title: "Quy tắc二" },
+      fields: { title: "Quy tắc 2" },
       seqRange: [2, 2],
     },
     {
@@ -49,7 +49,7 @@ function createGraph() {
       importance: 3,
       createdTime: 3,
       archived: false,
-      fields: { title: "Quy tắc三" },
+      fields: { title: "Quy tắc 3" },
       seqRange: [3, 3],
     },
   ];
@@ -140,7 +140,7 @@ function splitIntentSegments(text, { maxSegments = 4, minLength = 1 } = {}) {
   const raw = String(text || "").trim();
   if (!raw) return [];
   const segments = raw
-    .split(/[，,。.；;！!？?\n]+|(?:和|顺便|另外|还有|对了|然后|而且|并且|同时)/)
+    .split(/[，,。.；;！!？?\n]+|(?:và|tiện thể|ngoài ra|còn nữa|à mà|sau đó|hơn nữa|và còn|đồng thời)/)
     .map((item) => item.trim())
     .filter((item) => item.length >= minLength);
   return uniqueStrings(segments).slice(0, Math.max(1, maxSegments));
@@ -237,7 +237,7 @@ function buildContextQueryBlend(
   const rawParts = [
     {
       kind: "currentUser",
-      label: "当前Người dùngtin nhắn",
+      label: "hiện tạiTin nhắn người dùng",
       text: currentText,
       weight: enabled ? currentWeight : 1,
     },
@@ -253,7 +253,7 @@ function buildContextQueryBlend(
   if (enabled && previousUserText) {
     rawParts.push({
       kind: "previousUser",
-      label: "上一条 user tin nhắn",
+      label: "Tin nhắn user trước đó",
       text: previousUserText,
       weight: Number(previousUserWeight || 0),
     });
@@ -709,8 +709,8 @@ const retrieve = await loadRetrieve({
     const text = [userMessage, ...(Array.isArray(recentMessages) ? recentMessages : [])]
       .map((value) => String(value || ""))
       .join("\n");
-    if (/回忆|以前|过去/.test(text)) return "flashback";
-    if (/以后|未来|计划|打算/.test(text)) return "future";
+    if (/hồi ức|trước đây|Quá khứ/.test(text)) return "flashback";
+    if (/về sau|tương lai|kế hoạch|dự tính/.test(text)) return "future";
     return "";
   },
   describeNodeStoryTime(node = {}) {
@@ -727,7 +727,7 @@ const retrieve = await loadRetrieve({
         reason: "undated",
       };
     }
-    if (label === activeSegmentId || label === "当前") {
+    if (label === activeSegmentId || label === "hiện tại") {
       return {
         bucket: "current",
         weight: 1.15,
@@ -736,7 +736,7 @@ const retrieve = await loadRetrieve({
         reason: "current",
       };
     }
-    if (label === "未来计划") {
+    if (label === "kế hoạch tương lai") {
       return {
         bucket: "future",
         weight: cueMode === "future" ? 0.74 : 0.22,
@@ -745,7 +745,7 @@ const retrieve = await loadRetrieve({
         reason: cueMode === "future" ? "future-cue" : "future-suppressed",
       };
     }
-    if (label === "往事") {
+    if (label === "chuyện cũ") {
       return {
         bucket: cueMode === "flashback" ? "flashback" : "distantPast",
         weight: cueMode === "flashback" ? 1.02 : 0.64,
@@ -773,9 +773,9 @@ const retrieve = await loadRetrieve({
     return String(bucket || "");
   },
   EXTRACTION_CONTEXT_REVIEW_HEADER:
-    "--- 以下是上下文回顾（已Trích xuất过），仅供理解剧情 ---",
+    "--- Dưới đây là phần nhìn lại ngữ cảnh (đã trích xuất), chỉ để hiểu cốt truyện ---",
   RECALL_TARGET_CONTENT_HEADER:
-    "--- 以下是本lần需要Truy hồiKý ức的新对话Nội dung ---",
+    "--- sau đây là phầnlầncầnTruy hồiKý ứcmới củahội thoạiNội dung ---",
   buildTaskPrompt() {
     return { systemPrompt: "" };
   },
@@ -783,8 +783,8 @@ const retrieve = await loadRetrieve({
     return text;
   },
   splitIntentSegments(text) {
-    if (String(text).includes("和")) {
-      return String(text).split("和").map((item) => item.trim());
+    if (String(text).includes("và")) {
+      return String(text).split("và").map((item) => item.trim());
     }
     return [];
   },
@@ -885,7 +885,7 @@ state.diffusionCalls.length = 0;
 state.llmCalls.length = 0;
 const noStageResult = await retrieve({
   graph,
-  userMessage: "只看当前Quy tắc",
+  userMessage: "chỉ xemhiện tạiQuy tắc",
   recentMessages: [],
   embeddingConfig: {},
   schema,
@@ -905,11 +905,11 @@ assert.deepEqual(Array.from(noStageResult.selectedNodeIds), ["rule-2", "rule-1"]
 state.vectorCalls.length = 0;
 await retrieve({
   graph,
-  userMessage: "他后来怎么做？",
+  userMessage: "sau đó anh ấy làm gì?",
   recentMessages: [
-    "[assistant]: 他提到了Quy tắc二的限制",
-    "[user]: 我们先看Quy tắc一",
-    "[user]: 他后来怎么做？",
+    "[assistant]: anh ấy đã nhắc tới giới hạn của Quy tắc 2",
+    "[user]: chúng ta xem Quy tắc 1 trước",
+    "[user]: sau đó anh ấy làm gì?",
   ],
   embeddingConfig: {},
   schema,
@@ -925,7 +925,7 @@ await retrieve({
 });
 assert.deepEqual(
   state.vectorCalls.map((item) => item.message),
-  ["他后来怎么做？", "他提到了Quy tắc二的限制", "我们先看Quy tắc一"],
+  ["sau đó anh ấy làm gì?", "anh ấy đã nhắc tới giới hạn của Quy tắc 2", "chúng ta xem Quy tắc 1 trước"],
 );
 
 state.vectorCalls.length = 0;
@@ -936,8 +936,8 @@ state.llmCandidateCount = 0;
 state.llmResponse = { selected_keys: ["R1", "R2"] };
 const llmPoolResult = await retrieve({
   graph,
-  userMessage: "请根据Quy tắc给出结论",
-  recentMessages: ["Người dùng：现在该怎么做？"],
+  userMessage: "hãy đưa ra kết luận dựa theo quy tắc",
+  recentMessages: ["Người dùng: hiện tại nên làm gì?"],
   embeddingConfig: {},
   schema,
   options: {
@@ -950,8 +950,8 @@ const llmPoolResult = await retrieve({
   },
 });
 assert.deepEqual(state.vectorCalls, [
-  { topK: 4, message: "请根据Quy tắc给出结论" },
-  { topK: 4, message: "现在该怎么做？" },
+  { topK: 4, message: "hãy đưa ra kết luận dựa theo quy tắc" },
+  { topK: 4, message: "hiện tại nên làm gì?" },
 ]);
 assert.equal(state.diffusionCalls.length, 0);
 assert.equal(state.llmCandidateCount, 2);
@@ -995,8 +995,8 @@ state.llmResponse = {
 };
 const selectedKeysPriorityResult = await retrieve({
   graph,
-  userMessage: "优先吃新协议",
-  recentMessages: ["Người dùng：Kiểm thử selected_keys 优先级"],
+  userMessage: "ưu tiên dùng giao thức mới",
+  recentMessages: ["Người dùng：Kiểm thử mức ưu tiên selected_keys"],
   embeddingConfig: {},
   schema,
   options: {
@@ -1025,8 +1025,8 @@ state.llmOptions.length = 0;
 state.llmResponse = { selected_ids: ["rule-1"] };
 const legacySelectionResult = await retrieve({
   graph,
-  userMessage: "兼容旧 selected_ids",
-  recentMessages: ["Người dùng：Kiểm thử legacy 路径"],
+  userMessage: "tương thích selected_ids cũ",
+  recentMessages: ["Người dùng：Kiểm thử legacy đường đi"],
   embeddingConfig: {},
   schema,
   options: {
@@ -1055,8 +1055,8 @@ state.llmOptions.length = 0;
 state.llmResponse = { selected_keys: [] };
 const emptySelectionFallbackResult = await retrieve({
   graph,
-  userMessage: "这lần故意空选",
-  recentMessages: ["Người dùng：Kiểm thử空选Lùi về"],
+  userMessage: "lần này cố ý để trống",
+  recentMessages: ["Người dùng：Kiểm thử fallback khi chọn rỗng"],
   embeddingConfig: {},
   schema,
   options: {
@@ -1089,8 +1089,8 @@ state.llmOptions.length = 0;
 state.llmResponse = { selected_keys: ["R99"] };
 const invalidKeyFallbackResult = await retrieve({
   graph,
-  userMessage: "这lần给Không效 key",
-  recentMessages: ["Người dùng：Kiểm thửKhông效候选Lùi về"],
+  userMessage: "lần này đưa key không hợp lệ",
+  recentMessages: ["Người dùng：Kiểm thử fallback ứng viên không hợp lệ"],
   embeddingConfig: {},
   schema,
   options: {
@@ -1118,7 +1118,7 @@ state.llmCalls.length = 0;
 state.llmOptions.length = 0;
 await retrieve({
   graph,
-  userMessage: "Quy tắc一和Quy tắc二有什么Liên kết",
+  userMessage: "Quy tắc 1 và Quy tắc 2 có liên hệ gì",
   recentMessages: [],
   embeddingConfig: {},
   schema,
@@ -1153,12 +1153,12 @@ state.llmOptions.length = 0;
 state.llmResponse = {
   ok: false,
   errorType: "invalid-json",
-  failureReason: "输出不是有效 JSON，请严格返回紧凑 JSON đối tượng",
+  failureReason: "đầu ra không phải JSON hợp lệ, hãy trả về đối tượng JSON gọn chặt",
 };
 const fallbackResult = await retrieve({
   graph,
-  userMessage: "LLM 这lần会坏掉",
-  recentMessages: ["Người dùng：请回忆相关Quy tắc"],
+  userMessage: "LLM lần này sẽ hỏng",
+  recentMessages: ["Người dùng: hãy hồi ức quy tắc liên quan"],
   embeddingConfig: {},
   schema,
   options: {
@@ -1171,7 +1171,7 @@ const fallbackResult = await retrieve({
   },
 });
 assert.equal(fallbackResult.meta.retrieval.llm.status, "fallback");
-assert.match(fallbackResult.meta.retrieval.llm.reason, /有效 JSON|Lùi về到评分排序/);
+assert.match(fallbackResult.meta.retrieval.llm.reason, /hợp lệ JSON|Lùi vềđến bước chấm điểm và xếp hạng/);
 assert.equal(fallbackResult.meta.retrieval.llm.fallbackType, "invalid-json");
 
 const sceneGraph = {
@@ -1182,7 +1182,7 @@ const sceneGraph = {
       importance: 10,
       createdTime: 1,
       archived: false,
-      fields: { title: "Sự kiện一" },
+      fields: { title: "Sự kiện 1" },
       seqRange: [1, 1],
     },
     {
@@ -1200,7 +1200,7 @@ const sceneGraph = {
       importance: 5,
       createdTime: 3,
       archived: false,
-      fields: { title: "大厅" },
+      fields: { title: "đại sảnh" },
       seqRange: [1, 1],
     },
   ],
@@ -1216,7 +1216,7 @@ const sceneSchema = [
 ];
 const cappedResult = await retrieve({
   graph: sceneGraph,
-  userMessage: "只看这一个场景",
+  userMessage: "chỉ xem cảnh này",
   recentMessages: [],
   embeddingConfig: {},
   schema: sceneSchema,
@@ -1239,7 +1239,7 @@ const lexicalGraph = {
       importance: 1,
       createdTime: 1,
       archived: false,
-      fields: { name: "Alice", summary: "常驻Nhân vật" },
+      fields: { name: "Alice", summary: "thường trúNhân vật" },
       seqRange: [1, 1],
     },
     {
@@ -1248,7 +1248,7 @@ const lexicalGraph = {
       importance: 1,
       createdTime: 1,
       archived: false,
-      fields: { name: "Bob", summary: "常驻Nhân vật" },
+      fields: { name: "Bob", summary: "thường trúNhân vật" },
       seqRange: [1, 1],
     },
   ],
@@ -1257,7 +1257,7 @@ const lexicalGraph = {
 const lexicalSchema = [{ id: "character", label: "Nhân vật", alwaysInject: false }];
 const lexicalResult = await retrieve({
   graph: lexicalGraph,
-  userMessage: "Alice 现在怎么样了",
+  userMessage: "Alice hiện tại thế nào rồi",
   recentMessages: [],
   embeddingConfig: {},
   schema: lexicalSchema,
@@ -1284,7 +1284,7 @@ const scopedGraph = {
       importance: 8,
       createdTime: 1,
       archived: false,
-      fields: { title: "旧王都Sự kiện" },
+      fields: { title: "Sự kiện vương đô cũ" },
       seqRange: [1, 1],
       scope: { layer: "objective", regionPrimary: "Khu phố cũ" },
     },
@@ -1294,7 +1294,7 @@ const scopedGraph = {
       importance: 4,
       createdTime: 2,
       archived: false,
-      fields: { summary: "Ailin觉得Tháp chuông入口非常可疑" },
+      fields: { summary: "Ailin cảm thấy lối vào Tháp chuông rất đáng ngờ" },
       seqRange: [2, 2],
       scope: {
         layer: "pov",
@@ -1318,7 +1318,7 @@ const scopedSchema = [
 ];
 const scopedResult = await retrieve({
   graph: scopedGraph,
-  userMessage: "Tháp chuông里到底有什么",
+  userMessage: "Rốt cuộc bên trong Tháp chuông có gì",
   recentMessages: [],
   embeddingConfig: {},
   schema: scopedSchema,
@@ -1365,7 +1365,7 @@ const multiOwnerGraph = {
       importance: 8,
       createdTime: 2,
       archived: false,
-      fields: { summary: "Ailin觉得Tháp chuông里还有第二条暗道" },
+      fields: { summary: "Ailin cảm thấy bên trong Tháp chuông còn có một mật đạo thứ hai" },
       seqRange: [2, 2],
       scope: {
         layer: "pov",
@@ -1380,7 +1380,7 @@ const multiOwnerGraph = {
       importance: 7,
       createdTime: 3,
       archived: false,
-      fields: { summary: "Lucia认为Tháp chuông守卫在故意拖时间" },
+      fields: { summary: "Lucia cho rằng lính canh Tháp chuông đang cố tình câu giờ" },
       seqRange: [3, 3],
       scope: {
         layer: "pov",
@@ -1405,14 +1405,14 @@ state.llmResponse = {
   selected_ids: ["pov-a", "pov-b"],
   active_owner_keys: ["character:Ailin", "character:Lucia"],
   active_owner_scores: [
-    { ownerKey: "character:Ailin", score: 0.91, reason: "她的 POV 直接命中当前追问" },
-    { ownerKey: "character:Lucia", score: 0.83, reason: "她也在同一场景并提供互补判断" },
+    { ownerKey: "character:Ailin", score: 0.91, reason: "POV của cô ấy khớp trực tiếp với truy vấn hiện tại" },
+    { ownerKey: "character:Lucia", score: 0.83, reason: "cô ấy cũng ở cùng cảnh và cung cấp nhận định bổ sung" },
   ],
 };
 const multiOwnerResult = await retrieve({
   graph: multiOwnerGraph,
-  userMessage: "Ailin和Lucia现在各自怎么看Tháp chuông这件事",
-  recentMessages: ["[assistant]: 她们刚刚一起进入Tháp chuông大厅"],
+  userMessage: "Ailin và Lucia hiện tại mỗi người nhìn nhận chuyện Tháp chuông này thế nào",
+  recentMessages: ["[assistant]: họ vừa cùng đi vào đại sảnh Tháp chuông"],
   embeddingConfig: {},
   schema: multiOwnerSchema,
   options: {
@@ -1462,9 +1462,9 @@ const temporalGraph = {
       importance: 5,
       createdTime: 1,
       archived: false,
-      fields: { title: "当前调查" },
+      fields: { title: "hiện tạiđiều tra" },
       seqRange: [10, 10],
-      storyTime: { label: "当前" },
+      storyTime: { label: "hiện tại" },
     },
     {
       id: "evt-past",
@@ -1472,9 +1472,9 @@ const temporalGraph = {
       importance: 6,
       createdTime: 2,
       archived: false,
-      fields: { title: "旧冲突" },
+      fields: { title: "Xung đột cũ" },
       seqRange: [8, 8],
-      storyTime: { label: "往事" },
+      storyTime: { label: "chuyện cũ" },
     },
     {
       id: "evt-future",
@@ -1482,29 +1482,29 @@ const temporalGraph = {
       importance: 10,
       createdTime: 3,
       archived: false,
-      fields: { title: "未来计划" },
+      fields: { title: "kế hoạch tương lai" },
       seqRange: [12, 12],
-      storyTime: { label: "未来计划", tense: "future" },
+      storyTime: { label: "kế hoạch tương lai", tense: "future" },
     },
   ],
   edges: [],
   historyState: {
-    activeStorySegmentId: "当前",
-    activeStoryTimeLabel: "当前",
+    activeStorySegmentId: "hiện tại",
+    activeStoryTimeLabel: "hiện tại",
     activeStoryTimeSource: "test",
   },
   timelineState: {
     segments: [
-      { id: "当前", label: "当前", order: 2 },
-      { id: "往事", label: "往事", order: 1 },
-      { id: "未来计划", label: "未来计划", order: 3 },
+      { id: "hiện tại", label: "hiện tại", order: 2 },
+      { id: "chuyện cũ", label: "chuyện cũ", order: 1 },
+      { id: "kế hoạch tương lai", label: "kế hoạch tương lai", order: 3 },
     ],
   },
 };
 const temporalSchema = [{ id: "event", label: "Sự kiện", alwaysInject: false }];
 const temporalResult = await retrieve({
   graph: temporalGraph,
-  userMessage: "现在现场怎么样",
+  userMessage: "Hiện trường hiện tại ra sao",
   recentMessages: [],
   embeddingConfig: {},
   schema: temporalSchema,
@@ -1517,12 +1517,12 @@ const temporalResult = await retrieve({
     enableDiversitySampling: false,
     enableStoryTimeline: true,
     storyTimeSoftDirecting: true,
-    activeStorySegmentId: "当前",
-    activeStoryTimeLabel: "当前",
+    activeStorySegmentId: "hiện tại",
+    activeStoryTimeLabel: "hiện tại",
   },
 });
-assert.equal(temporalResult.meta.retrieval.activeStorySegmentId, "当前");
-assert.equal(temporalResult.meta.retrieval.activeStoryTimeLabel, "当前");
+assert.equal(temporalResult.meta.retrieval.activeStorySegmentId, "hiện tại");
+assert.equal(temporalResult.meta.retrieval.activeStoryTimeLabel, "hiện tại");
 assert.ok(Array.isArray(temporalResult.meta.retrieval.temporalSuppressedNodes));
 assert.ok(
   Array.isArray(temporalResult.meta.retrieval.temporalBuckets?.future) ||
@@ -1537,3 +1537,6 @@ assert.equal(
 );
 
 console.log("retrieval-config tests passed");
+
+
+

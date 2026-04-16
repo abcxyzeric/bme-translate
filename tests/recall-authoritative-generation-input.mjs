@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import { MODULE_NAME } from "../graph/graph-persistence.js";
 import {
@@ -12,9 +12,9 @@ async function testSendIntentCanRemainAuthoritativeQueryWhenFlagEnabled() {
   harness.extension_settings[MODULE_NAME] = {
     recallUseAuthoritativeGenerationInput: true,
   };
-  harness.chat = [{ is_user: true, mes: "旧的 chat tail" }];
+  harness.chat = [{ is_user: true, mes: "cũ chat tail" }];
   harness.pendingRecallSendIntent = {
-    text: "刚触发发送的新输入",
+    text: "đầu vào mới vừa kích hoạt gửi",
     hash: "hash-phase4-send-intent",
     at: Date.now(),
     source: "dom-intent",
@@ -23,7 +23,7 @@ async function testSendIntentCanRemainAuthoritativeQueryWhenFlagEnabled() {
   await harness.result.onGenerationAfterCommands("normal", {}, false);
 
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "刚触发发送的新输入");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "đầu vào mới vừa kích hoạt gửi");
   assert.equal(harness.runRecallCalls[0].overrideSource, "send-intent");
   assert.equal(harness.runRecallCalls[0].targetUserMessageIndex, 0);
   assert.equal(harness.runRecallCalls[0].includeSyntheticUserMessage, true);
@@ -32,12 +32,12 @@ async function testSendIntentCanRemainAuthoritativeQueryWhenFlagEnabled() {
   assert.ok(transaction);
   assert.equal(
     transaction.frozenRecallOptions.overrideUserMessage,
-    "刚触发发送的新输入",
+    "đầu vào mới vừa kích hoạt gửi",
   );
   assert.equal(transaction.frozenRecallOptions.lockedSource, "send-intent");
   assert.equal(transaction.frozenRecallOptions.targetUserMessageIndex, 0);
   assert.equal(transaction.frozenRecallOptions.authoritativeInputUsed, true);
-  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "旧的 chat tail");
+  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "cũ chat tail");
   assert.equal(transaction.frozenRecallOptions.includeSyntheticUserMessage, true);
 }
 
@@ -46,14 +46,14 @@ async function testPlannerHandoffCanRemainAuthoritativeQueryWhenFlagEnabled() {
   harness.extension_settings[MODULE_NAME] = {
     recallUseAuthoritativeGenerationInput: true,
   };
-  harness.chat = [{ is_user: true, mes: "tầng里的稳定Người dùng输入" }];
+  harness.chat = [{ is_user: true, mes: "đầu vào người dùng ổn định trong tầng" }];
 
   const handoff = harness.result.preparePlannerRecallHandoff({
-    rawUserInput: "planner 原始输入",
-    plannerAugmentedMessage: "planner 增强后的输入",
+    rawUserInput: "planner nguyên gốcđầu vào",
+    plannerAugmentedMessage: "đầu vào sau khi được planner tăng cường",
     plannerRecall: {
-      memoryBlock: "规划Ký ức块",
-      recentMessages: ["[user]: planner 原始输入", "[assistant]: Ký ức命中"],
+      memoryBlock: "khối ký ức quy hoạch",
+      recentMessages: ["[user]: planner nguyên gốcđầu vào", "[assistant]: Ký ứckhớp trúng"],
       result: {
         selectedNodeIds: ["node-planner-1"],
         stats: {
@@ -87,12 +87,12 @@ async function testPlannerHandoffCanRemainAuthoritativeQueryWhenFlagEnabled() {
   });
 
   assert.equal(recallContext.shouldRun, true);
-  assert.equal(recallContext.recallOptions.overrideUserMessage, "planner 原始输入");
+  assert.equal(recallContext.recallOptions.overrideUserMessage, "planner nguyên gốcđầu vào");
   assert.equal(recallContext.recallOptions.overrideSource, "planner-handoff");
   assert.equal(recallContext.recallOptions.authoritativeInputUsed, true);
   assert.equal(
     recallContext.recallOptions.boundUserFloorText,
-    "tầng里的稳定Người dùng输入",
+    "đầu vào người dùng ổn định trong tầng",
   );
   assert.equal(recallContext.recallOptions.includeSyntheticUserMessage, true);
   assert.ok(recallContext.recallOptions.cachedRecallPayload);
@@ -104,12 +104,12 @@ async function testPlannerHandoffCanRemainAuthoritativeQueryWhenFlagEnabled() {
   await harness.result.onGenerationAfterCommands("normal", {}, false);
 
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "planner 原始输入");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "planner nguyên gốcđầu vào");
   assert.equal(harness.runRecallCalls[0].overrideSource, "planner-handoff");
   assert.equal(harness.runRecallCalls[0].authoritativeInputUsed, true);
   assert.equal(
     harness.runRecallCalls[0].boundUserFloorText,
-    "tầng里的稳定Người dùng输入",
+    "đầu vào người dùng ổn định trong tầng",
   );
   assert.equal(harness.runRecallCalls[0].includeSyntheticUserMessage, true);
   assert.ok(harness.runRecallCalls[0].cachedRecallPayload);
@@ -120,9 +120,9 @@ async function testAuthoritativeSendIntentStaysFrozenAcrossHooksWhenFlagEnabled(
   harness.extension_settings[MODULE_NAME] = {
     recallUseAuthoritativeGenerationInput: true,
   };
-  harness.chat = [{ is_user: true, mes: "稳定 chat tail" }];
+  harness.chat = [{ is_user: true, mes: "ổn định chat tail" }];
   harness.pendingRecallSendIntent = {
-    text: "第一lầnĐầu vào chuẩn quyền",
+    text: "thứ nhấtlầnĐầu vào chuẩn quyền",
     hash: "hash-phase4-frozen-a",
     at: Date.now(),
     source: "dom-intent",
@@ -131,7 +131,7 @@ async function testAuthoritativeSendIntentStaysFrozenAcrossHooksWhenFlagEnabled(
   await harness.result.onGenerationAfterCommands("normal", {}, false);
 
   harness.pendingRecallSendIntent = {
-    text: "第二lần漂移输入",
+    text: "đầu vào trôi lệch ở lần thứ hai",
     hash: "hash-phase4-frozen-b",
     at: Date.now(),
     source: "dom-intent",
@@ -139,19 +139,19 @@ async function testAuthoritativeSendIntentStaysFrozenAcrossHooksWhenFlagEnabled(
   await harness.result.onBeforeCombinePrompts();
 
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "第一lầnĐầu vào chuẩn quyền");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "thứ nhấtlầnĐầu vào chuẩn quyền");
   assert.equal(harness.runRecallCalls[0].overrideSource, "send-intent");
   assert.equal(harness.runRecallCalls[0].authoritativeInputUsed, true);
-  assert.equal(harness.runRecallCalls[0].boundUserFloorText, "稳定 chat tail");
+  assert.equal(harness.runRecallCalls[0].boundUserFloorText, "ổn định chat tail");
 
   const transaction = [...harness.result.generationRecallTransactions.values()][0];
   assert.ok(transaction);
   assert.equal(
     transaction.frozenRecallOptions.overrideUserMessage,
-    "第一lầnĐầu vào chuẩn quyền",
+    "thứ nhấtlầnĐầu vào chuẩn quyền",
   );
   assert.equal(transaction.frozenRecallOptions.authoritativeInputUsed, true);
-  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "稳定 chat tail");
+  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "ổn định chat tail");
   assert.equal(transaction.frozenRecallOptions.includeSyntheticUserMessage, true);
 }
 
@@ -160,9 +160,9 @@ async function testHostSnapshotCanRemainAuthoritativeQueryWhenFlagEnabled() {
   harness.extension_settings[MODULE_NAME] = {
     recallUseAuthoritativeGenerationInput: true,
   };
-  harness.chat = [{ is_user: true, mes: "旧的 chat tail" }];
+  harness.chat = [{ is_user: true, mes: "cũ chat tail" }];
   const frozenSnapshot = harness.result.freezeHostGenerationInputSnapshot(
-    "Hostsnapshot输入",
+    "Hostsnapshotđầu vào",
   );
 
   await harness.result.onGenerationAfterCommands(
@@ -172,7 +172,7 @@ async function testHostSnapshotCanRemainAuthoritativeQueryWhenFlagEnabled() {
   );
 
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "Hostsnapshot输入");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "Hostsnapshotđầu vào");
   assert.equal(
     harness.runRecallCalls[0].overrideSource,
     "host-generation-lifecycle",
@@ -188,14 +188,14 @@ async function testHostSnapshotCanRemainAuthoritativeQueryWhenFlagEnabled() {
 
   const transaction = [...harness.result.generationRecallTransactions.values()][0];
   assert.ok(transaction);
-  assert.equal(transaction.frozenRecallOptions.overrideUserMessage, "Hostsnapshot输入");
+  assert.equal(transaction.frozenRecallOptions.overrideUserMessage, "Hostsnapshotđầu vào");
   assert.equal(
     transaction.frozenRecallOptions.lockedSource,
     "host-generation-lifecycle",
   );
   assert.equal(transaction.frozenRecallOptions.targetUserMessageIndex, 0);
   assert.equal(transaction.frozenRecallOptions.authoritativeInputUsed, true);
-  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "旧的 chat tail");
+  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "cũ chat tail");
   assert.equal(transaction.frozenRecallOptions.includeSyntheticUserMessage, true);
 }
 
@@ -204,22 +204,22 @@ async function testGenerationAfterCommandsWritesBackAuthoritativePromptWhenPrese
   harness.extension_settings[MODULE_NAME] = {
     recallUseAuthoritativeGenerationInput: true,
   };
-  harness.chat = [{ is_user: true, mes: "旧的 chat tail" }];
+  harness.chat = [{ is_user: true, mes: "cũ chat tail" }];
   harness.pendingRecallSendIntent = {
-    text: "发送前Đầu vào chuẩn quyền",
+    text: "trước khi gửiĐầu vào chuẩn quyền",
     hash: "hash-phase4-writeback",
     at: Date.now(),
     source: "dom-intent",
   };
   const params = {
-    prompt: "旧 prompt",
-    user_input: "旧 user_input",
+    prompt: "prompt cũ",
+    user_input: "user_input cũ",
   };
 
   await harness.result.onGenerationAfterCommands("normal", params, false);
 
-  assert.equal(params.prompt, "发送前Đầu vào chuẩn quyền");
-  assert.equal(params.user_input, "发送前Đầu vào chuẩn quyền");
+  assert.equal(params.prompt, "trước khi gửiĐầu vào chuẩn quyền");
+  assert.equal(params.user_input, "trước khi gửiĐầu vào chuẩn quyền");
 }
 
 function testResolveRecallInputControllerAppendsSyntheticAuthoritativeUserMessage() {
@@ -239,7 +239,7 @@ function testResolveRecallInputControllerAppendsSyntheticAuthoritativeUserMessag
     },
   };
   const result = resolveRecallInputController(
-    [{ is_user: true, mes: "旧的 chat tail" }],
+    [{ is_user: true, mes: "cũ chat tail" }],
     4,
     {
       overrideUserMessage: "Đầu vào chuẩn quyền",
@@ -254,7 +254,7 @@ function testResolveRecallInputControllerAppendsSyntheticAuthoritativeUserMessag
   assert.equal(result.authoritativeInputUsed, false);
   assert.equal(result.boundUserFloorText, "");
   assert.deepEqual(result.recentMessages, [
-    "[user]: 旧的 chat tail",
+    "[user]: cũ chat tail",
     "[user]: Đầu vào chuẩn quyền",
   ]);
 }
@@ -267,3 +267,4 @@ await testGenerationAfterCommandsWritesBackAuthoritativePromptWhenPreserved();
 testResolveRecallInputControllerAppendsSyntheticAuthoritativeUserMessage();
 
 console.log("recall-authoritative-generation-input tests passed");
+

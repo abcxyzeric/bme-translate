@@ -363,9 +363,9 @@ export function formatExtractionTranscript(messages = []) {
 
     if (hasContextMessages && hasTargetMessages && isContext !== inContext) {
       if (isContext) {
-        lines.push("--- 以下是上下文回顾（已Trích xuất过），仅供理解剧情 ---");
+        lines.push("--- Dưới đây là ngữ cảnh nhìn lại (đã từng được trích xuất), chỉ dùng để hiểu cốt truyện ---");
       } else {
-        lines.push("--- 以下是本lần需要Trích xuấtKý ức的新对话Nội dung ---");
+        lines.push("--- sau đây là phầnlầncầnTrích xuấtKý ứcmới củahội thoạiNội dung ---");
       }
       inContext = isContext;
     }

@@ -36,7 +36,7 @@ export function createContextHostFacade(options = {}) {
   return Object.freeze({
     available,
     mode,
-    fallbackReason: available ? "" : "未检测到 getContext HostGiao diện",
+    fallbackReason: available ? "" : "Không phát hiện giao diện host getContext",
     versionHints: mergeVersionHints(
       {
         getter: "getContext",
@@ -72,7 +72,7 @@ export function createContextHostFacade(options = {}) {
         const context = getContext(...args);
         return context && typeof context === "object" ? context : null;
       } catch (error) {
-        debugDebug("[ST-BME] host-adapter/context Đọc上下文Thất bại", error);
+        debugDebug("[ST-BME] host-adapter/context Đọcngữ cảnhThất bại", error);
         return null;
       }
     },

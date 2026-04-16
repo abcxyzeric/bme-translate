@@ -1,4 +1,4 @@
-// wired into npm run test:all
+﻿// wired into npm run test:all
 import assert from "node:assert/strict";
 import { MODULE_NAME } from "../graph/graph-persistence.js";
 import { isTrivialUserInput } from "../ui/ui-status.js";
@@ -22,13 +22,13 @@ function testIsTrivialUserInputTable() {
     ["/", true, "slash-command"],
     [" /echo", true, "slash-command"],
     ["a", false, ""],
-    ["好", false, ""],
+    ["được", false, ""],
     ["ok", false, ""],
     ["ok a", false, ""],
-    ["好的", false, ""],
-    ["好的呀", false, ""],
+    ["được rồi", false, ""],
+    ["được thôi", false, ""],
     ["hello world", false, ""],
-    ["你好", false, ""],
+    ["xin chào", false, ""],
   ];
 
   for (const [input, trivial, reason] of cases) {
@@ -93,21 +93,21 @@ async function testEmptyInputSkipsPriorHistoryFallback() {
 async function testNormalInputStillRecalls() {
   const harness = await createGenerationRecallHarness();
   harness.chat = [];
-  harness.__sendTextareaValue = "好的呀";
+  harness.__sendTextareaValue = "được thôi";
 
   const snapshot = harness.result.onGenerationStarted("normal", {}, false);
-  assert.equal(snapshot?.text, "好的呀");
+  assert.equal(snapshot?.text, "được thôi");
   assert.equal(harness.result.getCurrentGenerationTrivialSkip(), null);
 
   const beforeCombine = await harness.result.onBeforeCombinePrompts();
   assert.equal(beforeCombine?.source, "fresh");
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "好的呀");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "được thôi");
 }
 
 async function testSentinelBlocksHistoryFallback() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "真实旧tin nhắn" }];
+  harness.chat = [{ is_user: true, mes: "tin nhắn cũ thật sự" }];
   harness.pendingRecallSendIntent = {
     text: "/echo hidden",
     source: "send-button",
@@ -166,7 +166,7 @@ async function testPlannerRecallTrivialAndNonTrivialPaths() {
     historyState: {},
   };
   recall = await harness.result.runPlannerRecallForEna({
-    rawUserInput: "好的呀",
+    rawUserInput: "được thôi",
   });
   assert.equal(recall.reason, "graph-empty");
 }
@@ -330,3 +330,4 @@ await testSkipFlagTtlExpires();
 await testPromptViewerSyntheticGenerationSkipsRecall();
 
 console.log("trivial-user-input tests passed");
+

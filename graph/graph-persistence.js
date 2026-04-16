@@ -1,11 +1,11 @@
-// ST-BME: đồ thịLưu bền常量与纯工具函数
-// 不依赖 index.js 模块级可变Trạng thái（currentGraph / graphPersistenceState 等）
+// ST-BME: hằng số lưu bền đồ thị và các hàm công cụ thuần
+// Không phụ thuộc vào trạng thái biến đổi cấp mô-đun của index.js (currentGraph / graphPersistenceState...)
 
 import { deserializeGraph, getGraphStats, serializeGraph } from "./graph.js";
 import { normalizeGraphRuntimeState } from "../runtime/runtime-state.js";
 
 // ═══════════════════════════════════════════════════════════
-// 常量
+// hằng số
 // ═══════════════════════════════════════════════════════════
 
 export const MODULE_NAME = "st_bme";
@@ -42,7 +42,7 @@ export const GRAPH_IDENTITY_ALIAS_STORAGE_KEY = `${MODULE_NAME}:chat-identity-al
 export const GRAPH_STARTUP_RECONCILE_DELAYS_MS = [150, 600, 1800, 4000];
 
 // ═══════════════════════════════════════════════════════════
-// 纯工具
+// Công cụ thuần
 // ═══════════════════════════════════════════════════════════
 
 export function cloneRuntimeDebugValue(value, fallback = null) {
@@ -369,7 +369,7 @@ export function stampGraphPersistenceMeta(
 }
 
 // ═══════════════════════════════════════════════════════════
-// 聊天Metadata
+// chatMetadata
 // ═══════════════════════════════════════════════════════════
 
 export function writeChatMetadataPatch(context, patch = {}) {
@@ -824,7 +824,7 @@ export async function readGraphChatStateNamespaces(
       }
     }
   } catch (error) {
-    console.warn("[ST-BME] 批量ĐọcSidecar chatThất bại，Lùi về逐项Đọc:", error);
+    console.warn("[ST-BME] Đọc sidecar chat theo lô thất bại, lùi về đọc từng mục:", error);
   }
 
   const result = new Map();
@@ -883,7 +883,7 @@ export async function writeGraphChatStatePayload(
       payload,
     };
   } catch (error) {
-    console.warn(`[ST-BME] 写入Sidecar chat ${namespace} Thất bại:`, error);
+    console.warn(`[ST-BME] ghi vàoSidecar chat ${namespace} Thất bại:`, error);
     return {
       ok: false,
       updated: false,
@@ -1272,7 +1272,7 @@ export async function writeGraphChatStateSnapshot(
           : "chat-state-save-failed",
     };
   } catch (error) {
-    console.warn("[ST-BME] 写入Sidecar chatđồ thịThất bại:", error);
+    console.warn("[ST-BME] ghi vàoSidecar chatđồ thịThất bại:", error);
     return {
       ok: false,
       updated: false,
@@ -1459,7 +1459,7 @@ export function detectIndexedDbSnapshotCommitMarkerMismatch(
 }
 
 // ═══════════════════════════════════════════════════════════
-// Shadow Snapshot（会话存储）
+// Shadow Snapshot（phiênlưu trữ）
 // ═══════════════════════════════════════════════════════════
 
 export function getGraphShadowSnapshotStorageKey(chatId = "") {
@@ -1572,7 +1572,7 @@ export function writeGraphShadowSnapshot(
     );
     return true;
   } catch (error) {
-    console.warn("[ST-BME] 写入会话đồ thị临时snapshotThất bại:", error);
+    console.warn("[ST-BME] ghi vàophiênđồ thịtạm thờisnapshotThất bại:", error);
     return false;
   }
 }
@@ -1590,7 +1590,7 @@ export function removeGraphShadowSnapshot(chatId = "") {
 }
 
 // ═══════════════════════════════════════════════════════════
-// đồ thị克隆 / 比较
+// Sao chép / so sánh đồ thị
 // ═══════════════════════════════════════════════════════════
 
 export function cloneGraphForPersistence(graph, chatId = "") {

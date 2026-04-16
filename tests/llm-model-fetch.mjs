@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import {
   installResolveHooks,
@@ -310,7 +310,7 @@ async function testFetchMemoryModelsReturnsHelpfulMessageForAnthropic() {
       assert.equal(result.success, false);
       assert.equal(result.models.length, 0);
       assert.match(result.error, /Anthropic Claude/);
-      assert.match(result.error, /Thủ công填写Model名/);
+      assert.match(result.error, /điền tay tên model/);
     },
   );
 }
@@ -322,3 +322,4 @@ await testFetchMemoryModelsUsesGoogleStatusRoute();
 await testFetchMemoryModelsReturnsHelpfulMessageForAnthropic();
 
 console.log("llm-model-fetch tests passed");
+

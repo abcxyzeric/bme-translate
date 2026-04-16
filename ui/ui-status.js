@@ -1,10 +1,10 @@
-// ST-BME: UI Trạng thái工厂、纯工具函数
-// 此模块Trung bình的函数均不依赖 index.js 模块级可变Trạng thái，
-// 可被 index.js 及其他模块安全Nhập。
+// ST-BME: factory trạng thái UI và các hàm công cụ thuần
+// Các hàm trong mô-đun này đều không phụ thuộc vào trạng thái biến đổi cấp mô-đun của index.js,
+// nên có thể được index.js và các mô-đun khác import an toàn.
 import { sanitizePlannerMessageText } from "../runtime/planner-tag-utils.js";
 
 // ═══════════════════════════════════════════════════════════
-// 常量
+// hằng số
 // ═══════════════════════════════════════════════════════════
 
 export const BATCH_STAGE_ORDER = ["core", "structural", "semantic", "finalize"];
@@ -15,7 +15,7 @@ export const BATCH_STAGE_SEVERITY = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// UI Trạng thái工厂
+// Factory trạng thái UI
 // ═══════════════════════════════════════════════════════════
 
 export function createUiStatus(text = "Chờ", meta = "", level = "idle") {
@@ -151,7 +151,7 @@ export function createRecallRunResult(status = "completed", extra = {}) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 批lầnTrạng thái
+// Trạng thái theo lô
 // ═══════════════════════════════════════════════════════════
 
 export function createBatchStageStatus(stage, consistency = "strong") {
@@ -169,7 +169,7 @@ export function createBatchStageStatus(stage, consistency = "strong") {
  * @param {object} opts
  * @param {number[]} opts.processedRange
  * @param {number}   opts.extractionCountBefore
- * @param {number}   [opts.extractionCountAfter] — 如未提供，fallback 为 extractionCountBefore
+ * @param {number}   [opts.extractionCountAfter] — nếu không cung cấp thì fallback về extractionCountBefore
  */
 export function createBatchStatusSkeleton({
   processedRange,
@@ -231,7 +231,7 @@ export function pushBatchStageArtifact(status, stage, artifact) {
 
 /**
  * @param {object} status
- * @param {number} [currentExtractionCount] — 传入调用方的 extractionCount
+ * @param {number} [currentExtractionCount] — extractionCount do phía gọi truyền vào
  */
 export function finalizeBatchStatus(status, currentExtractionCount) {
   const stages = status?.stages || {};
@@ -272,7 +272,7 @@ export function finalizeBatchStatus(status, currentExtractionCount) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 纯映射 / 纯变换
+// Ánh xạ thuần / biến đổi thuần
 // ═══════════════════════════════════════════════════════════
 
 export function normalizeStageNoticeLevel(level = "info") {
@@ -381,7 +381,7 @@ export function formatRecallContextLine(message) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 文本 / 数值 工具
+// Công cụ văn bản / số
 // ═══════════════════════════════════════════════════════════
 
 export function normalizeRecallInputText(value) {

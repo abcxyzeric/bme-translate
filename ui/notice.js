@@ -399,7 +399,7 @@ export function showManagedBmeNotice(input) {
   const closeButton = doc.createElement("button");
   closeButton.className = "st-bme-notice__close";
   closeButton.type = "button";
-  closeButton.setAttribute("aria-label", "Tắt提示");
+  closeButton.setAttribute("aria-label", "Tắtnhắc");
   closeButton.textContent = "×";
 
   const progress = doc.createElement("div");

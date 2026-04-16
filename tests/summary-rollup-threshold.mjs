@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -72,7 +72,7 @@ appendSummaryEntry(graph, {
   id: "summary-a",
   level: 0,
   kind: "small",
-  text: "第一条Tóm tắt ngắn",
+  text: "mục thứ nhấtTóm tắt ngắn",
   messageRange: [1, 2],
   extractionRange: [1, 1],
 });
@@ -80,7 +80,7 @@ appendSummaryEntry(graph, {
   id: "summary-b",
   level: 0,
   kind: "small",
-  text: "第二条Tóm tắt ngắn",
+  text: "mục thứ haiTóm tắt ngắn",
   messageRange: [3, 4],
   extractionRange: [2, 2],
 });
@@ -88,7 +88,7 @@ appendSummaryEntry(graph, {
   id: "summary-c",
   level: 0,
   kind: "small",
-  text: "第三条Tóm tắt ngắn",
+  text: "Tóm tắt ngắn thứ ba",
   messageRange: [5, 6],
   extractionRange: [3, 3],
 });
@@ -104,6 +104,7 @@ const result = await rollupSummaryFrontier({
 assert.equal(result.createdCount, 0);
 assert.equal(result.foldedCount, 0);
 assert.equal(result.skipped, true);
-assert.match(String(result.reason || ""), /超过 3 条同层Tóm tắt hoạt động/);
+assert.match(String(result.reason || ""), /vượt quá 3 tóm tắt hoạt động cùng tầng/);
 
 console.log("summary-rollup-threshold tests passed");
+

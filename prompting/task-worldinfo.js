@@ -1,6 +1,6 @@
-// ST-BME: Tác vụ级世界书激活引擎
-// 对标 SillyTavern 原生世界书扫描逻辑，并在私有 prompt 组装阶段
-// 提供最小 EJS 配合能力，用于 getwi / activewi。
+// ST-BME: engine kích hoạt World Info cấp tác vụ
+// Căn theo logic quét World Info gốc của SillyTavern và cung cấp ở giai đoạn lắp ráp prompt riêng tư
+// Cung cấp năng lực EJS tối thiểu, dùng cho getwi / activewi.
 
 import {
   createTaskEjsRenderContext,
@@ -375,7 +375,7 @@ async function getWorldbookHost() {
     }
   } catch (error) {
     debugDebug(
-      "[ST-BME] task-worldinfo Đọc worldbook bridge Thất bại，Lùi về到 legacy HostGiao diện",
+      "[ST-BME] Đọc worldbook bridge của task-worldinfo thất bại, lùi về giao diện host legacy",
       error,
     );
   }
@@ -980,12 +980,12 @@ async function collectAllWorldbookEntries(
   const missingCapabilities = capabilityStatus?.missingCapabilities || [];
   if (supplementedCapabilities.length > 0) {
     debugDebug(
-      `[ST-BME] task-worldinfo worldbook bridge 已通过 legacy 补齐关键能力: ${supplementedCapabilities.join(", ")} [${sourceTag}]`,
+      `[ST-BME] Worldbook bridge của task-worldinfo đã bổ sung các năng lực then chốt qua đường legacy: ${supplementedCapabilities.join(", ")} [${sourceTag}]`,
     );
   }
   if (missingCapabilities.length > 0) {
     console.warn(
-      `[ST-BME] task-worldinfo worldbook host 缺失关键能力，将显式降级相关旧Ngữ nghĩa: ${missingCapabilities.join(", ")} [${sourceTag}]`,
+      `[ST-BME] Worldbook host của task-worldinfo đang thiếu các năng lực then chốt, sẽ hạ cấp tường minh các ngữ nghĩa cũ liên quan: ${missingCapabilities.join(", ")} [${sourceTag}]`,
     );
   }
 
@@ -1002,7 +1002,7 @@ async function collectAllWorldbookEntries(
         : [];
     } catch (error) {
       debugDebug(
-        `[ST-BME] task-worldinfo ĐọcNhân vật世界书Thất bại [${sourceTag}]`,
+        `[ST-BME] task-worldinfo ĐọcNhân vậtWorld InfoThất bại [${sourceTag}]`,
         error,
       );
     }
@@ -1097,7 +1097,7 @@ async function collectAllWorldbookEntries(
       allEntries.push(...entries);
     } catch (error) {
       debugDebug(
-        `[ST-BME] task-worldinfo Đọc世界书Thất bại: ${normalizedName} [${sourceTag}]`,
+        `[ST-BME] task-worldinfo ĐọcWorld InfoThất bại: ${normalizedName} [${sourceTag}]`,
         error,
       );
     }
@@ -1291,7 +1291,7 @@ function warnLegacyEntryNames(entries = [], warnings = []) {
   }
 
   const warning =
-    `检测到旧 EW 命名条目 (${legacyNames.join(", ")})；这些条目现在只按普通世界书条目Xử lý，不再有专用魔法Hành vi`;
+    `Phát hiện mục đặt tên EW kiểu cũ (${legacyNames.join(", ")}); các mục này hiện chỉ được xử lý như mục World Info thông thường, không còn hành vi ma thuật riêng nữa`;
   if (!warnings.includes(warning)) {
     warnings.push(warning);
   }
@@ -1649,15 +1649,15 @@ export async function resolveTaskWorldInfo({
         } catch (error) {
           const warning =
             error?.code === "st_bme_task_ejs_unsupported_helper"
-              ? `世界书条目 ${entry.name} 调用了不支持的 helper: ${error.helperName}`
+              ? `Mục World Info ${entry.name} đã gọi helper không được hỗ trợ: ${error.helperName}`
               : error?.code === "st_bme_task_ejs_runtime_unavailable"
-                ? `世界书条目 ${entry.name} 依赖 EJS runtime，当前Đã bỏ qua`
-                : `世界书条目 ${entry.name} 渲染Thất bại，Đã bỏ qua`;
+                ? `World Infomục ${entry.name} phụ thuộc EJS runtime，hiện tạiĐã bỏ qua`
+                : `World Infomục ${entry.name} kết xuấtThất bại，Đã bỏ qua`;
           if (!result.debug.warnings.includes(warning)) {
             result.debug.warnings.push(warning);
           }
           console.warn(
-            `[ST-BME] task-worldinfo 渲染世界书条目Thất bại: ${entry.name}`,
+            `[ST-BME] task-worldinfo kết xuấtWorld InfomụcThất bại: ${entry.name}`,
             error,
           );
           if (
@@ -1722,7 +1722,7 @@ export async function resolveTaskWorldInfo({
               blockedContents,
             });
         if (mvuSanitized.dropped) {
-          const warning = `世界书条目 ${entry.name} 渲染Kết quả命中 MVU Quy tắc，Đã bỏ qua`;
+          const warning = `World Infomục ${entry.name} kết xuấtKết quảkhớp trúng MVU Quy tắc，Đã bỏ qua`;
           if (!result.debug.warnings.includes(warning)) {
             result.debug.warnings.push(warning);
           }
@@ -1792,7 +1792,7 @@ export async function resolveTaskWorldInfo({
     }
 
     if (hitResolveCap) {
-      const warning = `世界书 EJS 激活达到递归上限 ${maxResolvePasses}，已停止继续展开`;
+      const warning = `Kích hoạt World Info EJS đã chạm giới hạn đệ quy ${maxResolvePasses}, đã dừng mở rộng tiếp`;
       if (!result.debug.warnings.includes(warning)) {
         result.debug.warnings.push(warning);
       }
@@ -1871,7 +1871,7 @@ export async function resolveTaskWorldInfo({
       ].filter(Boolean),
     );
   } catch (error) {
-    console.error("[ST-BME] task-worldinfo 解析Thất bại:", error);
+    console.error("[ST-BME] task-worldinfo phân tíchThất bại:", error);
   }
 
   return result;

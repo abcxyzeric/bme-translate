@@ -342,7 +342,7 @@ async function ensureOpfsRootDirectory(
   { repairFileConflict = false } = {},
 ) {
   if (!rootDirectory || typeof rootDirectory.getDirectoryHandle !== "function") {
-    throw new Error("OPFS 根目录Không khả dụng");
+    throw new Error("OPFS thư mục gốcKhông khả dụng");
   }
 
   try {
@@ -1574,7 +1574,7 @@ class LegacyOpfsGraphStore {
       this._chatDirectoryPromise = (async () => {
         const rootDirectory = await this._rootDirectoryFactory();
         if (!rootDirectory || typeof rootDirectory.getDirectoryHandle !== "function") {
-          throw new Error("OPFS 根目录Không khả dụng");
+          throw new Error("OPFS thư mục gốcKhông khả dụng");
         }
         const opfsRoot = await ensureOpfsRootDirectory(rootDirectory, {
           repairFileConflict: true,
@@ -2849,7 +2849,7 @@ export class OpfsGraphStore {
       this._chatDirectoryPromise = (async () => {
         const rootDirectory = await this._rootDirectoryFactory();
         if (!rootDirectory || typeof rootDirectory.getDirectoryHandle !== "function") {
-          throw new Error("OPFS 根目录Không khả dụng");
+          throw new Error("OPFS thư mục gốcKhông khả dụng");
         }
         const opfsRoot = await ensureOpfsRootDirectory(rootDirectory, {
           repairFileConflict: true,

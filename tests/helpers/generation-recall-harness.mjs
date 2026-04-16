@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+﻿import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
@@ -60,7 +60,7 @@ export function createGenerationRecallHarness(options = {}) {
     const endFallback = source.indexOf("async function runExtraction()");
     const resolvedEnd = end >= 0 ? end : endFallback;
     if (start < 0 || resolvedEnd < 0 || resolvedEnd <= start) {
-      throw new Error("Không法从 index.js Trích xuất生成Truy hồi事务định nghĩa");
+      throw new Error("");
     }
     const snippet = source
       .slice(start, resolvedEnd)
@@ -420,3 +420,4 @@ export function createGenerationRecallHarness(options = {}) {
     return context;
   });
 }
+

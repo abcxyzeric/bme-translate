@@ -1,6 +1,6 @@
-// ST-BME: Tác vụRegex兼容层（Phase 1）
-// 目标：在Preset tác vụ中复用 Tavern RegexNguồn（global/preset/character），
-// 同时叠加Tác vụCục bộQuy tắc，并按Tác vụ阶段执行。
+// ST-BME: tầng tương thích regex tác vụ (Phase 1)
+// Mục tiêu: tái sử dụng nguồn Tavern Regex (global/preset/character) trong preset tác vụ,
+// đồng thời chồng thêm quy tắc cục bộ của tác vụ và thực thi theo từng giai đoạn của tác vụ.
 
 import { extension_settings, getContext } from "../../../../extensions.js";
 import { debugDebug } from "../runtime/debug-logging.js";
@@ -22,11 +22,11 @@ const TAVERN_REGEX_PLACEMENT = Object.freeze({
   REASONING: 6,
 });
 const TAVERN_REGEX_PLACEMENT_LABELS = Object.freeze({
-  [TAVERN_REGEX_PLACEMENT.USER_INPUT]: "Người dùng输入",
-  [TAVERN_REGEX_PLACEMENT.AI_OUTPUT]: "AI 输出",
-  [TAVERN_REGEX_PLACEMENT.SLASH_COMMAND]: "斜杠命令",
-  [TAVERN_REGEX_PLACEMENT.WORLD_INFO]: "世界书",
-  [TAVERN_REGEX_PLACEMENT.REASONING]: "推理/思维",
+  [TAVERN_REGEX_PLACEMENT.USER_INPUT]: "Người dùngđầu vào",
+  [TAVERN_REGEX_PLACEMENT.AI_OUTPUT]: "AI đầu ra",
+  [TAVERN_REGEX_PLACEMENT.SLASH_COMMAND]: "Lệnh gạch chéo",
+  [TAVERN_REGEX_PLACEMENT.WORLD_INFO]: "World Info",
+  [TAVERN_REGEX_PLACEMENT.REASONING]: "Suy luận/tư duy",
 });
 
 const PROMPT_STAGES = new Set([
@@ -112,7 +112,7 @@ function derivePlacementLabelsFromSourceFlags(sourceFlags = {}) {
     !sourceFlags.worldInfo &&
     !sourceFlags.reasoning
   ) {
-    labels.push("系统/世界书");
+    labels.push("hệ thống/World Info");
   }
   return labels;
 }
@@ -319,7 +319,7 @@ function getRegexHost() {
     }
   } catch (error) {
     debugDebug(
-      "[ST-BME] task-regex Đọc regex bridge Thất bại，Lùi về到 legacy HostGiao diện",
+      "[ST-BME] Đọc regex bridge của task-regex thất bại, lùi về giao diện host legacy",
       error,
     );
   }
@@ -343,8 +343,8 @@ function getRegexHost() {
     fallback: true,
     fallbackReason:
       typeof legacyGetTavernRegexes === "function"
-        ? "当前通过 legacy globalThis Lùi về提供 Tavern Regex 能力"
-        : "未检测到 Tavern Regex HostGiao diện",
+        ? "Hiện tại đang cung cấp năng lực Tavern Regex qua đường lùi legacy globalThis"
+        : "Không phát hiện giao diện host Tavern Regex",
     capabilityStatus: Object.freeze({
       mode: "legacy",
       supplementedCapabilities: Object.freeze([]),
@@ -627,7 +627,7 @@ function collectTavernRulesDetailed(regexConfig = {}) {
         resolvedVia,
         allowed,
         reason:
-          reason || (shouldReuse ? "当前Tác vụ已Tắt该Nguồn" : "当前Tác vụ未Bật复用酒馆Regex"),
+          reason || (shouldReuse ? "Tác vụ hiện tại đã tắt nguồn này" : "Tác vụ hiện tại chưa bật tái sử dụng SillyTavern Regex"),
         rawRuleCount: Array.isArray(rawItems) ? rawItems.length : 0,
         activeRuleCount: 0,
         previewRules: Array.isArray(rawItems)
@@ -708,7 +708,7 @@ function collectTavernRulesDetailed(regexConfig = {}) {
   if (presetViaApi.supported) {
     appendSourceSnapshot({
       type: "preset",
-      label: "当前预设",
+      label: "hiện tạipreset",
       enabled: enabledSources.preset,
       supported: true,
       resolvedVia: "bridge",
@@ -720,7 +720,7 @@ function collectTavernRulesDetailed(regexConfig = {}) {
     const allowed = isPresetRegexAllowed(extSettings, apiId, presetName);
     appendSourceSnapshot({
       type: "preset",
-      label: "当前预设",
+      label: "hiện tạipreset",
       enabled: enabledSources.preset,
       supported: true,
       resolvedVia: "fallback",
@@ -728,8 +728,8 @@ function collectTavernRulesDetailed(regexConfig = {}) {
       reason: allowed
         ? ""
         : apiId && presetName
-          ? `酒馆当前未允许预设 "${presetName}" 的Regex参与运行`
-          : "未识别到酒馆当前生效的预设",
+          ? `SillyTavern hiện tại chưa cho phép regex của preset "${presetName}" tham gia chạy`
+          : "Không nhận diện được preset hiện đang có hiệu lực của SillyTavern",
       rawItems,
     });
   }
@@ -738,7 +738,7 @@ function collectTavernRulesDetailed(regexConfig = {}) {
   if (characterViaApi.supported) {
     appendSourceSnapshot({
       type: "character",
-      label: "Nhân vật卡",
+      label: "Thẻ nhân vật",
       enabled: enabledSources.character,
       supported: true,
       resolvedVia: "bridge",
@@ -750,7 +750,7 @@ function collectTavernRulesDetailed(regexConfig = {}) {
     const allowed = isCharacterRegexAllowed(extSettings, avatar);
     appendSourceSnapshot({
       type: "character",
-      label: "Nhân vật卡",
+      label: "Thẻ nhân vật",
       enabled: enabledSources.character,
       supported: true,
       resolvedVia: "fallback",
@@ -758,8 +758,8 @@ function collectTavernRulesDetailed(regexConfig = {}) {
       reason: allowed
         ? ""
         : avatar
-          ? "酒馆当前未允许该Nhân vật卡的 scoped regex 参与运行"
-          : "Hiện không có可用的Nhân vật卡上下文",
+          ? "SillyTavern hiện tại chưa cho phép scoped regex của thẻ nhân vật này tham gia chạy"
+          : "Hiện không có ngữ cảnh thẻ nhân vật nào dùng được",
       rawItems,
     });
   }
@@ -877,7 +877,7 @@ function buildHostRegexExecutionState(regexHost = null) {
       formatterAvailable: true,
       fallbackReason:
         String(regexHost?.fallbackReason || "").trim() ||
-        "当前通过 helper bridge 提供 Tavern Regex formatter",
+        "Hiện tại đang cung cấp formatter Tavern Regex qua helper bridge",
     };
   }
 
@@ -888,7 +888,7 @@ function buildHostRegexExecutionState(regexHost = null) {
       formatterAvailable: false,
       fallbackReason:
         String(regexHost?.fallbackReason || "").trim() ||
-        "Host formatter Không khả dụng，已Lùi về插件侧兼容执行",
+        "Host formatter không khả dụng, đã lùi về thực thi tương thích phía plugin",
     };
   }
 
@@ -898,7 +898,7 @@ function buildHostRegexExecutionState(regexHost = null) {
     formatterAvailable: false,
     fallbackReason:
       String(regexHost?.fallbackReason || "").trim() ||
-      "未检测到可用的 Tavern Regex HostGiao diện",
+      "Không phát hiện được giao diện host Tavern Regex khả dụng",
   };
 }
 
@@ -1228,7 +1228,7 @@ export function applyHostRegexReuse(
         skippedDisplayOnlyRuleCount,
       };
     } catch (error) {
-      debugDebug("[ST-BME] Host formatter 执行Thất bại，Lùi về插件兼容执行", error);
+      debugDebug("[ST-BME] Host formatter thực thiThất bại，Lùi vềplugintương thíchthực thi", error);
     }
   }
 
@@ -1241,7 +1241,7 @@ export function applyHostRegexReuse(
     executionState.mode === "host-unavailable"
       ? executionState.fallbackReason
       : executionState.fallbackReason ||
-        "Host formatter Không khả dụng，已Lùi về插件侧兼容执行";
+        "Host formatter không khả dụng, đã lùi về thực thi tương thích phía plugin";
   pushDebug(debugCollector, {
     kind: "host-reuse",
     taskType: normalizedTaskType,
@@ -1288,7 +1288,7 @@ export function applyTaskRegex(
     return input;
   }
 
-  // 阶段检查已移到 shouldApplyRuleForStage 中，Không需单独 gate
+  // Việc kiểm tra giai đoạn đã được chuyển vào shouldApplyRuleForStage, không cần gate riêng nữa
   const stagesConfig = normalizeTaskRegexStages(regexConfig?.stages || {});
 
   const localRules = collectLocalRules(regexConfig);

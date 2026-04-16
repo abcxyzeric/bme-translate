@@ -163,7 +163,7 @@ function resolveProviderCandidate(candidate, options = {}) {
       const resolved = candidate(options);
       return isObjectLike(resolved) ? resolved : null;
     } catch (error) {
-      debugDebug("[ST-BME] host-adapter/regex provider 解析Thất bại", error);
+      debugDebug("[ST-BME] host-adapter/regex provider phân tíchThất bại", error);
       return null;
     }
   }
@@ -374,7 +374,7 @@ function detectRegexMode(sourceRecord = {}) {
 
 function buildFallbackReason(sourceRecord, available, mode) {
   if (!available) {
-    return "未检测到 Tavern Regex HostGiao diện";
+    return "Không phát hiện giao diện host Tavern Regex";
   }
 
   if (mode === "core-real") {
@@ -382,11 +382,11 @@ function buildFallbackReason(sourceRecord, available, mode) {
   }
 
   if (mode === "helper-bridge") {
-    return `当前通过 ${sourceRecord?.label || "unknown"} helper bridge 提供 Tavern Regex formatter`;
+    return `Hiện tại đang cung cấp Tavern Regex formatter qua helper bridge ${sourceRecord?.label || "unknown"}`;
   }
 
   if (mode === "helper-getter-only") {
-    return `Tavern Regex 桥接仅发现Quy tắcĐọcGiao diện，Nguồn: ${sourceRecord?.label || "unknown"}`;
+    return `Cầu nối Tavern Regex chỉ phát hiện giao diện đọc quy tắc, nguồn: ${sourceRecord?.label || "unknown"}`;
   }
 
   return "";

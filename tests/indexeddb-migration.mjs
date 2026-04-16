@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   BME_LEGACY_RETENTION_MS,
@@ -21,7 +21,7 @@ async function setupIndexedDbTestEnv() {
     await import("fake-indexeddb/auto");
   } catch (error) {
     console.warn(
-      `${PREFIX} fake-indexeddb 未安装，Lùi về到当前运行时 indexedDB:`,
+      `${PREFIX} fake-indexeddb chưa được cài, fallback về indexedDB runtime hiện tại:`,
       error?.message || error,
     );
   }
@@ -36,7 +36,7 @@ async function setupIndexedDbTestEnv() {
   }
 
   await ensureDexieLoaded();
-  assert.equal(typeof globalThis.Dexie, "function", "Dexie 构造函数必须可用");
+  assert.equal(typeof globalThis.Dexie, "function", "Hàm tạo Dexie bắt buộc phải dùng được");
 }
 
 async function cleanupDatabases() {
@@ -65,7 +65,7 @@ function createLegacyGraph(chatId, suffix = "legacy") {
       seqRange: [4, 5],
       archived: false,
       fields: {
-        title: "第一条",
+        title: "mục thứ nhất",
       },
     },
     {
@@ -74,7 +74,7 @@ function createLegacyGraph(chatId, suffix = "legacy") {
       seq: 8,
       archived: false,
       fields: {
-        title: "第二条",
+        title: "mục thứ hai",
       },
     },
   );
@@ -122,9 +122,9 @@ async function testMigrationSuccessAndMeta() {
   assert.ok(migratedNodeB);
   assert.ok(migratedEdge);
 
-  assert.equal(migratedNodeA.sourceFloor, 5, "node sourceFloor 应优先取 seqRange[1]");
-  assert.equal(migratedNodeB.sourceFloor, 8, "node sourceFloor 应Lùi về到 seq");
-  assert.equal(migratedEdge.sourceFloor, 8, "edge sourceFloor 应优先取 seqRange[1]");
+  assert.equal(migratedNodeA.sourceFloor, 5, "node sourceFloor nên ưu tiên lấy seqRange[1]");
+  assert.equal(migratedNodeB.sourceFloor, 8, "node sourceFloor nên fallback về seq");
+  assert.equal(migratedEdge.sourceFloor, 8, "edge sourceFloor nên ưu tiên lấy seqRange[1]");
 
   assert.equal(snapshot.meta.migrationSource, "chat_metadata");
   assert.equal(snapshot.meta.migrationCompletedAt, nowMs);
@@ -222,3 +222,4 @@ async function main() {
 }
 
 await main();
+

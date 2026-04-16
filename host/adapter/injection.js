@@ -53,8 +53,8 @@ export function createInjectionHostFacade(options = {}) {
     fallbackReason: available
       ? ""
       : contextHost?.available
-        ? "当前上下文未暴露 setExtensionPrompt Giao diện"
-        : "未检测到可用TiêmHostGiao diện",
+        ? "Ngữ cảnh hiện tại chưa expose giao diện setExtensionPrompt"
+        : "Không phát hiện giao diện tiêm host khả dụng",
     versionHints: mergeVersionHints(
       {
         setter: "setExtensionPrompt",

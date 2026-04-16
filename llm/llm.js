@@ -1,5 +1,5 @@
-// ST-BME: LLM 调用封装
-// 包装 ST 的 sendOpenAIRequest，提供Cấu trúc化 JSON 输出和重试机制
+// ST-BME: LLM gọiđóng gói
+// Bọc sendOpenAIRequest của ST, cung cấp đầu ra JSON có cấu trúc và cơ chế thử lại
 
 import { getRequestHeaders } from "../../../../../script.js";
 import { extension_settings } from "../../../../extensions.js";
@@ -474,14 +474,14 @@ function getLlmTestOverride(name) {
 function formatLlmConfigSourceLabel(source = "") {
   switch (String(source || "").trim()) {
     case "task-preset":
-      return "Tác vụ专用模板";
+      return "Tác vụdành riêngmẫu";
     case "global-fallback-missing-task-preset":
-      return "Tác vụ模板缺失，已Lùi về当前 API";
+      return "Thiếu preset tác vụ, đã lùi về API hiện tại";
     case "global-fallback-invalid-task-preset":
-      return "Tác vụ模板不完整，已Lùi về当前 API";
+      return "Preset tác vụ không đầy đủ, đã lùi về API hiện tại";
     case "global":
     default:
-      return "跟随当前 API";
+      return "Đi theo API hiện tại";
   }
 }
 
@@ -804,9 +804,9 @@ function buildEffectiveLlmRoute(
       : "sillytavern-current-model",
     transportLabel: dedicated
       ? String(
-          config?.llmTransportLabel || config?.llmProviderLabel || "专用Ký ứcModel",
+          config?.llmTransportLabel || config?.llmProviderLabel || "dành riêngKý ứcModel",
         )
-      : "酒馆当前Model",
+      : "SillyTavernhiện tạiModel",
     provider: dedicated ? String(config?.llmProvider || "") : "",
     providerLabel: dedicated ? String(config?.llmProviderLabel || "") : "",
     routeMode: dedicated ? String(config?.llmRouteMode || "") : "",
@@ -1017,7 +1017,7 @@ function createStreamHandlingError(
   code = "stream_error",
   options = {},
 ) {
-  const error = new Error(String(message || "流式请求Thất bại"));
+  const error = new Error(String(message || "dạng luồngyêu cầuThất bại"));
   error.name = "StreamHandlingError";
   error.code = code;
   error.fallbackable = options?.fallbackable !== false;
@@ -1452,9 +1452,9 @@ function buildJsonAttemptMessages(
   promptMessages = [],
 ) {
   const systemParts = [
-    "输出Yêu cầu补充：只输出一个紧凑的 JSON đối tượng。",
-    "禁止 markdown 代码块、禁止解释、禁止前后缀、禁止省略号。",
-    "如果需要重新生成，请直接从头xuất ra đầy đủ JSON，不要续写上一lầnNội dung。",
+    "Yêu cầu bổ sung cho đầu ra: chỉ xuất ra một đối tượng JSON gọn gàng.",
+    "Cấm khối mã markdown, cấm giải thích, cấm tiền tố/hậu tố, cấm dấu ba chấm.",
+    "Nếu cần sinh lại, hãy trực tiếp xuất lại đầy đủ JSON từ đầu, đừng nối tiếp nội dung của lần trước.",
   ];
 
   const userParts = [];
@@ -1463,13 +1463,13 @@ function buildJsonAttemptMessages(
   }
   if (attempt > 0) {
     userParts.push(
-      reason ? `上一lần输出Thất bạiNguyên nhân：${reason}` : "上一lần输出未能被程序解析。",
+      reason ? `Lý do đầu ra lần trước thất bại: ${reason}` : "Đầu ra của lần trước không thể được chương trình phân tích.",
     );
     userParts.push(
-      "请重新输出一个完整、紧凑、可直接 JSON.parse 的 JSON đối tượng。",
+      "Hãy xuất lại một đối tượng JSON hoàn chỉnh, gọn gàng và có thể JSON.parse trực tiếp.",
     );
   } else {
-    userParts.push("请直接输出紧凑 JSON đối tượng，不要包含任何额外文本。");
+    userParts.push("Hãy trực tiếp xuất ra đối tượng JSON gọn gàng, đừng kèm thêm văn bản nào khác.");
   }
 
   const normalizedPromptMessages = Array.isArray(promptMessages)
@@ -1585,7 +1585,7 @@ async function fetchWithTimeout(
     () =>
       controller.abort(
         new DOMException(
-          `LLM 请求超时 (${Math.round(timeoutMs / 1000)}s)`,
+          `LLM yêu cầuquá thời gian (${Math.round(timeoutMs / 1000)}s)`,
           "AbortError",
         ),
       ),
@@ -1631,7 +1631,7 @@ function createCombinedAbortSignal(...signals) {
   return controller.signal;
 }
 
-// Tự động检测：如果 API 不支持 response_format，记住并Bỏ qua
+// Tự động phát hiện kiểm tra: nếu API không hỗ trợ response_format thì ghi nhớ và bỏ qua
 let _jsonModeSupported = true;
 
 function isAbortError(error) {
@@ -1645,7 +1645,7 @@ async function parseDedicatedStreamingResponse(
   const reader = response?.body?.getReader?.();
   if (!reader) {
     throw createStreamHandlingError(
-      "专用 LLM 返回的响应体不可流式Đọc",
+      "Không thể đọc phần thân phản hồi do LLM chuyên dụng trả về ở chế độ luồng",
       "missing_stream_body",
     );
   }
@@ -1707,7 +1707,7 @@ async function parseDedicatedStreamingResponse(
           parsed = JSON.parse(rawData);
         } catch (error) {
           throw createStreamHandlingError(
-            "专用 LLM 返回了Không法解析的 SSE Dữ liệu块",
+            "LLM chuyên dụng đã trả về khối dữ liệu SSE không thể phân tích",
             "invalid_sse_chunk",
             {
               fallbackable: true,
@@ -1769,7 +1769,7 @@ async function parseDedicatedStreamingResponse(
     buffer += decoder.decode();
     if (!sawStreamEvent) {
       throw createStreamHandlingError(
-        "专用 LLM 未返回可识别的 SSE Sự kiện流",
+        "LLM chuyên dụng không trả về luồng sự kiện SSE có thể nhận diện",
         "invalid_sse_stream",
       );
     }
@@ -1853,7 +1853,7 @@ async function executeDedicatedRequest(
         response.status === 400 &&
         looksLikeJsonModeUnsupportedMessage(message)
       ) {
-        console.warn("[ST-BME] API 不支持 json mode，降级为普通 JSON 提示模式");
+        console.warn("[ST-BME] API không hỗ trợ json mode, hạ cấp về chế độ nhắc JSON thông thường");
         _jsonModeSupported = false;
         delete requestBody.custom_include_body;
         continue;
@@ -1968,7 +1968,7 @@ async function callDedicatedOpenAICompatible(
   const hasDedicatedConfig = hasDedicatedLLMConfig(config);
   if (taskType && config.llmPresetFallbackReason) {
     debugWarn(
-      `[ST-BME] Tác vụ ${taskType} 指定的 API 模板Không khả dụng，已Lùi về当前 API: ` +
+      `[ST-BME] API preset được chỉ định cho tác vụ ${taskType} không khả dụng, đã lùi về API hiện tại: ` +
         `${config.requestedLlmPresetName || "(empty)"} / ${config.llmPresetFallbackReason}`,
     );
   }
@@ -2011,7 +2011,7 @@ async function callDedicatedOpenAICompatible(
     route: hasDedicatedConfig
       ? config.llmTransport || "dedicated-openai-compatible"
       : "sillytavern-current-model",
-    routeLabel: hasDedicatedConfig ? config.llmTransportLabel || "" : "酒馆当前Model",
+    routeLabel: hasDedicatedConfig ? config.llmTransportLabel || "" : "SillyTavernhiện tạiModel",
     model: hasDedicatedConfig ? config.model : "sillytavern-current-model",
     inputApiUrl: hasDedicatedConfig ? config.inputApiUrl || "" : "",
     apiUrl: hasDedicatedConfig ? config.apiUrl : "",
@@ -2185,7 +2185,7 @@ async function callDedicatedOpenAICompatible(
     recordTaskLlmStreamState(taskKey, streamState, {}, { force: true });
 
     console.warn(
-      `[ST-BME] 专用 LLM 流式Không khả dụng，已Tự động降级为非流式: ${streamState.fallbackReason}`,
+      `[ST-BME] LLM chuyên dụng ở chế độ luồng không khả dụng, đã tự động hạ cấp sang chế độ không luồng: ${streamState.fallbackReason}`,
     );
 
     const fallbackBody = {
@@ -2234,14 +2234,14 @@ async function _parseResponse(response) {
 }
 
 /**
- * 调用 LLM 并期望返回Cấu trúc化 JSON
+ * Gọi LLM và kỳ vọng trả về JSON có cấu trúc
  *
  * @param {object} params
- * @param {string} params.systemPrompt - 系统提示词
- * @param {string} params.userPrompt - Người dùng提示词
- * @param {number} [params.maxRetries=2] - JSON 解析Thất bại时的重试lần数
- * @param {string} [params.model] - 指定Model（留空使用当前Cấu hình）
- * @returns {Promise<object|null>} 解析后的 JSON đối tượng，或 null
+ * @param {string} params.systemPrompt - prompt hệ thống
+ * @param {string} params.userPrompt - Người dùngprompt
+ * @param {number} [params.maxRetries=2] - số lần thử lại khi phân tích JSON thất bại
+ * @param {string} [params.model] - model được chỉ định (để trống thì dùng cấu hình hiện tại)
+ * @returns {Promise<object|null>} đối tượng JSON sau khi phân tích, hoặc null
  */
 export async function callLLMForJSON({
   systemPrompt,
@@ -2369,13 +2369,13 @@ export async function callLLMForJSON({
       );
 
       if (!responseText || typeof responseText !== "string") {
-        console.warn(`[ST-BME] LLM 返回空响应 (尝试 ${attempt + 1})`);
-        lastFailureReason = "返回空响应";
+        console.warn(`[ST-BME] LLM trả về phản hồi rỗng (lần thử ${attempt + 1})`);
+        lastFailureReason = "trả về phản hồi rỗng";
         lastFailureType = "empty-response";
         continue;
       }
 
-      // 尝试解析 JSON
+      // thửphân tích JSON
       const parsed = extractJSON(outputCleanup.cleanedText);
       if (parsed !== null) {
         return returnFailureDetails
@@ -2394,26 +2394,26 @@ export async function callLLMForJSON({
         looksLikeTruncatedJson(outputCleanup.cleanedText);
       lastFailureType = truncated ? "truncated-json" : "invalid-json";
       lastFailureReason = truncated
-        ? "输出因长度限制被截断，请重新输出更紧凑的完整 JSON"
-        : "输出不是有效 JSON，请严格返回紧凑 JSON đối tượng";
+        ? "Đầu ra bị cắt ngắn do giới hạn độ dài, hãy xuất lại JSON hoàn chỉnh và gọn hơn"
+        : "Đầu ra không phải JSON hợp lệ, hãy nghiêm túc trả về đối tượng JSON gọn gàng";
       console.warn(
-        `[ST-BME] LLM 响应Không法解析为 JSON (尝试 ${attempt + 1}, finish=${response.finishReason || "unknown"}):`,
+        `[ST-BME] Phản hồi của LLM không thể phân tích thành JSON (lần thử ${attempt + 1}, finish=${response.finishReason || "unknown"}):`,
         responseText.slice(0, 200),
       );
     } catch (e) {
       if (isAbortError(e)) {
-        const abortMessage = e?.message || String(e) || "LLM 调用Đã chấm dứt";
+        const abortMessage = e?.message || String(e) || "LLM gọiĐã chấm dứt";
         const isTimeoutAbort =
-          !signal?.aborted && /超时/i.test(String(abortMessage || ""));
+          !signal?.aborted && /quá thời gian/i.test(String(abortMessage || ""));
         if (!isTimeoutAbort) {
           throw e;
         }
-        console.error(`[ST-BME] LLM 调用超时 (尝试 ${attempt + 1}):`, e);
+        console.error(`[ST-BME] LLM gọiquá thời gian (thử ${attempt + 1}):`, e);
         lastFailureReason = abortMessage;
         lastFailureType = "timeout";
         continue;
       }
-      console.error(`[ST-BME] LLM Gọi thất bại (尝试 ${attempt + 1}):`, e);
+      console.error(`[ST-BME] LLM Gọi thất bại (thử ${attempt + 1}):`, e);
       lastFailureReason = e?.message || String(e) || "LLM Gọi thất bại";
       lastFailureType = "provider-error";
     }
@@ -2425,7 +2425,7 @@ export async function callLLMForJSON({
       data: null,
       attempts: maxRetries + 1,
       errorType: lastFailureType || "unknown",
-      failureReason: lastFailureReason || "LLM 未返回可解析 JSON",
+      failureReason: lastFailureReason || "LLM không trả về JSON có thể phân tích",
     };
     recordTaskLlmRequest(taskType || privateRequestSource, {
       jsonFailure: failureSnapshot,
@@ -2440,7 +2440,7 @@ export async function callLLMForJSON({
 }
 
 /**
- * 调用 LLM（不Yêu cầu JSON 输出）
+ * Gọi LLM (không yêu cầu đầu ra JSON)
  *
  * @param {string} systemPrompt
  * @param {string} userPrompt
@@ -2501,8 +2501,8 @@ export async function callLLM(systemPrompt, userPrompt, options = {}) {
 }
 
 /**
- * Kiểm tra LLM bộ nhớ 连通性
- * 若未Cấu hình独立LLM bộ nhớ，则Kiểm thử当前 SillyTavern 聊天Model。
+ * Kiểm tra khả năng kết nối của LLM bộ nhớ
+ * Nếu chưa cấu hình LLM bộ nhớ riêng thì sẽ kiểm thử chat model hiện tại của SillyTavern.
  *
  * @returns {Promise<{success: boolean, mode: string, error: string}>}
  */
@@ -2514,8 +2514,8 @@ export async function testLLMConnection() {
 
   try {
     const response = await callLLM(
-      "你是一个连接Kiểm thửtrợ lý。请只回答 OK。",
-      "请只Phản hồi OK",
+      "Bạn là trợ lý kiểm thử kết nối. Hãy chỉ trả lời OK.",
+      "Hãy chỉ phản hồi OK",
       {
         requestSource: "diagnostic:test-connection",
       },
@@ -2523,7 +2523,7 @@ export async function testLLMConnection() {
     if (typeof response === "string" && response.trim().length > 0) {
       return { success: true, mode, error: "" };
     }
-    return { success: false, mode, error: "API 返回空Kết quả" };
+    return { success: false, mode, error: "API trả về kết quả rỗng" };
   } catch (e) {
     return { success: false, mode, error: String(e) };
   }
@@ -2535,7 +2535,7 @@ export async function fetchMemoryLLMModels() {
     return {
       success: false,
       models: [],
-      error: "请先填写Ký ức Địa chỉ API của LLM",
+      error: "Hãy điền địa chỉ API LLM bộ nhớ trước",
     };
   }
 
@@ -2543,7 +2543,7 @@ export async function fetchMemoryLLMModels() {
     return {
       success: false,
       models: [],
-      error: `${config.llmProviderLabel || "当前渠道"} 暂不支持Tự độngLấy model，请Thủ công填写Model名`,
+      error: `${config.llmProviderLabel || "kênh hiện tại"} tạm thời chưa hỗ trợ tự động lấy model, hãy tự điền tên model`,
     };
   }
 
@@ -2552,7 +2552,7 @@ export async function fetchMemoryLLMModels() {
     return {
       success: false,
       models: [],
-      error: `${config.llmProviderLabel || "当前渠道"} 暂Không可用的Model探测策略，请Thủ công填写Model名`,
+      error: `${config.llmProviderLabel || "kênh hiện tại"} chưa có chiến lược dò model khả dụng, hãy tự điền tên model`,
     };
   }
   const errors = [];
@@ -2577,8 +2577,8 @@ export async function fetchMemoryLLMModels() {
       models: [],
       error:
         errors.length > 0
-          ? `未拉取到可用Model。尝试Kết quả: ${errors.join(" | ")}`
-          : "未拉取到可用Model，请检查Giao diện是否支持Model列表Giao diện",
+          ? `Không lấy được model khả dụng. Kết quả thử: ${errors.join(" | ")}`
+          : "Không lấy được model khả dụng, hãy kiểm tra xem giao diện có hỗ trợ danh sách model hay không",
     };
   } catch (error) {
     return { success: false, models: [], error: String(error) };
@@ -2586,8 +2586,8 @@ export async function fetchMemoryLLMModels() {
 }
 
 /**
- * 从 LLM 响应文本中Trích xuất JSON đối tượng
- * Xử lý各种常见格式：纯 JSON、markdown 代码块、混合文本等
+ * Trích xuất đối tượng JSON từ văn bản phản hồi của LLM
+ * Xử lý nhiều định dạng thường gặp: JSON thuần, khối mã markdown, văn bản trộn lẫn...
  *
  * @param {string} text
  * @returns {object|null}
@@ -2597,14 +2597,14 @@ function extractJSON(text) {
 
   const trimmed = text.trim();
 
-  // 1. 直接尝试解析
+  // 1. trực tiếpthửphân tích
   try {
     return JSON.parse(trimmed);
   } catch {
     /* continue */
   }
 
-  // 2. 尝试Trích xuất markdown 代码块中的 JSON
+  // 2. Thử trích xuất JSON trong khối mã markdown
   const codeBlockMatch = trimmed.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/);
   if (codeBlockMatch) {
     try {
@@ -2614,7 +2614,7 @@ function extractJSON(text) {
     }
   }
 
-  // 3. 尝试找到第一个 { 或 [ 开始的 JSON
+  // 3. Thử tìm đoạn JSON bắt đầu bằng dấu { hoặc [ đầu tiên
   const firstBrace = trimmed.indexOf("{");
   const firstBracket = trimmed.indexOf("[");
 
@@ -2630,7 +2630,7 @@ function extractJSON(text) {
   }
 
   if (startIdx >= 0) {
-    // 从后往前找匹配的结束字符
+    // Tìm ký tự kết thúc tương ứng từ cuối về đầu
     const lastEnd = trimmed.lastIndexOf(endChar);
     if (lastEnd > startIdx) {
       try {
@@ -2641,7 +2641,7 @@ function extractJSON(text) {
     }
   }
 
-  // 4. trailing comma 容错 (常见 LLM Lỗi: {"a": 1,} 或 [1, 2,])
+  // 4. Chịu lỗi trailing comma (lỗi LLM thường gặp: {"a": 1,} hoặc [1, 2,])
   if (startIdx >= 0) {
     const lastEnd = trimmed.lastIndexOf(endChar);
     if (lastEnd > startIdx) {
@@ -2656,10 +2656,10 @@ function extractJSON(text) {
     }
   }
 
-  // 5. 截断 JSON 修复: 尝试补全不匹配的括号
+  // 5. Sửa JSON bị cắt ngắn: thử bù lại dấu ngoặc không khớp
   if (startIdx >= 0) {
     let candidate = trimmed.slice(startIdx);
-    // 先清理 trailing comma
+    // Trước tiên dọn sạch trailing comma
     candidate = candidate.replace(/,\s*$/g, "");
 
     const opens = { "{": 0, "[": 0 };
@@ -2670,7 +2670,7 @@ function extractJSON(text) {
     }
 
     if (opens["["] > 0 || opens["{"] > 0) {
-      // 去除末尾不完整的 key-value 残片（如 "key": "未完...）
+      // Loại bỏ mảnh key-value chưa hoàn chỉnh ở cuối (ví dụ: một cặp key/value bị dang dở)
       candidate = candidate.replace(
         /,?\s*"[^"]*"?\s*:\s*"?[^"}\]]*$/,
         "",

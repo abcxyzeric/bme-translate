@@ -1,5 +1,5 @@
-// ST-BME: 层级Nén引擎
-// 超过阈值的nút被 LLM 总结为更高层级的Nénnút
+﻿// ST-BME: phân tầngNénengine
+// Các nút vượt ngưỡng sẽ được LLM tóm tắt thành nút nén ở tầng cao hơn
 
 import { debugLog } from "../runtime/debug-logging.js";
 import { embedText } from "../vector/embedding.js";
@@ -124,14 +124,14 @@ function buildCompressionRankingQueryText(nodes = [], typeDef = {}) {
       const storyTimeLabel = describeNodeStoryTime(node);
       return [
         `${typeLabel}#${index + 1}`,
-        storyTimeLabel ? `剧情时间=${storyTimeLabel}` : "",
+        storyTimeLabel ? `thời gian cốt truyện=${storyTimeLabel}` : "",
         fieldsText,
       ]
         .filter(Boolean)
         .join(" | ");
     })
     .filter(Boolean);
-  return lines.length > 0 ? [`Nén批lần ${typeLabel}`, ...lines].join("\n") : "";
+  return lines.length > 0 ? [`Lô nén ${typeLabel}`, ...lines].join("\n") : "";
 }
 
 function buildCompressionFallbackSummary(batch = []) {
@@ -173,10 +173,10 @@ function normalizeCompressedFields(summaryResult, typeDef, batch = []) {
 
   const fallbackSummary = buildCompressionFallbackSummary(batch);
   if (!normalized.summary && columns.some((column) => column?.name === "summary")) {
-    normalized.summary = fallbackSummary || "Nén批lầntóm tắt缺失";
+    normalized.summary = fallbackSummary || "Thiếu tóm tắt cho lô nén";
   }
   if (!normalized.insight && columns.some((column) => column?.name === "insight")) {
-    normalized.insight = fallbackSummary || "Nén批lần洞察缺失";
+    normalized.insight = fallbackSummary || "Thiếu insight cho lô nén";
   }
   if (!normalized.title && columns.some((column) => column?.name === "title")) {
     const titled = ensureEventTitle({ title: rawFields?.title, summary: normalized.summary });
@@ -199,13 +199,13 @@ function normalizeCompressedFields(summaryResult, typeDef, batch = []) {
 }
 
 /**
- * 对指定Loại执行层级Nén
+ * Thực thi nén phân tầng cho loại được chỉ định
  *
  * @param {object} params
- * @param {object} params.graph - 当前图Trạng thái
- * @param {object} params.typeDef - 要Nén的Loạiđịnh nghĩa
+ * @param {object} params.graph - trạng thái đồ thị hiện tại
+ * @param {object} params.typeDef - định nghĩa loại cần nén
  * @param {object} params.embeddingConfig - Embedding Cấu hình API
- * @param {boolean} [params.force=false] - 忽略阈值强制Nén
+ * @param {boolean} [params.force=false] - bỏ qua ngưỡng và cưỡng chế nén
  * @returns {Promise<{created: number, archived: number}>}
  */
 export async function compressType({
@@ -229,7 +229,7 @@ export async function compressType({
   let totalCreated = 0;
   let totalArchived = 0;
 
-  // 从Thấp nhất层级开始逐层Nén
+  // Bắt đầu nén từng tầng từ tầng thấp nhất
   for (let level = 0; level < maxDepth; level++) {
     throwIfAborted(signal);
     const result = await compressLevel({
@@ -247,7 +247,7 @@ export async function compressType({
     totalCreated += result.created;
     totalArchived += result.archived;
 
-    // 如果这一层没有Nén发生，停止
+    // Nếu tầng này không có nén xảy ra thì dừng lại
     if (result.created === 0) break;
   }
 
@@ -255,7 +255,7 @@ export async function compressType({
 }
 
 /**
- * Nén特定层级的nút
+ * Nén các nút của tầng chỉ định
  */
 async function compressLevel({
   graph,
@@ -275,7 +275,7 @@ async function compressLevel({
   );
   throwIfAborted(signal);
 
-  // 获取该层级的活跃叶子nút
+  // Lấy các nút lá đang hoạt động của tầng này
   const levelNodes = getActiveNodes(graph, typeDef.id)
     .filter((n) => n.level === level)
     .sort((a, b) => a.seq - b.seq);
@@ -314,7 +314,7 @@ async function compressLevel({
       );
       if (Object.keys(normalizedFields).length === 0) {
         throw new Error(
-          `NénKết quả缺少可用 fields，Không法创建 ${typeDef?.label || typeDef?.id || "Nén"} nút`,
+          `Kết quả nén thiếu fields dùng được, không thể tạo nút ${typeDef?.label || typeDef?.id || "Nén"}`,
         );
       }
 
@@ -464,7 +464,7 @@ export function inspectAutoCompressionCandidates(
     threshold: 0,
     fanIn: 0,
     keepRecent: 0,
-    reason: "已到Chu kỳ nén tự động，但Hiện không có达到内部Nén阈值的候选组",
+    reason: "Đã tới chu kỳ nén tự động, nhưng hiện không có nhóm ứng viên nén nội bộ đạt ngưỡng",
   };
 }
 
@@ -502,7 +502,7 @@ function migrateBatchEdges(graph, batch, compressedNode) {
 }
 
 /**
- * 调用 LLM 总结一批nút
+ * Gọi LLM để tóm tắt một lô nút
  */
 async function summarizeBatch(
   nodes,
@@ -521,12 +521,12 @@ async function summarizeBatch(
         .filter(([_, v]) => v)
         .map(([k, v]) => `${k}: ${v}`)
         .join("\n    ");
-      return `nút ${i + 1} [tầng ${n.seq}]${storyTimeLabel ? ` [剧情时间 ${storyTimeLabel}]` : ""}:\n    ${fieldsStr}`;
+      return `nút ${i + 1} [tầng ${n.seq}]${storyTimeLabel ? ` [thời gian cốt truyện ${storyTimeLabel}]` : ""}:\n    ${fieldsStr}`;
     })
     .join("\n\n");
 
   const instruction =
-    typeDef.compression.instruction || "将以下nútNén总结为一条精炼记录。";
+    typeDef.compression.instruction || "Hãy nén các nút dưới đây thành một bản ghi tinh gọn.";
   const excludedNodeIds = new Set(
     (Array.isArray(nodes) ? nodes : []).map((node) => String(node?.id || "").trim()),
   );
@@ -547,7 +547,7 @@ async function summarizeBatch(
       enableMultiIntent: true,
       maxTextLength: 1200,
     },
-    relevantHeading: "与当前Nén批lần最相关的既有nút",
+    relevantHeading: "Các nút đã có liên quan nhất tới lô nén hiện tại",
   });
 
   const compressPromptBuild = await buildTaskPrompt(settings, "compress", {
@@ -566,24 +566,24 @@ async function summarizeBatch(
     compressPromptBuild.systemPrompt ||
       customPrompt ||
       [
-        "你是一个Ký ứcNén器。将多个同Loạinút总结为一条更高层级的Nénnút。",
+        "Bạn là bộ nén ký ức. Hãy tóm tắt nhiều nút cùng loại thành một nút nén ở tầng cao hơn.",
         instruction,
         "",
-        "Định dạng đầu ra为严格 JSON：",
+        "Đầu ra phải là JSON nghiêm ngặt:",
         `{"fields": {${typeDef.columns.map((c) => `"${c.name}": "..."`).join(", ")}}}`,
         "",
         "Quy tắc：",
-        "- 保留关键信息：因果关系、不可逆Kết quả、未解决伏笔",
-        "- 去除重复和低信息密度Nội dung",
-        "- Nén后文本应精炼，目标 150 字左右",
-        "- 必须保持剧情时间顺序，不要把不同阶段的Nội dung写反",
-        "- 不要把未来计划写成已经发生的Khách quan事实",
+        "- Giữ lại thông tin then chốt: quan hệ nhân quả, kết quả không thể đảo ngược, và các manh mối cài cắm chưa được giải quyết",
+        "- Loại bỏ nội dung trùng lặp và có mật độ thông tin thấp",
+        "- Văn bản sau khi nén phải tinh gọn, mục tiêu khoảng 150 ký tự",
+        "- Bắt buộc phải giữ đúng thứ tự thời gian cốt truyện, đừng viết đảo nội dung của các giai đoạn khác nhau",
+        "- Đừng viết kế hoạch tương lai như thể đó là sự thật khách quan đã xảy ra",
       ].join("\n"),
     compressRegexInput,
     "system",
   );
 
-  const userPrompt = `请Nén以下 ${nodes.length} 个 "${typeDef.label}" nút：\n\n${nodeDescriptions}`;
+  const userPrompt = `Hãy nén ${nodes.length} nút "${typeDef.label}" dưới đây:\n\n${nodeDescriptions}`;
   const promptPayload = resolveTaskPromptPayload(
     compressPromptBuild,
     userPrompt,
@@ -610,7 +610,7 @@ async function summarizeBatch(
 }
 
 /**
- * 对所有支持Nén的Loại执行Nén
+ * Thực thi nén cho mọi loại hỗ trợ nén
  *
  * @param {object} graph
  * @param {object[]} schema
@@ -651,15 +651,15 @@ export async function compressAll(
   return { created: totalCreated, archived: totalArchived };
 }
 
-// ==================== v2: Lãng quên chủ động（SleepGate 启发） ====================
+// ==================== v2: Lãng quên chủ động (lấy cảm hứng từ SleepGate) ====================
 
 /**
- * 睡眠清理周期
- * 评估每 nút的保留价值，低于阈值的Lưu trữ（遗忘）
+ * Chu kỳ dọn sạch lúc ngủ
+ * Đánh giá giá trị giữ lại của từng nút, nút nào thấp hơn ngưỡng thì lưu trữ (lãng quên)
  *
- * @param {object} graph - 图Trạng thái
- * @param {object} settings - 包含 forgetThreshold 的设置
- * @returns {{forgotten: number}} 本lần遗忘的nút数
+ * @param {object} graph - trạng thái đồ thị
+ * @param {object} settings - cài đặt có bao gồm forgetThreshold
+ * @returns {{forgotten: number}} số nút bị lãng quên ở lượt này
  */
 export function sleepCycle(graph, settings) {
   const threshold = settings.forgetThreshold ?? 0.5;
@@ -668,19 +668,19 @@ export function sleepCycle(graph, settings) {
   let forgotten = 0;
 
   for (const node of nodes) {
-    // Bỏ qua常驻Loại（synopsis, rule 等重要nút不应被遗忘）
+    // Bỏ qua các loại thường trú (những nút quan trọng như synopsis, rule không nên bị lãng quên)
     if (
       node.type === "synopsis" ||
       node.type === "rule" ||
       node.type === "thread"
     )
       continue;
-    // Bỏ qua高重要性nút
+    // Bỏ qua nút có độ quan trọng cao
     if (node.importance >= 8) continue;
-    // Bỏ quaGần nhất创建的nút（< 1 小时）
+    // Bỏ qua các nút vừa mới tạo gần đây (< 1 giờ)
     if (now - node.createdTime < 3600000) continue;
 
-    // 计算保留价值 = importance × recency × (1 + accessFreq)
+    // Tính toán giá trị giữ lại = importance × recency × (1 + accessFreq)
     const ageHours = (now - node.createdTime) / 3600000;
     const recency = 1 / (1 + Math.log10(1 + ageHours));
     const accessFreq = node.accessCount / Math.max(1, ageHours / 24);
@@ -693,8 +693,9 @@ export function sleepCycle(graph, settings) {
   }
 
   if (forgotten > 0) {
-    debugLog(`[ST-BME] Lãng quên chủ động: ${forgotten} 个低价值nútĐã lưu trữ`);
+    debugLog(`[ST-BME] Lãng quên chủ động: đã lưu trữ ${forgotten} nút giá trị thấp`);
   }
 
   return { forgotten };
 }
+

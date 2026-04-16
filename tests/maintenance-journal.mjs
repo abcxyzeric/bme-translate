@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   appendMaintenanceJournal,
@@ -51,7 +51,7 @@ function buildEdge(id, fromId, toId, extra = {}) {
   const entry = createMaintenanceJournalEntry(before, after, {
     action: "sleep",
     mode: "manual",
-    summary: "Thủ công遗忘：Lưu trữ 1  nút",
+    summary: "Thủ côngLãng quên：Lưu trữ 1  nút",
   });
 
   appendMaintenanceJournal(graph, entry);
@@ -66,7 +66,7 @@ function buildEdge(id, fromId, toId, extra = {}) {
     nodes: [
       buildNode("child-1"),
       buildNode("child-2"),
-      buildNode("location-1", { type: "location", fields: { title: "大厅" } }),
+      buildNode("location-1", { type: "location", fields: { title: "đại sảnh" } }),
     ],
     edges: [buildEdge("edge-old", "child-1", "location-1")],
   };
@@ -78,7 +78,7 @@ function buildEdge(id, fromId, toId, extra = {}) {
   after.nodes.push(
     buildNode("parent-1", {
       level: 1,
-      fields: { summary: "Nén父nút" },
+      fields: { summary: "nút cha nén" },
       childIds: ["child-1", "child-2"],
     }),
   );
@@ -112,14 +112,14 @@ function buildEdge(id, fromId, toId, extra = {}) {
 {
   const before = {
     nodes: [
-      buildNode("new-1", { fields: { summary: "新Manh mối" } }),
-      buildNode("old-1", { fields: { summary: "旧mô tả" } }),
+      buildNode("new-1", { fields: { summary: "manh mối mới" } }),
+      buildNode("old-1", { fields: { summary: "mô tả cũ" } }),
     ],
     edges: [],
   };
   const after = clone(before);
   after.nodes[0].archived = true;
-  after.nodes[1].fields.summary = "被新信息修正后的旧mô tả";
+  after.nodes[1].fields.summary = "";
   after.edges.push(buildEdge("edge-merge", "new-1", "old-1"));
 
   const graph = normalizeGraphRuntimeState(clone(after), "chat-consolidate");
@@ -138,7 +138,7 @@ function buildEdge(id, fromId, toId, extra = {}) {
   );
   assert.equal(
     graph.nodes.find((node) => node.id === "old-1")?.fields?.summary,
-    "旧mô tả",
+    "mô tả cũ",
   );
   assert.equal(
     graph.edges.some((edge) => edge.id === "edge-merge"),
@@ -158,7 +158,7 @@ function buildEdge(id, fromId, toId, extra = {}) {
   const entry = createMaintenanceJournalEntry(before, after, {
     action: "sleep",
     mode: "manual",
-    summary: "Thủ công遗忘：Lưu trữ 1  nút",
+    summary: "Thủ côngLãng quên：Lưu trữ 1  nút",
   });
 
   appendMaintenanceJournal(graph, entry);
@@ -166,8 +166,10 @@ function buildEdge(id, fromId, toId, extra = {}) {
 
   const result = undoLatestMaintenance(graph);
   assert.equal(result.ok, false);
-  assert.match(result.reason, /Trạng thái hiện tại已变化|已被后续Thao tác改写/);
+  assert.match(result.reason, /Trạng thái hiện tại đã thay đổi|đã bị thao tác về sau ghi đè/);
   assert.equal(graph.maintenanceJournal.length, 1);
 }
 
 console.log("maintenance-journal tests passed");
+
+

@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
 } from "./helpers/register-hooks-compat.mjs";
@@ -93,101 +93,101 @@ function createConstantWorldbookEntry(uid, name, content, comment = name) {
 
 const constantEntry = createWorldbookEntry({
   uid: 1,
-  name: "常驻thiết lập",
-  comment: "常驻thiết lập",
-  content: "这里是常驻世界thiết lập。",
+  name: "thường trúthiết lập",
+  comment: "thường trúthiết lập",
+  content: "ở đâyCóthường trúthế giớithiết lập。",
   order: 10,
 });
 
 const dynEntry = createWorldbookEntry({
   uid: 2,
   name: "EW/Dyn/Manh mối",
-  comment: "Manh mối条目",
-  content: "隐藏Manh mối：<%= charName %> 正在调查。",
+  comment: "Manh mốimục",
+  content: "ẩnManh mối：<%= charName %> đangđiều tra。",
   enabled: false,
   strategyType: "selective",
-  keys: ["调查"],
+  keys: ["điều tra"],
   order: 15,
 });
 
 const inlineSummaryEntry = createWorldbookEntry({
   uid: 3,
-  name: "普通 EJS 汇总",
-  comment: "EJS 汇总",
-  content: '控制tóm tắt：<%= await getwi("EW/Dyn/Manh mối") %>',
+  name: "thông thường EJS tổng hợp",
+  comment: "EJS tổng hợp",
+  content: 'Tóm tắt điều khiển：<%= await getwi("EW/Dyn/Manh mối") %>',
   order: 20,
 });
 
 const inlineDataSummaryEntry = createWorldbookEntry({
   uid: 12,
-  name: "Dữ liệu EJS 汇总",
-  comment: "Dữ liệu EJS 汇总",
+  name: "Dữ liệu EJS tổng hợp",
+  comment: "Dữ liệu EJS tổng hợp",
   content:
-    'Dữ liệutóm tắt：<%= await getwi("Dữ liệu模板", { clue: "Chìa khóa xanh", mood: "紧张" }) %>',
+    'Dữ liệutóm tắt：<%= await getwi("Dữ liệumẫu", { clue: "Chìa khóa xanh", mood: "căng thẳng" }) %>',
   order: 21,
 });
 
 const inlineDataTemplateEntry = createWorldbookEntry({
   uid: 13,
-  name: "Dữ liệu模板",
-  comment: "Dữ liệu模板",
+  name: "Dữ liệumẫu",
+  comment: "Dữ liệumẫu",
   content:
-    "Manh mối=<%= clue %>；Cảm xúc=<%= mood %>；Nhân vật=<%= char %>；Người dùng=<%= user %>；上下文=<%= recentMessages %>",
+    "Manh mối=<%= clue %>；Cảm xúc=<%= mood %>；Nhân vật=<%= char %>；Người dùng=<%= user %>；ngữ cảnh=<%= recentMessages %>",
   enabled: false,
   order: 22,
 });
 
 const commentKeywordProbeEntry = createWorldbookEntry({
   uid: 14,
-  name: "备注命中Kiểm thử",
-  comment: "常驻备注",
-  content: "这条只用于验证 comment 不参与自định nghĩaLọc。",
+  name: "ghi chúkhớp trúngKiểm thử",
+  comment: "thường trúghi chú",
+  content: "Mục này chỉ dùng để xác thực comment, không tham gia bộ lọc tự định nghĩa.",
   strategyType: "selective",
-  keys: ["绝不会匹配到这里"],
+  keys: ["tuyệt đối sẽ không khớp ở đây"],
   order: 23,
 });
 
 const extensionLiteralEntry = createWorldbookEntry({
   uid: 4,
-  name: "扩展Ngữ nghĩa正文",
-  comment: "扩展Ngữ nghĩa正文",
-  content: "@@generate\n[GENERATE:Test]\n扩展Ngữ nghĩa只是普通文本。",
+  name: "thân văn bản ngữ nghĩa extension",
+  comment: "thân văn bản ngữ nghĩa extension",
+  content: "@@generate\n[GENERATE:Test]\n.",
   order: 25,
 });
 
 const externalInlineEntry = createWorldbookEntry({
   uid: 5,
-  name: "外部书汇总",
-  comment: "外部书汇总",
-  content: '外部补充：<%= await getwi("bonus-book", "Bonus 条目") %>',
+  name: "tổng hợp sách ngoài",
+  comment: "tổng hợp sách ngoài",
+  content: 'bên ngoàibổ sung：<%= await getwi("bonus-book", "Bonus mục") %>',
   order: 26,
 });
 
 const forceControlEntry = createWorldbookEntry({
   uid: 6,
-  name: "普通 EJS 控制",
-  comment: "EJS 控制",
-  content: '<% await activewi("强制 after") %>',
+  name: "điều khiển EJS thông thường",
+  comment: "Điều khiển EJS",
+  content: '<% await activewi("cưỡng chế after") %>',
   order: 30,
 });
 
 const forcedAfterEntry = createWorldbookEntry({
   uid: 7,
-  name: "强制 after",
-  comment: "强制后置",
-  content: "这是被 EJS 强制激活的后置条目。",
+  name: "cưỡng chế after",
+  comment: "cưỡng chếđặt sau",
+  content: "Đây là mục đặt sau được EJS cưỡng chế kích hoạt.",
   enabled: false,
   positionType: "after_character_definition",
   strategyType: "selective",
-  keys: ["永远不会命中"],
+  keys: ["không bao giờ khớp trúng"],
   order: 40,
 });
 
 const atDepthEntry = createWorldbookEntry({
   uid: 8,
-  name: "深度Tiêm",
-  comment: "深度Tiêm",
-  content: "这是一条 atDepth tin nhắn。",
+  name: "độ sâuTiêm",
+  comment: "độ sâuTiêm",
+  content: "Đây là một tin nhắn atDepth.",
   positionType: "at_depth_as_system",
   depth: 2,
   order: 5,
@@ -197,13 +197,13 @@ const mvuTaggedEntry = createWorldbookEntry({
   uid: 9,
   name: "[mvu_update] Trạng tháiĐồng bộ",
   comment: "MVU tagged",
-  content: "这一条不应该进入Kết quả。",
+  content: "Mục này không nên đi vào kết quả.",
   order: 28,
 });
 
 const mvuHeuristicEntry = createWorldbookEntry({
   uid: 10,
-  name: "MVU 启发式条目",
+  name: "mục heuristic MVU",
   comment: "MVU heuristic",
   content: "<status_current_variable>secret=true</status_current_variable>",
   order: 29,
@@ -211,8 +211,8 @@ const mvuHeuristicEntry = createWorldbookEntry({
 
 const mvuLazyProbeEntry = createWorldbookEntry({
   uid: 11,
-  name: "MVU 懒加载探测",
-  comment: "MVU 懒加载探测",
+  name: "dò tải lười MVU",
+  comment: "dò tải lười MVU",
   content: 'MVU lazy: <%= await getwi("bonus-book", "Bonus MVU") %>',
   order: 27,
 });
@@ -247,16 +247,16 @@ const customContextProbeEntry = createWorldbookEntry({
   uid: 18,
   name: "Custom Context Probe",
   comment: "Custom Context Probe",
-  content: "上下文探针：user=<%= user_input %>;char=<%= charName %>",
+  content: "thăm dò ngữ cảnh：user=<%= user_input %>;char=<%= charName %>",
   strategyType: "selective",
   keys: ["probe custom mode"],
   order: 24.3,
 });
 const bonusEntry = createWorldbookEntry({
   uid: 101,
-  name: "Bonus 条目",
-  comment: "Bonus 条目",
-  content: "来自 bonus-book 的补充Nội dung。",
+  name: "Bonus mục",
+  comment: "Bonus mục",
+  content: "Nội dung bổ sung đến từ bonus-book.",
   order: 10,
 });
 
@@ -264,7 +264,7 @@ const bonusEntry = createWorldbookEntry({
   uid: 102,
   name: "Bonus MVU",
   comment: "Bonus MVU",
-  content: "变量Cập nhậtQuy tắc:\ntype: sync\n当前Thời gian: 12:00",
+  content: "biếnCập nhậtQuy tắc:\ntype: sync\nhiện tạiThời gian: 12:00",
   order: 20,
 });
 
@@ -298,7 +298,7 @@ try {
       return {
         name1: "User",
         name2: "Alice",
-        chat: [{ is_user: true, mes: "我们继续调查那条Manh mối" }],
+        chat: [{ is_user: true, mes: "Chúng ta tiếp tục điều tra manh mối đó" }],
         chatMetadata: {},
         extensionSettings: {},
       };
@@ -327,27 +327,27 @@ try {
     templateContext: {},
   });
   assert.equal(
-    emptyTriggerWorldInfo.beforeEntries.some((entry) => entry.name === "常驻thiết lập"),
+    emptyTriggerWorldInfo.beforeEntries.some((entry) => entry.name === "thường trúthiết lập"),
     true,
     "constant world info should still resolve without trigger text",
   );
   assert.equal(
-    emptyTriggerWorldInfo.beforeEntries.some((entry) => entry.name === "Dữ liệu EJS 汇总"),
+    emptyTriggerWorldInfo.beforeEntries.some((entry) => entry.name === "Dữ liệu EJS tổng hợp"),
     true,
     "constant EJS entry should still render with empty template context defaults",
   );
-  assert.match(emptyTriggerWorldInfo.beforeText, /Dữ liệutóm tắt：Manh mối=Chìa khóa xanh；Cảm xúc=紧张；Nhân vật=Alice；Người dùng=User；上下文=/);
+  assert.match(emptyTriggerWorldInfo.beforeText, /Dữ liệutóm tắt：Manh mối=Chìa khóa xanh；Cảm xúc=căng thẳng；Nhân vật=Alice；Người dùng=User；ngữ cảnh=/);
   assert.equal(
-    emptyTriggerWorldInfo.debug.warnings.some((warning) => warning.includes("渲染Thất bại")),
+    emptyTriggerWorldInfo.debug.warnings.some((warning) => warning.includes("kết xuấtThất bại")),
     false,
   );
 
   const worldInfo = await resolveTaskWorldInfo({
     templateContext: {
-      recentMessages: "我们继续调查那条Manh mối",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
-    userMessage: "继续调查",
+    userMessage: "tiếp tục điều tra",
   });
   assert.equal(worldInfo.beforeEntries.length, 6);
   assert.equal(worldInfo.afterEntries.length, 1);
@@ -394,10 +394,10 @@ try {
         return {
           stat_data: {
             user: {
-              "意识Trạng thái": "沉眠",
+              "Trạng thái ý thức": "ngủ sâu",
             },
-            "恼恼": {
-              "发情值": 71,
+            "Nao Nao": {
+              "Giá trị động dục": 71,
             },
           },
         };
@@ -436,18 +436,18 @@ try {
   );
   assert.match(
     customWorldInfo.beforeText,
-    /控制tóm tắt：隐藏Manh mối：Alice 正在调查。/,
+    /Tóm tắt điều khiển：ẩnManh mối：Alice đangđiều tra。/,
   );
   assert.match(
     customWorldInfo.beforeText,
-    /上下文探针：user=probe custom mode;char=Alice/,
+    /thăm dò ngữ cảnh：user=probe custom mode;char=Alice/,
   );
   assert.equal(
     customWorldInfo.allEntries.some((entry) => String(entry.name || "").startsWith("EW/Dyn/")),
     true,
   );
   assert.equal(
-    customWorldInfo.afterEntries.some((entry) => entry.sourceName === "强制 after"),
+    customWorldInfo.afterEntries.some((entry) => entry.sourceName === "cưỡng chế after"),
     true,
   );
   assert.equal(customWorldInfo.debug.mvu.filteredEntryCount, 0);
@@ -494,7 +494,7 @@ try {
 
   assert.match(
     customWorldInfoWithNativeRuntime.beforeText,
-    /上下文探针：user=probe custom mode;char=Alice/,
+    /thăm dò ngữ cảnh：user=probe custom mode;char=Alice/,
   );
   assert.doesNotMatch(
     customWorldInfoWithNativeRuntime.beforeText,
@@ -505,45 +505,45 @@ try {
   const keywordWorldInfo = await resolveTaskWorldInfo({
     settings: {
       worldInfoFilterMode: "custom",
-      worldInfoFilterCustomKeywords: "常驻",
+      worldInfoFilterCustomKeywords: "thường trú",
     },
     templateContext: {
-      recentMessages: "我们继续调查那条Manh mối",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
-    userMessage: "继续调查",
+    userMessage: "tiếp tục điều tra",
   });
 
   assert.equal(
     keywordWorldInfo.beforeEntries.some(
-      (entry) => entry.sourceName === "常驻thiết lập",
+      (entry) => entry.sourceName === "thường trúthiết lập",
     ),
     false,
   );
   assert.equal(
-    keywordWorldInfo.allEntries.some((entry) => entry.name === "备注命中Kiểm thử"),
+    keywordWorldInfo.allEntries.some((entry) => entry.name === "ghi chúkhớp trúngKiểm thử"),
     true,
   );
   assert.equal(keywordWorldInfo.debug.customFilter.filteredEntryCount, 1);
   assert.equal(
     keywordWorldInfo.debug.customFilter.filteredEntries[0].name,
-    "常驻thiết lập",
+    "thường trúthiết lập",
   );
   assert.equal(
     keywordWorldInfo.debug.customFilter.filteredEntries[0].matchedKeyword,
-    "常驻",
+    "thường trú",
   );
 
   const keywordCachePrime = await resolveTaskWorldInfo({
     settings: {
       worldInfoFilterMode: "custom",
-      worldInfoFilterCustomKeywords: "常驻,缓存探针",
+      worldInfoFilterCustomKeywords: "thường trú,thăm dò bộ đệm",
     },
     templateContext: {
-      recentMessages: "我们继续调查那条Manh mối",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
-    userMessage: "继续调查",
+    userMessage: "tiếp tục điều tra",
   });
   assert.equal(keywordCachePrime.debug.cache.hit, false);
   assert.equal(keywordCachePrime.debug.customFilter.filteredEntryCount, 1);
@@ -551,19 +551,19 @@ try {
   const keywordCacheHit = await resolveTaskWorldInfo({
     settings: {
       worldInfoFilterMode: "custom",
-      worldInfoFilterCustomKeywords: "常驻,缓存探针",
+      worldInfoFilterCustomKeywords: "thường trú,thăm dò bộ đệm",
     },
     templateContext: {
-      recentMessages: "我们继续调查那条Manh mối",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
-    userMessage: "继续调查",
+    userMessage: "tiếp tục điều tra",
   });
   assert.equal(keywordCacheHit.debug.cache.hit, true);
   assert.equal(keywordCacheHit.debug.customFilter.filteredEntryCount, 1);
   assert.equal(
     keywordCacheHit.debug.customFilter.filteredEntries[0].name,
-    "常驻thiết lập",
+    "thường trúthiết lập",
   );
 
   delete globalThis.Mvu;
@@ -571,17 +571,17 @@ try {
   const defaultModeWithKeywords = await resolveTaskWorldInfo({
     settings: {
       worldInfoFilterMode: "default",
-      worldInfoFilterCustomKeywords: "常驻",
+      worldInfoFilterCustomKeywords: "thường trú",
     },
     templateContext: {
-      recentMessages: "我们继续调查那条Manh mối",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
-    userMessage: "继续调查",
+    userMessage: "tiếp tục điều tra",
   });
   assert.equal(
     defaultModeWithKeywords.beforeEntries.some(
-      (entry) => entry.sourceName === "常驻thiết lập",
+      (entry) => entry.sourceName === "thường trúthiết lập",
     ),
     true,
   );
@@ -595,7 +595,7 @@ try {
         profiles: [
           {
             id: "custom",
-            name: "Kiểm thử预设",
+            name: "Kiểm thửpreset",
             taskType: "recall",
             builtin: false,
             blocks: [
@@ -635,22 +635,22 @@ try {
 
   const promptBuild = await buildTaskPrompt(settings, "recall", {
     taskName: "recall",
-    userMessage: "继续调查",
-    recentMessages: "我们继续调查那条Manh mối",
+    userMessage: "tiếp tục điều tra",
+    recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
     charName: "Alice",
   });
 
-  assert.match(promptBuild.systemPrompt, /这里是常驻世界thiết lập/);
-  assert.match(promptBuild.systemPrompt, /控制tóm tắt：隐藏Manh mối：Alice 正在调查/);
+  assert.match(promptBuild.systemPrompt, /ở đâyCóthường trúthế giớithiết lập/);
+  assert.match(promptBuild.systemPrompt, /Tóm tắt điều khiển：ẩnManh mối：Alice đangđiều tra/);
   assert.match(
     promptBuild.systemPrompt,
-    /Dữ liệutóm tắt：Manh mối=Chìa khóa xanh；Cảm xúc=紧张；Nhân vật=Alice；Người dùng=User；上下文=我们继续调查那条Manh mối/,
+    /Dữ liệutóm tắt：Manh mối=Chìa khóa xanh；Cảm xúc=căng thẳng；Nhân vật=Alice；Người dùng=User；ngữ cảnh=Chúng ta tiếp tục điều tra manh mối đó/,
   );
-  assert.match(promptBuild.systemPrompt, /扩展Ngữ nghĩa只是普通文本/);
-  assert.match(promptBuild.systemPrompt, /来自 bonus-book 的补充Nội dung/);
+  assert.match(promptBuild.systemPrompt, /ngữ nghĩa extension chỉ có văn bản thông thường/);
+  assert.match(promptBuild.systemPrompt, /nội dung bổ sung đến từ bonus-book/);
   assert.match(promptBuild.systemPrompt, /MVU lazy:/);
   assert.doesNotMatch(promptBuild.systemPrompt, /getwi|<%=?/);
-  assert.doesNotMatch(promptBuild.systemPrompt, /status_current_variable|变量Cập nhậtQuy tắc|updatevariable/i);
+  assert.doesNotMatch(promptBuild.systemPrompt, /status_current_variable|biếnCập nhậtQuy tắc|updatevariable/i);
   assert.equal(
     promptBuild.privateTaskMessages.length,
     2,
@@ -662,22 +662,22 @@ try {
   );
   assert.equal(
     promptBuild.privateTaskMessages[0].content,
-    "这是一条 atDepth tin nhắn。",
+    "Đây là một tin nhắn atDepth.",
   );
   assert.deepEqual(
     promptBuild.hostInjections.before.map((entry) => entry.name),
     [
-      "常驻thiết lập",
-      "EJS 汇总",
-      "Dữ liệu EJS 汇总",
-      "扩展Ngữ nghĩa正文",
-      "外部书汇总",
-      "MVU 懒加载探测",
+      "thường trúthiết lập",
+      "EJS tổng hợp",
+      "Dữ liệu EJS tổng hợp",
+      "thân văn bản ngữ nghĩa extension",
+      "tổng hợp sách ngoài",
+      "dò tải lười MVU",
     ],
   );
   assert.deepEqual(
     promptBuild.hostInjections.after.map((entry) => entry.name),
-    ["强制后置"],
+    ["cưỡng chếđặt sau"],
   );
   assert.equal(promptBuild.hostInjections.atDepth.length, 1);
   assert.equal(promptBuild.hostInjections.atDepth[0].depth, 2);
@@ -685,19 +685,19 @@ try {
   assert.equal(promptBuild.hostInjectionPlan.before[0].blockId, "b1");
   assert.equal(promptBuild.hostInjectionPlan.before[0].sourceKey, "worldInfoBefore");
   assert.deepEqual(promptBuild.hostInjectionPlan.before[0].entryNames, [
-    "常驻thiết lập",
-    "EJS 汇总",
-    "Dữ liệu EJS 汇总",
-    "扩展Ngữ nghĩa正文",
-    "外部书汇总",
-    "MVU 懒加载探测",
+    "thường trúthiết lập",
+    "EJS tổng hợp",
+    "Dữ liệu EJS tổng hợp",
+    "thân văn bản ngữ nghĩa extension",
+    "tổng hợp sách ngoài",
+    "dò tải lười MVU",
   ]);
   assert.equal(promptBuild.hostInjectionPlan.after.length, 1);
   assert.equal(promptBuild.hostInjectionPlan.after[0].blockId, "b2");
   assert.equal(promptBuild.hostInjectionPlan.after[0].sourceKey, "worldInfoAfter");
-  assert.deepEqual(promptBuild.hostInjectionPlan.after[0].entryNames, ["强制后置"]);
+  assert.deepEqual(promptBuild.hostInjectionPlan.after[0].entryNames, ["cưỡng chếđặt sau"]);
   assert.equal(promptBuild.hostInjectionPlan.atDepth.length, 1);
-  assert.equal(promptBuild.hostInjectionPlan.atDepth[0].entryName, "深度Tiêm");
+  assert.equal(promptBuild.hostInjectionPlan.atDepth[0].entryName, "độ sâuTiêm");
   assert.equal(typeof promptBuild.debug.worldInfoCacheHit, "boolean");
   assert.equal(promptBuild.executionMessages.length, 4);
   assert.deepEqual(
@@ -706,14 +706,14 @@ try {
   );
   assert.equal(
     promptBuild.executionMessages[0].content,
-    "这是一条 atDepth tin nhắn。",
+    "Đây là một tin nhắn atDepth.",
   );
   assert.deepEqual(
     promptBuild.renderedBlocks.map((block) => block.delivery),
     ["private.system", "private.system", "private.message"],
   );
   assert.equal(promptBuild.additionalMessages.length, 1);
-  assert.equal(promptBuild.additionalMessages[0].content, "这是一条 atDepth tin nhắn。");
+  assert.equal(promptBuild.additionalMessages[0].content, "Đây là một tin nhắn atDepth.");
   assert.equal(promptBuild.debug.mvu.sanitizedFieldCount >= 0, true);
 
   const customPromptBuild = await buildTaskPrompt(
@@ -725,8 +725,8 @@ try {
     "recall",
     {
       taskName: "recall",
-      userMessage: "继续调查",
-      recentMessages: "我们继续调查那条Manh mối",
+      userMessage: "tiếp tục điều tra",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
   );
@@ -734,8 +734,8 @@ try {
     customPromptBuild.systemPrompt,
     /<status_current_variable>secret=true<\/status_current_variable>/,
   );
-  assert.match(customPromptBuild.systemPrompt, /这一条不应该进入Kết quả/);
-  assert.match(customPromptBuild.systemPrompt, /控制tóm tắt：隐藏Manh mối：Alice 正在调查/);
+  assert.match(customPromptBuild.systemPrompt, /Mục này không nên đi vào kết quả/);
+  assert.match(customPromptBuild.systemPrompt, /Tóm tắt điều khiển：ẩnManh mối：Alice đangđiều tra/);
   const customPayload = buildTaskLlmPayload(customPromptBuild, "unused fallback");
   assert.equal(
     customPayload.promptMessages.some((message) =>
@@ -753,14 +753,14 @@ try {
         profiles: [
           {
             id: "interpolated",
-            name: "插值预设",
+            name: "preset nội suy",
             taskType: "recall",
             builtin: false,
             blocks: [
               {
                 id: "interp-system",
                 type: "custom",
-                content: "世界书插值:\\n{{worldInfoBefore}}",
+                content: "Nội suy World Info:\\n{{worldInfoBefore}}",
                 role: "system",
                 enabled: true,
                 order: 0,
@@ -779,8 +779,8 @@ try {
     "recall",
     {
       taskName: "recall",
-      userMessage: "继续调查",
-      recentMessages: "我们继续调查那条Manh mối",
+      userMessage: "tiếp tục điều tra",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
   );
@@ -808,7 +808,7 @@ try {
         profiles: [
           {
             id: "custom",
-            name: "Không世界书显式块",
+            name: "không có khối World Info tường minh",
             taskType: "recall",
             builtin: false,
             blocks: [
@@ -833,8 +833,8 @@ try {
     "recall",
     {
       taskName: "recall",
-      userMessage: "继续调查",
-      recentMessages: "我们继续调查那条Manh mối",
+      userMessage: "tiếp tục điều tra",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
   );
@@ -844,7 +844,7 @@ try {
   assert.equal(atDepthOnlyPromptBuild.additionalMessages.length, 1);
   assert.equal(
     atDepthOnlyPromptBuild.additionalMessages[0].content,
-    "这是一条 atDepth tin nhắn。",
+    "Đây là một tin nhắn atDepth.",
   );
   assert.deepEqual(
     atDepthOnlyPromptBuild.executionMessages.map((message) => message.role),
@@ -852,23 +852,23 @@ try {
   );
   assert.equal(
     atDepthOnlyPromptBuild.executionMessages[0].content,
-    "这是一条 atDepth tin nhắn。",
+    "Đây là một tin nhắn atDepth.",
   );
 
   const depthD4Entry = createWorldbookEntry({
     uid: 201,
-    name: "深度Tiêm D4",
-    comment: "深度Tiêm D4",
-    content: "这是 d4 atDepth tin nhắn。",
+    name: "độ sâuTiêm D4",
+    comment: "độ sâuTiêm D4",
+    content: "Đây là tin nhắn atDepth d4.",
     positionType: "at_depth_as_system",
     depth: 4,
     order: 8,
   });
   const depthD1Entry = createWorldbookEntry({
     uid: 202,
-    name: "深度Tiêm D1",
-    comment: "深度Tiêm D1",
-    content: "这是 d1 atDepth tin nhắn。",
+    name: "độ sâuTiêm D1",
+    comment: "độ sâuTiêm D1",
+    content: "Đây là tin nhắn atDepth d1.",
     positionType: "at_depth_as_system",
     depth: 1,
     order: 3,
@@ -887,7 +887,7 @@ try {
         profiles: [
           {
             id: "depth-aware",
-            name: "深度顺序预设",
+            name: "độ sâuthứ tựpreset",
             taskType: "recall",
             builtin: false,
             blocks: [
@@ -903,7 +903,7 @@ try {
               {
                 id: "depth-user",
                 type: "custom",
-                content: "Người dùng问题：{{userMessage}}",
+                content: "Câu hỏi của người dùng: {{userMessage}}",
                 role: "user",
                 enabled: true,
                 order: 1,
@@ -918,11 +918,11 @@ try {
 
   const depthAwarePromptBuild = await buildTaskPrompt(depthAwareSettings, "recall", {
     taskName: "recall",
-    userMessage: "继续调查 depth 排序",
-    recentMessages: "这里会被 chatMessages 替换",
+    userMessage: "tiếp tục điều tra depth xếp hạng",
+    recentMessages: "ở đây sẽ được chatMessages thay thế",
     chatMessages: [
-      { seq: 11, role: "user", content: "第一句" },
-      { seq: 12, role: "assistant", content: "第二句" },
+      { seq: 11, role: "user", content: "câu thứ nhất" },
+      { seq: 12, role: "assistant", content: "câu thứ hai" },
     ],
     charName: "Alice",
   });
@@ -930,17 +930,17 @@ try {
   assert.deepEqual(
     depthAwarePromptBuild.executionMessages.map((message) => message.content),
     [
-      "#1 [assistant|深度Tiêm D4]: 这是 d4 atDepth tin nhắn。\n\n#2 [assistant|深度Tiêm]: 这是一条 atDepth tin nhắn。\n\n#11 [user]: 第一句\n\n#4 [assistant|深度Tiêm D1]: 这是 d1 atDepth tin nhắn。\n\n#12 [assistant]: 第二句",
-      "Người dùng问题：继续调查 depth 排序",
+      "#1 [assistant|độ sâuTiêm D4]: Đây là tin nhắn atDepth d4.\n\n#2 [assistant|độ sâuTiêm]: Đây là một tin nhắn atDepth.\n\n#11 [user]: câu thứ nhất\n\n#4 [assistant|độ sâuTiêm D1]: Đây là tin nhắn atDepth d1.\n\n#12 [assistant]: câu thứ hai",
+      "Câu hỏi của người dùng: tiếp tục điều tra xếp hạng depth",
     ],
   );
   assert.deepEqual(
     depthAwarePromptBuild.hostInjections.atDepth.map((entry) => entry.name),
-    ["深度Tiêm D4", "深度Tiêm", "深度Tiêm D1"],
+    ["độ sâuTiêm D4", "độ sâuTiêm", "độ sâuTiêm D1"],
   );
   assert.deepEqual(
     depthAwarePromptBuild.hostInjectionPlan.atDepth.map((entry) => entry.entryName),
-    ["深度Tiêm D4", "深度Tiêm", "深度Tiêm D1"],
+    ["độ sâuTiêm D4", "độ sâuTiêm", "độ sâuTiêm D1"],
   );
   assert.equal(
     depthAwarePromptBuild.executionMessages.at(-1)?.content.includes("atDepth"),
@@ -952,10 +952,10 @@ try {
   const { initializeHostAdapter } = await import("../host/adapter/index.js");
   const partialBridgeCalls = [];
   const partialBridgeEntriesByWorldbook = {
-    "main-book": [createConstantWorldbookEntry(11, "主书原名", "主书Nội dung。", "主书注释")],
-    "side-book": [createConstantWorldbookEntry(12, "支线原名", "支线Nội dung。", "支线注释")],
-    "persona-book": [createConstantWorldbookEntry(13, "人格原名", "人格Nội dung。", "人格注释")],
-    "chat-book": [createConstantWorldbookEntry(14, "聊天原名", "聊天Nội dung。", "聊天注释")],
+    "main-book": [createConstantWorldbookEntry(11, "Tên gốc sách chính", "Nội dung sách chính.", "Chú thích sách chính")],
+    "side-book": [createConstantWorldbookEntry(12, "Tên gốc nhánh phụ", "Nội dung nhánh phụ.", "Chú thích nhánh phụ")],
+    "persona-book": [createConstantWorldbookEntry(13, "Tên gốc nhân cách", "Nội dung nhân cách.", "Chú thích nhân cách")],
+    "chat-book": [createConstantWorldbookEntry(14, "Tên gốc chat", "Nội dung chat.", "Chú thích chat")],
   };
 
   globalThis.SillyTavern = {
@@ -963,7 +963,7 @@ try {
       return {
         name1: "User",
         name2: "Alice",
-        chat: [{ is_user: true, mes: "我们继续调查那条Manh mối" }],
+        chat: [{ is_user: true, mes: "Chúng ta tiếp tục điều tra manh mối đó" }],
         chatMetadata: {
           world: "chat-book",
         },
@@ -999,10 +999,10 @@ try {
 
   const partialBridgeWorldInfo = await resolveTaskWorldInfo({
     templateContext: {
-      recentMessages: "我们继续调查那条Manh mối",
+      recentMessages: "Chúng ta tiếp tục điều tra manh mối đó",
       charName: "Alice",
     },
-    userMessage: "继续调查",
+    userMessage: "tiếp tục điều tra",
   });
 
   assert.deepEqual(partialBridgeCalls, [
@@ -1013,7 +1013,7 @@ try {
   ]);
   assert.deepEqual(
     partialBridgeWorldInfo.beforeEntries.map((entry) => entry.name).sort(),
-    ["主书注释", "支线注释", "人格注释", "聊天注释"].sort(),
+    ["Chú thích sách chính", "Chú thích nhánh phụ", "Chú thích nhân cách", "Chú thích chat"].sort(),
   );
 
   console.log("task-worldinfo tests passed");
@@ -1061,3 +1061,5 @@ try {
     // ignore reset failures in test cleanup
   }
 }
+
+

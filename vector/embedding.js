@@ -1,9 +1,9 @@
-// ST-BME: 外部 Embedding API 封装 + Vector检索
-// 支持 OpenAI 兼容的 /v1/embeddings Giao diện
+// ST-BME: đóng gói Embedding API bên ngoài + truy xuất vector
+// Hỗ trợ giao diện /v1/embeddings tương thích OpenAI
 
 /**
- * Embedding 服务
- * 调用外部 API 获取文本Vector，并提供bạo lựcTìm kiếm cosine 相似度
+ * Dịch vụ Embedding
+ * Gọi API bên ngoài để lấy vector văn bản và cung cấp tìm kiếm cosine độ tương đồng kiểu brute force
  */
 
 import { extension_settings } from "../../../../extensions.js";
@@ -77,7 +77,7 @@ async function fetchWithTimeout(
     () =>
       controller.abort(
         new DOMException(
-          `Embedding 请求超时 (${Math.round(timeoutMs / 1000)}s)`,
+          `Yêu cầu embedding quá thời gian (${Math.round(timeoutMs / 1000)}s)`,
           "AbortError",
         ),
       ),
@@ -98,14 +98,14 @@ async function fetchWithTimeout(
 }
 
 /**
- * 调用外部 Embedding API
+ * Gọi Embedding API bên ngoài
  *
- * @param {string} text - 要嵌入的文本
- * @param {object} config - Cấu hình API
- * @param {string} config.apiUrl - API 基地址（如 https://api.openai.com/v1）
+ * @param {string} text - văn bản cần nhúng
+ * @param {object} config - cấu hình API
+ * @param {string} config.apiUrl - địa chỉ gốc của API (ví dụ https://api.openai.com/v1)
  * @param {string} config.apiKey - API Key
- * @param {string} config.model - Model名（如 text-embedding-3-small）
- * @returns {Promise<Float64Array|null>} Vector或 null
+ * @param {string} config.model - tên model (ví dụ text-embedding-3-small)
+ * @returns {Promise<Float64Array|null>} vector hoặc null
  */
 export async function embedText(text, config, { signal } = {}) {
   const override = getEmbeddingTestOverride("embedText");
@@ -115,7 +115,7 @@ export async function embedText(text, config, { signal } = {}) {
 
   const apiUrl = normalizeOpenAICompatibleBaseUrl(config?.apiUrl);
   if (!text || !apiUrl || !config?.model) {
-    console.warn("[ST-BME] Embedding Cấu hình不完整，Bỏ qua");
+    console.warn("[ST-BME] Cấu hình Embedding chưa đầy đủ, bỏ qua");
     return null;
   }
 
@@ -152,7 +152,7 @@ export async function embedText(text, config, { signal } = {}) {
     const vector = data?.data?.[0]?.embedding;
 
     if (!vector || !Array.isArray(vector)) {
-      console.error("[ST-BME] Embedding API 返回格式异常:", data);
+      console.error("[ST-BME] Embedding API trả vềđịnh dạngbất thường:", data);
       return null;
     }
 
@@ -167,7 +167,7 @@ export async function embedText(text, config, { signal } = {}) {
 }
 
 /**
- * 批量嵌入文本
+ * Nhúng văn bản theo lô
  *
  * @param {string[]} texts
  * @param {object} config
@@ -207,7 +207,7 @@ export async function embedBatch(texts, config, { signal } = {}) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(
-        `[ST-BME] Embedding API 批量Lỗi (${response.status}):`,
+        `[ST-BME] Embedding API hàng loạtLỗi (${response.status}):`,
         errorText,
       );
       return texts.map(() => null);
@@ -220,7 +220,7 @@ export async function embedBatch(texts, config, { signal } = {}) {
       return texts.map(() => null);
     }
 
-    // 按 index 排序（API 可能不保证顺序）
+    // Xếp lại theo index (API có thể không đảm bảo thứ tự)
     embeddings.sort((a, b) => a.index - b.index);
 
     return embeddings.map((item) => {
@@ -233,17 +233,17 @@ export async function embedBatch(texts, config, { signal } = {}) {
     if (isAbortError(e)) {
       throw e;
     }
-    console.error("[ST-BME] Embedding API 批量Gọi thất bại:", e);
+    console.error("[ST-BME] Embedding API hàng loạtGọi thất bại:", e);
     return texts.map(() => null);
   }
 }
 
 /**
- * 计算两个Vector的 cosine 相似度
+ * Tính cosine độ tương đồng của hai vector
  *
  * @param {Float64Array|number[]} vecA
  * @param {Float64Array|number[]} vecB
- * @returns {number} 相似度 [-1, 1]
+ * @returns {number} độ tương đồng [-1, 1]
  */
 export function cosineSimilarity(vecA, vecB) {
   if (!vecA || !vecB || vecA.length !== vecB.length || vecA.length === 0) {
@@ -267,13 +267,13 @@ export function cosineSimilarity(vecA, vecB) {
 }
 
 /**
- * bạo lựcTìm kiếm：找出与查询Vector最相似的 Top-K nút
- * PeroCore 的Vector引擎也是bạo lựcTìm kiếm（<1000 nút时比 HNSW 更快）
+ * Tìm kiếm brute force: tìm ra Top-K nút giống nhất với vector truy vấn
+ * Engine vector của PeroCore cũng có tìm kiếm brute force (khi <1000 nút thì nhanh hơn HNSW)
  *
- * @param {Float64Array|number[]} queryVec - 查询Vector
+ * @param {Float64Array|number[]} queryVec - vector truy vấn
  * @param {Array<{nodeId: string, embedding: Float64Array|number[]}>} candidates - Nút ứng viên
- * @param {number} topK - 返回数量
- * @returns {Array<{nodeId: string, score: number}>} 按相似度降序
+ * @param {number} topK - số lượng trả về
+ * @returns {Array<{nodeId: string, score: number}>} sắp xếp giảm dần theo độ tương đồng
  */
 export function searchSimilar(queryVec, candidates, topK = 20) {
   const override = getEmbeddingTestOverride("searchSimilar");
@@ -297,9 +297,9 @@ export function searchSimilar(queryVec, candidates, topK = 20) {
 }
 
 /**
- * Kiểm tra Embedding API 连通性
+ * Kiểm tra khả năng kết nối của Embedding API
  *
- * @param {object} config - Cấu hình API
+ * @param {object} config - cấu hình API
  * @returns {Promise<{success: boolean, dimensions: number, error: string}>}
  */
 export async function testConnection(config) {
@@ -308,7 +308,7 @@ export async function testConnection(config) {
     if (vec) {
       return { success: true, dimensions: vec.length, error: "" };
     }
-    return { success: false, dimensions: 0, error: "API 返回空Kết quả" };
+    return { success: false, dimensions: 0, error: "API trả về kết quả rỗng" };
   } catch (e) {
     return { success: false, dimensions: 0, error: String(e) };
   }

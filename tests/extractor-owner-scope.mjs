@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -26,7 +26,7 @@ const scriptShimSource = [
   "  return {};",
   "}",
   "export function substituteParamsExtended(value) {",
-  "  return String(value ?? '');",
+  "  return String(value QiuThuy '');",
   "}",
 ].join("\n");
 
@@ -103,7 +103,7 @@ globalThis.__stBmeTestContext = {
       seq: 1,
     }),
   );
-  globalThis.__stBmeTestContext.name2 = "群像卡";
+  globalThis.__stBmeTestContext.name2 = "Thẻ nhóm";
   const restore = setTestOverrides({
     llm: {
       async callLLMForJSON() {
@@ -112,7 +112,7 @@ globalThis.__stBmeTestContext = {
             {
               action: "create",
               type: "pov_memory",
-              fields: { summary: "有人觉得Tháp chuông里还有问题" },
+              fields: { summary: "Có người cảm thấy bên trong Tháp chuông vẫn còn vấn đề" },
             },
           ],
           cognitionUpdates: [
@@ -129,7 +129,7 @@ globalThis.__stBmeTestContext = {
   try {
     const result = await extractMemories({
       graph,
-      messages: [{ seq: 3, role: "assistant", content: "多人场景Kiểm thử" }],
+      messages: [{ seq: 3, role: "assistant", content: "Kiểm thử cảnh nhiều người" }],
       startSeq: 3,
       endSeq: 3,
       schema: DEFAULT_NODE_SCHEMA,
@@ -170,7 +170,7 @@ globalThis.__stBmeTestContext = {
             {
               action: "create",
               type: "pov_memory",
-              fields: { summary: "Ailin觉得Tháp chuông里藏着第二条暗道" },
+              fields: { summary: "Ailin cảm thấy bên trong Tháp chuông còn giấu một mật đạo thứ hai" },
             },
           ],
           cognitionUpdates: [],
@@ -183,7 +183,7 @@ globalThis.__stBmeTestContext = {
   try {
     const result = await extractMemories({
       graph,
-      messages: [{ seq: 5, role: "assistant", content: "单Nhân vật场景Kiểm thử" }],
+      messages: [{ seq: 5, role: "assistant", content: "Kiểm thử cảnh một nhân vật" }],
       startSeq: 5,
       endSeq: 5,
       schema: DEFAULT_NODE_SCHEMA,
@@ -205,8 +205,8 @@ globalThis.__stBmeTestContext = {
 
 {
   const graph = createEmptyGraph();
-  globalThis.__stBmeTestContext.name1 = "邱谁";
-  globalThis.__stBmeTestContext.name2 = "群像卡";
+  globalThis.__stBmeTestContext.name1 = "QiuThuy";
+  globalThis.__stBmeTestContext.name2 = "Thẻ nhóm";
   const restore = setTestOverrides({
     llm: {
       async callLLMForJSON() {
@@ -218,16 +218,16 @@ globalThis.__stBmeTestContext = {
               scope: {
                 layer: "pov",
                 ownerType: "character",
-                ownerName: "邱 谁",
-                ownerId: "邱 谁",
+                ownerName: "Qiu Thuy",
+                ownerId: "Qiu Thuy",
               },
-              fields: { summary: "她感觉对方在试探自己的底线" },
+              fields: { summary: "cô ấy cảm thấy đối phương đang thử dò giới hạn của mình" },
             },
           ],
           cognitionUpdates: [
             {
               ownerType: "character",
-              ownerName: "【邱谁】",
+              ownerName: "【QiuThuy】",
               knownRefs: [],
             },
           ],
@@ -240,7 +240,7 @@ globalThis.__stBmeTestContext = {
   try {
     const result = await extractMemories({
       graph,
-      messages: [{ seq: 7, role: "assistant", content: "Người dùng名误标Kiểm thử" }],
+      messages: [{ seq: 7, role: "assistant", content: "Kiểm thử gắn nhầm tên người dùng" }],
       startSeq: 7,
       endSeq: 7,
       schema: DEFAULT_NODE_SCHEMA,
@@ -254,13 +254,13 @@ globalThis.__stBmeTestContext = {
     );
     assert.ok(povNode);
     assert.equal(povNode.scope?.ownerType, "user");
-    assert.equal(povNode.scope?.ownerName, "邱谁");
+    assert.equal(povNode.scope?.ownerName, "QiuThuy");
     const knowledgeOwners = Object.values(graph.knowledgeState?.owners || {});
     assert.equal(
       knowledgeOwners.some(
         (entry) =>
           String(entry?.ownerType || "") === "character" &&
-          String(entry?.ownerName || "") === "邱谁",
+          String(entry?.ownerName || "") === "QiuThuy",
       ),
       false,
     );
@@ -268,7 +268,7 @@ globalThis.__stBmeTestContext = {
       knowledgeOwners.some(
         (entry) =>
           String(entry?.ownerType || "") === "user" &&
-          String(entry?.ownerName || "") === "邱谁",
+          String(entry?.ownerName || "") === "QiuThuy",
       ),
       true,
     );
@@ -278,3 +278,4 @@ globalThis.__stBmeTestContext = {
 }
 
 console.log("extractor-owner-scope tests passed");
+

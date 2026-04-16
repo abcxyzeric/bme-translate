@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
   toDataModuleUrl,
@@ -76,8 +76,8 @@ extractProfile.regex = {
       id: "assistant-local-role-aware",
       script_name: "assistant-local-role-aware",
       enabled: true,
-      find_regex: "/继续说明/g",
-      replace_string: "trợ lý已净化",
+      find_regex: "/tiếp tụcmô tả/g",
+      replace_string: "trợ lý đã được làm sạch",
       source: {
         user_input: false,
         ai_output: true,
@@ -91,8 +91,8 @@ extractProfile.regex = {
       id: "user-local-role-aware",
       script_name: "user-local-role-aware",
       enabled: true,
-      find_regex: "/Người dùng输入/g",
-      replace_string: "Người dùng已净化",
+      find_regex: "/Người dùngđầu vào/g",
+      replace_string: "Người dùng đã được làm sạch",
       source: {
         user_input: true,
         ai_output: false,
@@ -109,12 +109,12 @@ const promptBuild = await buildTaskPrompt(settings, "extract", {
   taskName: "extract",
   charDescription: "",
   userPersona: "",
-  recentMessages: "这里会被 chatMessages 回填",
+  recentMessages: "ở đây sẽ được chatMessages bù lại",
   chatMessages: [
     {
       seq: 41,
       role: "assistant",
-      content: "继续说明",
+      content: "tiếp tụcmô tả",
       name: "Ailin",
       speaker: "Ailin",
       hideSpeakerLabel: true,
@@ -123,7 +123,7 @@ const promptBuild = await buildTaskPrompt(settings, "extract", {
     {
       seq: 42,
       role: "user",
-      content: "Người dùng输入",
+      content: "Người dùngđầu vào",
       name: "người chơi",
       speaker: "người chơi",
       isContextOnly: false,
@@ -159,17 +159,18 @@ assert.deepEqual(
     },
   ],
 );
-assert.match(String(recentMessages[0]?.content || ""), /^--- 以下是上下文回顾（已Trích xuất过），仅供理解剧情 ---/);
-assert.match(String(recentMessages[0]?.content || ""), /#41 \[assistant\]: trợ lý已净化/);
-assert.match(String(recentMessages[1]?.content || ""), /^--- 以下是本lần需要Trích xuấtKý ức的新对话Nội dung ---/);
-assert.match(String(recentMessages[1]?.content || ""), /#42 \[user\|người chơi\]: Người dùng已净化/);
+assert.match(String(recentMessages[0]?.content || ""), /^--- Dưới đây là phần nhìn lại ngữ cảnh (đã trích xuất), chỉ để hiểu cốt truyện ---/);
+assert.match(String(recentMessages[0]?.content || ""), /#41 \[assistant\]: trợ lý đã được làm sạch/);
+assert.match(String(recentMessages[1]?.content || ""), /^--- sau đây là phầnlầncầnTrích xuấtKý ứcmới củahội thoạiNội dung ---/);
+assert.match(String(recentMessages[1]?.content || ""), /#42 \[user\|người chơi\]: Người dùng đã được làm sạch/);
 assert.doesNotMatch(
   String(recentMessages[0]?.content || ""),
   /#41 \[assistant\|Ailin\]:/,
 );
 assert.doesNotMatch(
   String(recentMessages[1]?.content || ""),
-  /#42 \[user\|người chơi\]: trợ lý已净化/,
+  /#42 \[user\|người chơi\]: trợ lý đã được làm sạch/,
 );
 
 console.log("prompt-builder-mixed-transcript tests passed");
+

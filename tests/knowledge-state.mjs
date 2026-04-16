@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import { createEmptyGraph, createNode, addNode } from "../graph/graph.js";
 import {
@@ -25,22 +25,22 @@ globalThis.SillyTavern = {
 const graph = createEmptyGraph();
 const erinA = createNode({
   type: "character",
-  fields: { name: "Ailin", state: "守塔人" },
+  fields: { name: "Ailin", state: "người canh tháp" },
   seq: 1,
 });
 const erinB = createNode({
   type: "character",
-  fields: { name: "Ailin", state: "伪装者" },
+  fields: { name: "Ailin", state: "kẻ ngụy trang" },
   seq: 2,
 });
 const lucia = createNode({
   type: "character",
-  fields: { name: "Lucia", state: "旁观者" },
+  fields: { name: "Lucia", state: "người đứng ngoài quan sát" },
   seq: 2,
 });
 const bellEvent = createNode({
   type: "event",
-  fields: { title: "Tháp chuông异响", summary: "Tháp chuông深夜传出异响" },
+  fields: { title: "Âm thanh lạ ở Tháp chuông", summary: "Tháp chuông phát ra âm thanh lạ vào đêm khuya" },
   seq: 3,
   scope: { layer: "objective", regionPrimary: "Tháp chuông" },
 });
@@ -178,7 +178,7 @@ assert.deepEqual(
 
 const aliasMatchedUserOwner = resolveKnowledgeOwner(graph, {
   ownerType: "character",
-  ownerName: "露 西 亚",
+  ownerName: "Lucia",
 });
 assert.equal(aliasMatchedUserOwner.ownerType, "user");
 assert.equal(aliasMatchedUserOwner.ownerName, "Lucia");
@@ -189,7 +189,7 @@ addNode(
   syntheticGraph,
   createNode({
     type: "character",
-    fields: { name: "玩 家" },
+    fields: { name: "Người chơi" },
     seq: 1,
   }),
 );
@@ -199,7 +199,7 @@ assert.equal(syntheticOwners.some((entry) => entry.ownerType === "character"), f
 const roleCardGraph = createEmptyGraph();
 const roleCardEvent = createNode({
   type: "event",
-  fields: { title: "天气变化", summary: "窗外下起了雨" },
+  fields: { title: "Thời tiết thay đổi", summary: "Bên ngoài cửa sổ đã bắt đầu mưa" },
   seq: 1,
 });
 addNode(roleCardGraph, roleCardEvent);
@@ -209,7 +209,7 @@ applyCognitionUpdates(
   {
     changedNodeIds: [roleCardEvent.id],
     scopeRuntime: {
-      activeCharacterOwner: "旁白卡",
+      activeCharacterOwner: "thẻ dẫn truyện",
       activeUserOwner: "người chơi",
     },
   },
@@ -218,7 +218,7 @@ const roleCardOwners = listKnowledgeOwners(roleCardGraph);
 assert.equal(
   roleCardOwners.some(
     (entry) =>
-      entry.ownerType === "character" && entry.ownerName === "旁白卡",
+      entry.ownerType === "character" && entry.ownerName === "thẻ dẫn truyện",
   ),
   false,
 );
@@ -226,7 +226,7 @@ assert.equal(
 const characterNodeGraph = createEmptyGraph();
 const plainCharacterNode = createNode({
   type: "character",
-  fields: { name: "旁白卡", state: "仅Nhân vật卡实体" },
+  fields: { name: "thẻ dẫn truyện", state: "chỉ là thực thể thẻ nhân vật" },
   seq: 1,
 });
 addNode(characterNodeGraph, plainCharacterNode);
@@ -236,7 +236,7 @@ applyCognitionUpdates(
   {
     changedNodeIds: [plainCharacterNode.id],
     scopeRuntime: {
-      activeCharacterOwner: "旁白卡",
+      activeCharacterOwner: "thẻ dẫn truyện",
       activeUserOwner: "người chơi",
     },
   },
@@ -245,7 +245,7 @@ const characterNodeOwners = listKnowledgeOwners(characterNodeGraph);
 assert.equal(
   characterNodeOwners.some(
     (entry) =>
-      entry.ownerType === "character" && entry.ownerName === "旁白卡",
+      entry.ownerType === "character" && entry.ownerName === "thẻ dẫn truyện",
   ),
   false,
 );
@@ -253,12 +253,12 @@ assert.equal(
 const duplicateCharacterGraph = createEmptyGraph();
 const roleCardNameNode = createNode({
   type: "character",
-  fields: { name: "艾 琳" },
+  fields: { name: "Ailin" },
   seq: 1,
 });
 const watchedEvent = createNode({
   type: "event",
-  fields: { title: "看见Tháp chuông", summary: "Ailin看见Tháp chuông方向出现火光" },
+  fields: { title: "Nhìn thấy Tháp chuông", summary: "" },
   seq: 2,
 });
 addNode(duplicateCharacterGraph, roleCardNameNode);
@@ -290,3 +290,5 @@ assert.equal(
 );
 
 console.log("knowledge-state tests passed");
+
+

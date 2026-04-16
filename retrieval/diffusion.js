@@ -1,30 +1,30 @@
-// ST-BME: JS 版 PEDSA 扩散激活引擎
-// 从 PeroCore 的 Rust CognitiveGraphEngine 移植核心算法到纯 JS
-// 适配 ST 场景（<1万nút，不需要并行/SIMD）
+// ST-BME: engine kích hoạt khuếch tán PEDSA bản JS
+// Chuyển thuật toán cốt lõi từ Rust CognitiveGraphEngine của PeroCore sang JS thuần
+// Thích ứng với bối cảnh ST (<10 nghìn nút, không cần song song/SIMD)
 
 /**
- * PEDSA 扩散激活引擎
+ * Engine kích hoạt khuếch tán PEDSA
  *
- * 算法：Parallel Energy-Decay Spreading Activation
- * 本质：在有向加权图上的能量传播Model
+ * Thuật toán: Parallel Energy-Decay Spreading Activation
+ * Bản chất: mô hình truyền năng lượng trên đồ thị có hướng có trọng số
  *
- * 核心公式：
+ * Công thức cốt lõi:
  *   E_{t+1}(j) = Σ_{i∈N(j)} E_t(i) × W_ij × D_decay
  *
- * 特点（保留自 PeroCore）：
- * - 能量衰减：每步传播乘以衰减因子
- * - 动态剪枝：每步只保留 Top-K Nút hoạt động
- * - 抑制机制：特殊边Loại传递负能量
- * - 能量钳位：限制在 [-2.0, 2.0] Phạm vi
+ * Đặc điểm (giữ lại từ PeroCore):
+ * - Suy hao năng lượng: mỗi bước truyền nhân với hệ số suy hao
+ * - Cắt tỉa động: mỗi bước chỉ giữ lại Top-K nút hoạt động
+ * - Cơ chế ức chế: loại cạnh đặc biệt truyền năng lượng âm
+ * - Kẹp năng lượng: giới hạn trong khoảng [-2.0, 2.0]
  *
- * 与 PeroCore Rust 版的差异：
- * - Không Rayon 并行（JS 单线程，ST 场景不需要）
- * - Không u16 量化（直接 f64，内存不是瓶颈）
- * - Không SIMD（普通数组运算）
+ * Khác biệt so với bản Rust của PeroCore:
+ * - Không song song bằng Rayon (JS đơn luồng, bối cảnh ST không cần)
+ * - Không lượng hóa u16 (dùng thẳng f64, bộ nhớ không phải nút thắt)
+ * - Không SIMD (phép toán mảng thông thường)
  */
 
 /**
- * 抑制边Loại标记
+ * Dấu hiệu loại cạnh ức chế
  */
 const INHIBIT_EDGE_TYPE = 255;
 
@@ -32,32 +32,32 @@ const INHIBIT_EDGE_TYPE = 255;
  * Mặc địnhCấu hình
  */
 const DEFAULT_OPTIONS = {
-  maxSteps: 2, // 最大扩散步数
-  decayFactor: 0.6, // 每步衰减因子
-  topK: 100, // 每步保留的最大Nút hoạt động数
-  minEnergy: 0.01, // 最小有效能量（低于此值视为不活跃）
-  maxEnergy: 2.0, // 能量上限
-  minEnergy_clamp: -2.0, // 能量下限（抑制）
-  teleportAlpha: 0.0, // PPR 回拉概率
-  inhibitMultiplier: 2.0, // 抑制边负向传播倍率
+  maxSteps: 2, // số bước khuếch tán tối đa
+  decayFactor: 0.6, // hệ số suy hao mỗi bước
+  topK: 100, // số nút hoạt động tối đa được giữ lại mỗi bước
+  minEnergy: 0.01, // năng lượng hợp lệ tối thiểu (thấp hơn giá trị này thì xem là không hoạt động)
+  maxEnergy: 2.0, // giới hạn trên của năng lượng
+  minEnergy_clamp: -2.0, // giới hạn dưới của năng lượng (ức chế)
+  teleportAlpha: 0.0, // xác suất kéo ngược kiểu PPR
+  inhibitMultiplier: 2.0, // hệ số lan truyền âm của cạnh ức chế
 };
 
 /**
- * 执行 PEDSA 扩散激活
+ * Thực thi kích hoạt khuếch tán PEDSA
  *
  * @param {Map<string, Array<{targetId: string, strength: number, edgeType: number}>>} adjacencyMap
- *   邻接表：nodeId → [{targetId, strength, edgeType}]
- *   可通过 graph.buildAdjacencyMap() 构建
+ *   Bảng kề cận: nodeId → [{targetId, strength, edgeType}]
+ *   Có thể xây dựng qua graph.buildAdjacencyMap()
  *
  * @param {Array<{id: string, energy: number}>} seedNodes
- *   初始种子nút及其能量
- *   - Vector检索命中的nút：energy = vectorScore (0~1)
- *   - 实体锚点nút：energy = 2.0（最大值）
+ *   Nút hạt giống ban đầu và năng lượng của chúng
+ *   - Nút khớp qua truy xuất vector: energy = vectorScore (0~1)
+ *   - Nút neo thực thể: energy = 2.0 (giá trị tối đa)
  *
- * @param {object} [options] - Cấu hình选项
+ * @param {object} [options] - Cấu hìnhtùy chọn
  *
- * @returns {Map<string, number>} 所有被激活nút的最终能量
- *   nodeId → energy（正值=激活，负值=抑制）
+ * @returns {Map<string, number>} năng lượng cuối cùng của toàn bộ nút đã được kích hoạt
+ *   nodeId → energy (giá trị dương = kích hoạt, giá trị âm = ức chế)
  */
 export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
   const opts = { ...DEFAULT_OPTIONS, ...options };
@@ -79,16 +79,16 @@ export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
     }
   }
 
-  // 累积Kết quả（所有步骤的最大能量）
+  // Kết quả tích lũy (năng lượng lớn nhất của mọi bước)
   /** @type {Map<string, number>} */
   const result = new Map(currentEnergy);
 
-  // Step 1~N: 逐步扩散
+  // Bước 1~N: khuếch tán từng bước
   for (let step = 0; step < opts.maxSteps; step++) {
     /** @type {Map<string, number>} */
     const nextEnergy = new Map();
 
-    // 对每个当前Nút hoạt động，传播能量到邻居
+    // Với mỗi nút đang hoạt động hiện tại, truyền năng lượng tới nút lân cận
     for (const [nodeId, energy] of currentEnergy) {
       const neighbors = adjacencyMap.get(nodeId);
       if (!Array.isArray(neighbors) || neighbors.length === 0) continue;
@@ -101,7 +101,7 @@ export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
           opts.decayFactor *
           (1 - teleportAlpha);
 
-        // 抑制边：传递负能量
+        // Cạnh ức chế: truyền năng lượng âm
         if (neighbor.edgeType === INHIBIT_EDGE_TYPE) {
           propagated =
             -Math.abs(energy) *
@@ -110,13 +110,13 @@ export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
             (Number(opts.inhibitMultiplier) || 1);
         }
 
-        // 累加到邻居nút
+        // Cộng dồn vào nút lân cận
         const existing = nextEnergy.get(neighbor.targetId) || 0;
         nextEnergy.set(neighbor.targetId, existing + propagated);
       }
     }
 
-    // 钳位 + Lọc低能量
+    // Kẹp + lọc năng lượng thấp
     for (const [nodeId, energy] of nextEnergy) {
       const clamped = clampEnergy(energy, opts);
       if (Math.abs(clamped) < opts.minEnergy) {
@@ -140,7 +140,7 @@ export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
       }
     }
 
-    // 动态剪枝：只保留 Top-K
+    // Cắt tỉa động: chỉ giữ lại Top-K
     if (nextEnergy.size > opts.topK) {
       const sorted = [...nextEnergy.entries()].sort(
         (a, b) => Math.abs(b[1]) - Math.abs(a[1]),
@@ -152,7 +152,7 @@ export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
       }
     }
 
-    // Cập nhật累积Kết quả（取各步骤最大绝对值能量）
+    // Cập nhật kết quả tích lũy (lấy giá trị tuyệt đối lớn nhất ở các bước)
     for (const [nodeId, energy] of nextEnergy) {
       const existing = result.get(nodeId) || 0;
       if (Math.abs(energy) > Math.abs(existing)) {
@@ -160,10 +160,10 @@ export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
       }
     }
 
-    // 准备下一步
+    // Chuẩn bị cho bước tiếp theo
     currentEnergy = nextEnergy;
 
-    // 如果没有Nút hoạt động了，提前终止
+    // Nếu không còn nút hoạt động thì kết thúc sớm
     if (currentEnergy.size === 0) break;
   }
 
@@ -171,7 +171,7 @@ export function propagateActivation(adjacencyMap, seedNodes, options = {}) {
 }
 
 /**
- * 能量钳位
+ * Kẹp năng lượng
  * @param {number} energy
  * @param {object} opts
  * @returns {number}
@@ -185,12 +185,12 @@ function clamp01(value) {
 }
 
 /**
- * 快捷方法：从种子列表创建扩散并返回按能量排序的Kết quả
+ * Cách nhanh: tạo khuếch tán từ danh sách hạt giống và trả về kết quả xếp hạng theo năng lượng
  *
- * @param {Map} adjacencyMap - 邻接表
- * @param {Array<{id: string, energy: number}>} seeds - 种子nút
+ * @param {Map} adjacencyMap - bảng kề cận
+ * @param {Array<{id: string, energy: number}>} seeds - các nút hạt giống
  * @param {object} [options]
- * @returns {Array<{nodeId: string, energy: number}>} 按能量降序排列
+ * @returns {Array<{nodeId: string, energy: number}>} sắp xếp giảm dần theo năng lượng
  */
 export function diffuseAndRank(adjacencyMap, seeds, options = {}) {
   const energyMap = propagateActivation(adjacencyMap, seeds, options);

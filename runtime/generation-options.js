@@ -1,4 +1,4 @@
-// ST-BME: Tác vụ级Tham số sinhLọc层（Phase 1）
+// ST-BME: tầng lọc tham số sinh cấp tác vụ (Phase 1)
 
 import { getActiveTaskProfile } from "../prompting/prompt-profiles.js";
 

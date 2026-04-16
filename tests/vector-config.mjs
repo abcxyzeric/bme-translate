@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,7 +23,7 @@ async function loadVectorHelpers() {
   ].filter(Boolean);
 
   if (pieces.length < 10) {
-    throw new Error("Không法从 vector-index.js Trích xuấtVectorCấu hình辅助函数");
+    throw new Error("");
   }
 
   const context = vm.createContext({});
@@ -79,3 +79,4 @@ const invalidBackendConfig = getVectorConfigFromSettings({
 assert.equal(validateVectorConfig(invalidBackendConfig).valid, false);
 
 console.log("vector-config tests passed");
+

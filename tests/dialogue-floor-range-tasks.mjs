@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 
 import {
   buildDialogueFloorMap,
@@ -99,11 +99,11 @@ const chat = [
   assert.equal(calls.manual[0].lockedEndFloor, null);
   assert.equal(calls.manual[0].taskLabel, "Trích xuất lại");
   assert.equal(calls.manual[0].showStartToast, false);
-  assert.equal(calls.extractionStatus[0]?.text, "Trích xuất lại准备中");
-  assert.match(calls.extractionStatus[0]?.meta || "", /退化为从 2 到最新重提/);
-  assert.equal(calls.extractionStatus[1]?.text, "Trích xuất lại中");
-  assert.match(calls.extractionStatus[1]?.meta || "", /正在开始Trích xuất lại/);
-  assert.match(result.reason, /退化为从Tầng bắt đầu到最新重提/);
+  assert.equal(calls.extractionStatus[0]?.text, "Trích xuất lạiđang chuẩn bị");
+  assert.match(calls.extractionStatus[0]?.meta || "", /thoái hóa thành trích xuất lại từ 2 tới mới nhất/);
+  assert.equal(calls.extractionStatus[1]?.text, "Đang trích xuất lại");
+  assert.match(calls.extractionStatus[1]?.meta || "", /đangbắt đầuTrích xuất lại/);
+  assert.match(result.reason, /thoái hóa thành trích xuất lại từ tầng bắt đầu tới mới nhất/);
 }
 
 {
@@ -148,7 +148,7 @@ const chat = [
   assert.deepEqual(calls.rollback, [6]);
   assert.equal(calls.manual[0].lockedEndFloor, 6);
   assert.equal(calls.manual[0].showStartToast, false);
-  assert.equal(calls.extractionStatus[0]?.text, "Trích xuất lại准备中");
+  assert.equal(calls.extractionStatus[0]?.text, "Trích xuất lạiđang chuẩn bị");
 }
 
 {
@@ -226,13 +226,13 @@ const chat = [
     showStartToast: false,
   });
 
-  assert.equal(statuses[0]?.text, "Trích xuất lại中");
-  assert.match(statuses[0]?.meta || "", /待Xử lý AI Phản hồi 2 条/);
+  assert.equal(statuses[0]?.text, "Đang trích xuất lại");
+  assert.match(statuses[0]?.meta || "", /còn 2 phản hồi AI chờ xử lý/);
   assert.ok(
     statuses.some(
       (entry) =>
-        entry.text === "Trích xuất lại中" &&
-        /已Xử lý 1\/2 条 AI Phản hồi/.test(entry.meta || ""),
+        entry.text === "Đang trích xuất lại" &&
+        /đã xử lý 1\/2 phản hồi AI/.test(entry.meta || ""),
     ),
   );
   assert.equal(statuses[statuses.length - 1]?.text, "Trích xuất lạiHoàn tất");
@@ -277,3 +277,6 @@ const chat = [
 }
 
 console.log("dialogue-floor-range-tasks tests passed");
+
+
+

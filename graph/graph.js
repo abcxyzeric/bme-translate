@@ -1,5 +1,5 @@
-// ST-BME: 图Dữ liệuModel
-// 管理nút、边的 CRUD Thao tác，以及序列化到 chat_metadata
+﻿// ST-BME: mô hình dữ liệu đồ thị
+// Quản lý thao tác CRUD của nút và cạnh, cùng với việc tuần tự hóa vào chat_metadata
 
 import {
   createDefaultBatchJournal,
@@ -37,12 +37,12 @@ import {
 import { debugLog } from "../runtime/debug-logging.js";
 
 /**
- * 图Trạng tháiSố phiên bản
+ * Số phiên bản trạng thái đồ thị
  */
 const GRAPH_VERSION = 9;
 
 /**
- * 生成 UUID v4
+ * sinh UUID v4
  */
 function uuid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -53,7 +53,7 @@ function uuid() {
 }
 
 /**
- * 创建空的图Trạng thái
+ * Tạo trạng thái đồ thị rỗng
  * @returns {GraphState}
  */
 export function createEmptyGraph() {
@@ -77,9 +77,9 @@ export function createEmptyGraph() {
 // ==================== nútThao tác ====================
 
 /**
- * 创建新nút
+ * Tạo nút mới
  * @param {object} params
- * @returns {object} 新nút
+ * @returns {object} nút mới
  */
 export function createNode({
   type,
@@ -117,13 +117,13 @@ export function createNode({
 }
 
 /**
- * 在图中添加nút
+ * Thêm nút vào đồ thị
  * @param {GraphState} graph
  * @param {object} node
- * @returns {object} 添加的nút
+ * @returns {object} nút đã thêm
  */
 export function addNode(graph, node) {
-  // 同Loạinút的时间链表：连接到最后一个同Loạinút
+  // Danh sách liên kết thời gian của các nút cùng loại: nối tới nút cùng loại cuối cùng
   const sameTypeNodes = graph.nodes
     .filter(
       (n) =>
@@ -145,7 +145,7 @@ export function addNode(graph, node) {
 }
 
 /**
- * 根据 ID 获取nút
+ * dựa theo ID lấynút
  * @param {GraphState} graph
  * @param {string} nodeId
  * @returns {object|null}
@@ -155,11 +155,11 @@ export function getNode(graph, nodeId) {
 }
 
 /**
- * Cập nhậtnút字段（部分Cập nhật）
+ * Cập nhật trường của nút (cập nhật từng phần)
  * @param {GraphState} graph
  * @param {string} nodeId
- * @param {object} updates - 要Cập nhật的字段
- * @returns {boolean} 是否找到并Cập nhật
+ * @param {object} updates - các trường cần cập nhật
+ * @returns {boolean} có tìm thấy và cập nhật được hay không
  */
 export function updateNode(graph, nodeId, updates) {
   const node = getNode(graph, nodeId);
@@ -196,7 +196,7 @@ export function updateNode(graph, nodeId, updates) {
 }
 
 /**
- * Xóa nút及其相关边
+ * Xóa nút và các cạnh liên quan
  * @param {GraphState} graph
  * @param {string} nodeId
  * @returns {boolean}
@@ -210,7 +210,7 @@ export function removeNode(graph, nodeId, visited = new Set()) {
   const node = getNode(graph, normalizedNodeId);
   if (!node) return false;
 
-  // 修复时间链表
+  // Sửa danh sách liên kết thời gian
   if (node.prevId) {
     const prev = getNode(graph, node.prevId);
     if (prev) prev.nextId = node.nextId;
@@ -220,12 +220,12 @@ export function removeNode(graph, nodeId, visited = new Set()) {
     if (next) next.prevId = node.prevId;
   }
 
-  // 递归Xóa子nút（带环保护）
+  // Xóa đệ quy nút con (có bảo vệ vòng lặp)
   for (const childId of node.childIds) {
     removeNode(graph, childId, visited);
   }
 
-  // 从父nút中移除引用
+  // Xóa tham chiếu khỏi nút cha
   if (node.parentId) {
     const parent = getNode(graph, node.parentId);
     if (parent) {
@@ -233,7 +233,7 @@ export function removeNode(graph, nodeId, visited = new Set()) {
     }
   }
 
-  // 同时清理其它nút上可能残留的脏 child 引用，避免Nhập脏图残留环
+  // Đồng thời dọn sạch các tham chiếu child bẩn có thể còn sót trên nút khác để tránh vòng lặp còn lại khi nhập đồ thị bẩn
   for (const candidate of graph.nodes) {
     if (
       !Array.isArray(candidate?.childIds) ||
@@ -246,21 +246,21 @@ export function removeNode(graph, nodeId, visited = new Set()) {
     );
   }
 
-  // Xóa相关边
+  // Xóa các cạnh liên quan
   graph.edges = graph.edges.filter(
     (e) => e.fromId !== normalizedNodeId && e.toId !== normalizedNodeId,
   );
 
-  // Xóa nút本身
+  // Xóa chính nút đó
   graph.nodes = graph.nodes.filter((n) => n.id !== normalizedNodeId);
 
   return true;
 }
 
 /**
- * 获取所有未Lưu trữ的nút
+ * Lấy toàn bộ nút chưa lưu trữ
  * @param {GraphState} graph
- * @param {string} [typeFilter] - 可选LoạiLọc
+ * @param {string} [typeFilter] - tùy chọnLoạiLọc
  * @returns {object[]}
  */
 export function getActiveNodes(graph, typeFilter = null) {
@@ -272,11 +272,11 @@ export function getActiveNodes(graph, typeFilter = null) {
 }
 
 /**
- * 按Loại查找最新版本的nút（用于 latestOnly Loại）
+ * Tìm nút phiên bản mới nhất theo loại (dùng cho loại latestOnly)
  * @param {GraphState} graph
  * @param {string} type
- * @param {string} primaryKeyValue - 主键值（如Tên nhân vật）
- * @param {string} primaryKeyField - 主键字段名（Mặc định 'name'）
+ * @param {string} primaryKeyValue - giá trị khóa chính (ví dụ tên nhân vật)
+ * @param {string} primaryKeyField - tên trường khóa chính (mặc định 'name')
  * @returns {object|null}
  */
 export function findLatestNode(
@@ -303,12 +303,12 @@ export function findLatestNode(
   return candidates.sort((a, b) => b.seq - a.seq)[0];
 }
 
-// ==================== 边Thao tác ====================
+// ==================== Thao tác trên cạnh ====================
 
 /**
- * 创建边
+ * Tạo cạnh
  * @param {object} params
- * @returns {object} 新边
+ * @returns {object} cạnh mới
  */
 export function createEdge({
   fromId,
@@ -328,19 +328,19 @@ export function createEdge({
     edgeType,
     createdTime: now,
     updatedAt: now,
-    // Graphiti 启发的时序字段
-    validAt: now, // 关系生效时间
-    invalidAt: null, // 关系失效时间（null = 当前有效）
-    expiredAt: null, // 系统标记过期时间
+    // Trường theo thời gian lấy cảm hứng từ Graphiti
+    validAt: now, // thời điểm quan hệ có hiệu lực
+    invalidAt: null, // quan hệmất hiệu lựcthời gian（null = hiện tạihợp lệ）
+    expiredAt: null, // thời điểm hệ thống đánh dấu hết hiệu lực
     scope: normalizeMemoryScope(scope),
   };
 }
 
 /**
- * 在图中添加边（检查nút存在性）
+ * Thêm cạnh vào đồ thị (kiểm tra sự tồn tại của nút)
  * @param {GraphState} graph
  * @param {object} edge
- * @returns {object|null} 添加的边或 null
+ * @returns {object|null} cạnh đã thêm hoặc null
  */
 export function addEdge(graph, edge) {
   const from = getNode(graph, edge.fromId);
@@ -354,7 +354,7 @@ export function addEdge(graph, edge) {
     return true;
   };
 
-  // 对当前有效边去重；历史边保留，避免历史污染当前检索
+  // Khử trùng lặp cho các cạnh hiện còn hiệu lực; giữ lại cạnh lịch sử để tránh lịch sử làm nhiễu truy xuất hiện tại
   const existing = graph.edges.find(
     (e) =>
       e.fromId === edge.fromId &&
@@ -404,7 +404,7 @@ export function addEdge(graph, edge) {
 }
 
 /**
- * 移除边
+ * Gỡ cạnh
  * @param {GraphState} graph
  * @param {string} edgeId
  * @returns {boolean}
@@ -417,7 +417,7 @@ export function removeEdge(graph, edgeId) {
 }
 
 /**
- * 获取nút的所有出边
+ * Lấy toàn bộ cạnh ra của nút
  * @param {GraphState} graph
  * @param {string} nodeId
  * @returns {object[]}
@@ -427,7 +427,7 @@ export function getOutEdges(graph, nodeId) {
 }
 
 /**
- * 获取nút的所有入边
+ * Lấy toàn bộ cạnh vào của nút
  * @param {GraphState} graph
  * @param {string} nodeId
  * @returns {object[]}
@@ -437,7 +437,7 @@ export function getInEdges(graph, nodeId) {
 }
 
 /**
- * 获取连接到nút的所有边（入+出）
+ * Lấy toàn bộ cạnh nối tới nút (vào + ra)
  * @param {GraphState} graph
  * @param {string} nodeId
  * @returns {object[]}
@@ -446,10 +446,10 @@ export function getNodeEdges(graph, nodeId) {
   return graph.edges.filter((e) => e.fromId === nodeId || e.toId === nodeId);
 }
 
-// ==================== 查询辅助 ====================
+// ==================== Hỗ trợ truy vấn ====================
 
 /**
- * 构建邻接表（用于扩散引擎）
+ * Xây dựng bảng kề cận (dùng cho engine khuếch tán)
  * @param {GraphState} graph
  * @returns {Map<string, Array<{targetId: string, strength: number, edgeType: number}>>}
  */
@@ -484,8 +484,8 @@ export function buildAdjacencyMap(graph) {
 }
 
 /**
- * 构建时序感知邻接表（Lọc失效边）
- * Graphiti 启发：只纳入 "当前有效" 的边
+ * Xây dựng bảng kề cận có nhận biết thời gian (lọc cạnh mất hiệu lực)
+ * Lấy cảm hứng từ Graphiti: chỉ đưa các cạnh "hiện còn hiệu lực" vào
  * @param {GraphState} graph
  * @returns {Map}
  */
@@ -555,7 +555,7 @@ function isEdgeActive(edge, now = Date.now()) {
 }
 
 /**
- * 将边标记为失效（不Xóa，保留历史）
+ * Đánh dấu cạnh là mất hiệu lực (không xóa, giữ lại lịch sử)
  * @param {object} edge
  */
 export function invalidateEdge(edge) {
@@ -571,7 +571,7 @@ export function invalidateEdge(edge) {
 }
 
 /**
- * 获取图的统计信息
+ * Lấy thông tin thống kê của đồ thị
  * @param {GraphState} graph
  * @returns {object}
  */
@@ -593,10 +593,10 @@ export function getGraphStats(graph) {
   };
 }
 
-// ==================== 序列化 ====================
+// ==================== Tuần tự hóa ====================
 
 /**
- * 序列化图Trạng thái为 JSON 字符串
+ * Tuần tự hóa trạng thái đồ thị thành chuỗi JSON
  * @param {GraphState} graph
  * @returns {string}
  */
@@ -605,7 +605,7 @@ export function serializeGraph(graph) {
 }
 
 /**
- * 从 JSON 反序列化图Trạng thái
+ * Giải tuần tự chuỗi JSON thành trạng thái đồ thị
  * @param {string} json
  * @returns {GraphState}
  */
@@ -622,7 +622,7 @@ export function deserializeGraph(json) {
     }
 
     if (data.version < GRAPH_VERSION) {
-      debugLog(`[ST-BME] 图版本迁移 v${data.version} → v${GRAPH_VERSION}`);
+      debugLog(`[ST-BME] Di chuyển phiên bản đồ thị v${data.version} → v${GRAPH_VERSION}`);
 
       if (data.version < 2 && data.edges) {
         for (const edge of data.edges) {
@@ -657,7 +657,7 @@ export function deserializeGraph(json) {
           ...createDefaultVectorIndexState(),
           ...(data.vectorIndexState || {}),
           dirty: true,
-          lastWarning: "旧版本đồ thị已迁移，需要Xây lại vector运行时Trạng thái",
+          lastWarning: "Phiên bản đồ thị cũ đã được di chuyển, cần xây lại trạng thái runtime của vector",
         };
         data.batchJournal = Array.isArray(data.batchJournal)
           ? data.batchJournal
@@ -822,15 +822,15 @@ export function deserializeGraph(json) {
     }
     return normalizedGraph;
   } catch (e) {
-    console.error("[ST-BME] 图反序列化Thất bại:", e);
+    console.error("[ST-BME] Giải tuần tự đồ thị thất bại:", e);
     return createEmptyGraph();
   }
 }
 
 /**
- * Xuất图Dữ liệu（不含 embedding 以减小体积）
+ * Xuất dữ liệu đồ thị (không gồm embedding để giảm dung lượng)
  * @param {GraphState} graph
- * @returns {string} JSON 字符串
+ * @returns {string} chuỗi JSON
  */
 export function exportGraph(graph) {
   const exportData = {
@@ -846,7 +846,7 @@ export function exportGraph(graph) {
     vectorIndexState: {
       ...createDefaultVectorIndexState(graph?.historyState?.chatId || ""),
       dirty: true,
-      lastWarning: "Xuất đồ thị不包含运行时Vector索引",
+      lastWarning: "Bản xuất đồ thị không bao gồm chỉ mục vector của runtime",
     },
     batchJournal: createDefaultBatchJournal(),
     maintenanceJournal: createDefaultMaintenanceJournal(),
@@ -860,13 +860,13 @@ export function exportGraph(graph) {
 }
 
 /**
- * Nhập图Dữ liệu
+ * Nhập dữ liệu đồ thị
  * @param {string} json
  * @returns {GraphState}
  */
 export function importGraph(json) {
   const graph = normalizeGraphRuntimeState(deserializeGraph(json));
-  // Nhập的nút需要重新生成 embedding
+  // Nút được nhập vào cần sinh lại embedding
   for (const node of graph.nodes) {
     node.embedding = null;
   }
@@ -882,3 +882,4 @@ export function importGraph(json) {
   graph.vectorIndexState.lastWarning = "Sau khi nhập đồ thị cần xây lại chỉ mục vector";
   return graph;
 }
+

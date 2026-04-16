@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   MANUAL_BACKUP_BATCH_JOURNAL_COVERAGE_KEY,
   appendBatchJournal,
@@ -17,10 +17,10 @@ import { createEmptyGraph } from "../graph/graph.js";
 import { normalizeKnowledgeState } from "../graph/knowledge-state.js";
 
 const chat = [
-  { is_user: true, mes: "你好" },
-  { is_user: false, mes: "我记住了。" },
-  { is_user: true, mes: "继续" },
-  { is_user: false, mes: "新的Phản hồi" },
+  { is_user: true, mes: "xin chào" },
+  { is_user: false, mes: "tôi đã nhớ rồi." },
+  { is_user: true, mes: "tiếp tục" },
+  { is_user: false, mes: "mớiPhản hồi" },
 ];
 
 const hashes = snapshotProcessedMessageHashes(chat, 3);
@@ -52,7 +52,7 @@ assert.equal(sparseHashesDetection.dirty, true);
 assert.equal(sparseHashesDetection.earliestAffectedFloor, 1);
 
 const editedChat = structuredClone(chat);
-editedChat[1].mes = "我改过Nội dung了。";
+editedChat[1].mes = "tôi đã sửa nội dung rồi.";
 const editedDetection = detectHistoryMutation(editedChat, {
   lastProcessedAssistantFloor: 3,
   processedMessageHashVersion: PROCESSED_MESSAGE_HASH_VERSION,
@@ -135,7 +135,7 @@ const danglingKnowledgeGraph = createEmptyGraph();
 danglingKnowledgeGraph.nodes.push({
   id: "live-node",
   type: "event",
-  fields: { title: "仍存在", summary: "仍存在的nút" },
+  fields: { title: "vẫn còn tồn tại", summary: "nút vẫn còn tồn tại" },
   seq: 1,
   seqRange: [1, 1],
   archived: false,
@@ -222,7 +222,7 @@ const beforeSnapshot = cloneGraphSnapshot(graph);
 graph.nodes.push({
   id: "node-1",
   type: "event",
-  fields: { title: "旧Sự kiện", summary: "旧tóm tắt" },
+  fields: { title: "Sự kiện cũ", summary: "tóm tắt cũ" },
   seq: 1,
   seqRange: [1, 1],
   archived: false,
@@ -364,3 +364,4 @@ assert.equal(
 );
 
 console.log("runtime-history tests passed");
+

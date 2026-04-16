@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import {
   installResolveHooks,
 } from "./helpers/register-hooks-compat.mjs";
@@ -692,7 +692,7 @@ try {
   );
   assert.equal(markdownRule?.promptReplaceAsEmpty, false);
   assert.equal(markdownRule?.effectivePromptReplaceString, "<b>M</b>");
-  assert.deepEqual(markdownRule?.placementLabels, ["Người dùng输入"]);
+  assert.deepEqual(markdownRule?.placementLabels, ["Người dùngđầu vào"]);
   assert.equal(markdownRule?.promptStageMode, "display-only");
   const markdownOnlyFinalPromptSettings = buildSettings({
     sources: {
@@ -856,7 +856,7 @@ try {
   const destinationTextRule = destinationInspect.activeRules.find(
     (rule) => rule.id === "destination-display-only-text",
   );
-  assert.deepEqual(destinationBeautifyRule?.placementLabels, ["Người dùng输入"]);
+  assert.deepEqual(destinationBeautifyRule?.placementLabels, ["Người dùngđầu vào"]);
   assert.equal(destinationBeautifyRule?.promptReplaceAsEmpty, false);
   assert.equal(destinationBeautifyRule?.promptStageMode, "display-only");
   assert.equal(destinationTextRule?.promptReplaceAsEmpty, false);
@@ -905,7 +905,7 @@ try {
   const outputGuardSettings = buildSettings({
     inheritStRegex: false,
     localRules: [
-      createLocalRule("display-only-output", "/美化/g", "<b>美化</b>", {
+      createLocalRule("display-only-output", "/làm đẹp/g", "<b>làm đẹp</b>", {
         destination: {
           prompt: false,
           display: true,
@@ -924,11 +924,11 @@ try {
     outputGuardSettings,
     "extract",
     "output.rawResponse",
-    "JSON 美化",
+    "JSON làm đẹp",
     outputGuardDebug,
     "assistant",
   );
-  assert.equal(outputGuardResult, "DONE 美化");
+  assert.equal(outputGuardResult, "DONE làm đẹp");
   assert.deepEqual(
     outputGuardDebug.entries[0].appliedRules.map((item) => item.id),
     ["prompt-output"],
@@ -955,19 +955,19 @@ try {
     "extract",
     "input.recentMessages",
     [
-      "前缀",
-      "<thinking>内部思维</thinking>",
-      "<choice>1. 选项</choice>",
+      "tiền tố",
+      "<thinking>suy nghĩ nội bộ</thinking>",
+      "<choice>1. tùy chọn</choice>",
       "<UpdateVariable>hp=1</UpdateVariable>",
       "<status_current_variable>hp=1</status_current_variable>",
       "<StatusPlaceHolderImpl/>",
-      "尾巴",
+      "đuôi",
     ].join("\n"),
     globalDefaultDebug,
     "system",
   );
-  assert.match(globalDefaultResult, /前缀/);
-  assert.match(globalDefaultResult, /尾巴/);
+  assert.match(globalDefaultResult, /tiền tố/);
+  assert.match(globalDefaultResult, /đuôi/);
   assert.doesNotMatch(
     globalDefaultResult,
     /<choice|<thinking|<updatevariable|<status_current_variable|<StatusPlaceHolderImpl/i,
@@ -1010,13 +1010,13 @@ try {
     },
     "extract",
     "input.recentMessages",
-    "<choice>保留</choice><thinking>保留</thinking>",
+    "<choice>giữ lại</choice><thinking>giữ lại</thinking>",
     explicitEmptyGlobalDebug,
     "system",
   );
   assert.equal(
     explicitEmptyGlobalResult,
-    "<choice>保留</choice><thinking>保留</thinking>",
+    "<choice>giữ lại</choice><thinking>giữ lại</thinking>",
   );
   assert.deepEqual(explicitEmptyGlobalDebug.entries[0].appliedRules, []);
   assert.equal(explicitEmptyGlobalDebug.entries[0].sourceCount.local, 0);
@@ -1061,3 +1061,4 @@ try {
     // ignore reset failures in test cleanup
   }
 }
+

@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -230,7 +230,7 @@ const schema = [
   },
   {
     id: "synopsis",
-    label: "Toàn cục概要（旧）",
+    label: "Tóm lược toàn cục (cũ)",
     columns: [{ name: "summary" }, { name: "scope" }],
   },
 ];
@@ -274,7 +274,7 @@ function createBatchStageHarness() {
     const end = source.indexOf(marker);
     const resolvedEnd = end >= 0 ? end : endFallback;
     if (start < 0 || resolvedEnd < 0 || resolvedEnd <= start) {
-      throw new Error("Không法从 index.js Trích xuất批lầnTrạng thái机định nghĩa");
+      throw new Error("Không thể trích xuất định nghĩa máy trạng thái theo lô từ index.js");
     }
     const snippet = source
       .slice(start, resolvedEnd)
@@ -299,13 +299,13 @@ function createBatchStageHarness() {
       getVectorIndexStats: () => ({ pending: 0 }),
       analyzeAutoConsolidationGate: async () => ({
         triggered: false,
-        reason: "本批新增少且Không明显重复风险，Bỏ quaTự độngHợp nhất",
+        reason: "Lô này thêm mới ít và không thấy rõ rủi ro trùng lặp, bỏ qua tự động hợp nhất",
         matchedScore: null,
         matchedNodeId: "",
       }),
       inspectAutoCompressionCandidates: () => ({
         hasCandidates: false,
-        reason: "已到Chu kỳ nén tự động，但Hiện không có达到内部Nén阈值的候选组",
+        reason: "Đã tới chu kỳ nén tự động, nhưng hiện không có nhóm ứng viên nén nội bộ đạt ngưỡng",
       }),
       updateLastExtractedItems: () => {},
       ensureCurrentGraphRuntimeState: () => {},
@@ -338,10 +338,10 @@ function createHistoryRecoveryHarness() {
   return fs.readFile(indexPath, "utf8").then((source) => {
     const start = source.indexOf("async function recoverHistoryIfNeeded(");
     const endFallback = source.indexOf("async function runExtraction()");
-    const end = source.indexOf("/**\n * Trích xuấtPipeline：Xử lý未Trích xuất的对话tầng");
+    const end = source.indexOf("/**\n * Pipeline trích xuất: xử lý các tầng hội thoại chưa trích xuất");
     const resolvedEnd = end >= 0 ? end : endFallback;
     if (start < 0 || resolvedEnd < 0 || resolvedEnd <= start) {
-      throw new Error("Không法从 index.js Trích xuất history recovery định nghĩa");
+      throw new Error("Không thể trích xuất định nghĩa khôi phục lịch sử từ index.js");
     }
     const snippet = source
       .slice(start, resolvedEnd)
@@ -552,7 +552,7 @@ function createHistoryNotificationHarness() {
     const start = source.indexOf("function notifyHistoryDirty(dirtyFrom, reason) {");
     const end = source.indexOf("function clearPendingHistoryMutationChecks() {");
     if (start < 0 || end < 0 || end <= start) {
-      throw new Error("Không法从 index.js Trích xuất history notify định nghĩa");
+      throw new Error("Không thể trích xuất định nghĩa thông báo lịch sử từ index.js");
     }
     const snippet = source.slice(start, end).replace(/^export\s+/gm, "");
     const context = {
@@ -597,7 +597,7 @@ function createRerollHarness() {
       rollbackEnd <= rollbackStart ||
       rerollEnd <= rerollStart
     ) {
-      throw new Error("Không法从 index.js Trích xuất reroll định nghĩa");
+      throw new Error("Không thể trích xuất định nghĩa reroll từ index.js");
     }
     const snippet = [
       source.slice(rollbackStart, rollbackEnd),
@@ -1181,7 +1181,7 @@ async function createRecallUiHarness({
   const start = source.indexOf("function debugWithThrottle(");
   const end = source.indexOf("async function rerunRecallForMessage(");
   if (start < 0 || end < 0 || end <= start) {
-    throw new Error("Không法从 index.js Trích xuất Recall UI 逻辑");
+    throw new Error("Không thể trích xuất logic Recall UI từ index.js");
   }
   const snippet = source.slice(start, end).replace(/^export\s+/gm, "");
   const context = {
@@ -1371,7 +1371,7 @@ async function testRecallCardDelayedDomInsertionEventuallyRenders() {
     assert.equal(
       updateCalls,
       0,
-      "observer 先触发后不应再被旧 timeout 重复刷新",
+      "Sau khi observer đã kích hoạt thì không nên bị timeout cũ làm mới trùng lặp nữa",
     );
   } finally {
     harness.restoreGlobals();
@@ -1474,12 +1474,12 @@ async function testRecallCardSurvivesLateMessageDomReplacement() {
     assert.equal(
       harness.chatRoot.querySelectorAll(".bme-recall-card").length,
       1,
-      "延迟重渲染后的当前 user tầng应Tự động补挂 Recall Card",
+      "Sau khi kết xuất lại có độ trễ, tầng user hiện tại phải tự động gắn lại Recall Card",
     );
     assert.equal(
       replacementElement.querySelectorAll(".bme-recall-card").length,
       1,
-      "卡片应重新挂到替换后的tin nhắn DOM 上",
+      "Thẻ phải được gắn lại lên DOM tin nhắn sau khi thay thế",
     );
   } finally {
     harness.restoreGlobals();
@@ -1583,12 +1583,12 @@ async function testRecallCardPrefersBetterDuplicateMessageAnchor() {
     assert.equal(
       staleElement.querySelectorAll(".bme-recall-card").length,
       0,
-      "低质量的重复 DOM 不应抢走当前tầng卡片",
+      "DOM trùng lặp chất lượng thấp không được cướp mất thẻ của tầng hiện tại",
     );
     assert.equal(
       liveElement.querySelectorAll(".bme-recall-card").length,
       1,
-      "应优先挂到Cấu trúc更完整的那 tin nhắn DOM 上",
+      "Nên ưu tiên gắn lên DOM tin nhắn có cấu trúc đầy đủ hơn",
     );
     assert.equal(
       harness.chatRoot.querySelectorAll(".mes_block .bme-recall-card").length,
@@ -1908,7 +1908,7 @@ async function testCompressorMigratesEdgesToCompressedNode() {
         return {
           fields: {
             title: "NénSự kiện",
-            summary: "合并tóm tắt",
+            summary: "hợp nhấttóm tắt",
             participants: "Alice",
             status: "done",
           },
@@ -1952,7 +1952,7 @@ async function testVectorIndexKeepsDirtyOnDirectPartialEmbeddingFailure() {
   addNode(graph, first);
   addNode(graph, second);
   graph.vectorIndexState.dirty = true;
-  graph.vectorIndexState.lastWarning = "旧 warning";
+  graph.vectorIndexState.lastWarning = "cảnh báo cũ";
 
   const restoreOverrides = pushTestOverrides({
     embedding: {
@@ -1980,11 +1980,11 @@ async function testVectorIndexKeepsDirtyOnDirectPartialEmbeddingFailure() {
     assert.equal(graph.vectorIndexState.lastStats, result.stats);
     assert.match(
       graph.vectorIndexState.lastWarning,
-      /部分nút embedding Sinh thất bại/,
+      /phầnnút embedding Sinh thất bại/,
     );
     assert.equal(
       graph.vectorIndexState.lastWarning,
-      "部分nút embedding Sinh thất bại，Vector索引仍待修复",
+      "Một phần nút sinh embedding thất bại, chỉ mục vector vẫn đang chờ sửa",
     );
     assert.equal(second.embedding, null);
   } finally {
@@ -2127,19 +2127,19 @@ async function testDeleteCurrentIdbClearsCommitMarkerBeforeReload() {
     const syncLoadIndex = callLog.findIndex(
       (entry) => entry[0] === "sync-graph-load",
     );
-    assert.ok(clearMarkerIndex >= 0, "Xóa当前 IDB 后应清理 commit marker");
-    assert.ok(syncLoadIndex >= 0, "Xóa当前 IDB 后应重新Đồng bộđồ thị加载Trạng thái");
+    assert.ok(clearMarkerIndex >= 0, "Sau khi xóa IDB hiện tại thì phải dọn sạch commit marker");
+    assert.ok(syncLoadIndex >= 0, "Sau khi xóa IDB hiện tại thì phải đồng bộ lại trạng thái tải đồ thị");
     assert.ok(
       clearMarkerIndex < syncLoadIndex,
-      "应先清理 commit marker，再触发đồ thị重探测",
+      "Phải dọn sạch commit marker trước rồi mới kích hoạt thăm dò lại đồ thị",
     );
     assert.ok(
       callLog.some(
         (entry) =>
           entry[0] === "toast-success" &&
-          /Xóa服务端Đồng bộDữ liệu/.test(String(entry[1] || "")),
+          /Xóaphía máy chủĐồng bộDữ liệu/.test(String(entry[1] || "")),
       ),
-      "若Chat hiện tại存在远端Đồng bộ记录，应提示Người dùngBộ đệm cục bộXóa后仍可能被远端Khôi phục",
+      "Nếu chat hiện tại có bản ghi đồng bộ từ xa thì phải nhắc người dùng rằng sau khi xóa bộ đệm cục bộ vẫn có thể bị khôi phục từ xa",
     );
   } finally {
     globalThis.indexedDB = originalIndexedDb;
@@ -2241,7 +2241,7 @@ async function testClearGraphClearsRecoveryAnchorsAndPersistsEmptyMetadata() {
         entry[1] === "chat-clear-graph" &&
         entry[2] === "manual-clear-graph",
     ),
-    "清空đồ thị时应先清理Chat hiện tại的Neo khôi phục",
+    "Khi xóa sạch đồ thị thì trước tiên phải dọn sạch neo khôi phục của chat hiện tại",
   );
   assert.ok(
     callLog.some(
@@ -2251,7 +2251,7 @@ async function testClearGraphClearsRecoveryAnchorsAndPersistsEmptyMetadata() {
         entry[2] === true &&
         entry[3] === true,
     ),
-    "清空đồ thị时应显式把空图写入 metadata，避免旧Neo khôi phục复活",
+    "Khi xóa sạch đồ thị thì phải ghi đồ thị rỗng vào metadata một cách tường minh để tránh neo khôi phục cũ sống lại",
   );
 }
 
@@ -2281,14 +2281,14 @@ async function testCompressTypeAcceptsTopLevelFieldsResult() {
       columns: [{ name: "title" }, { name: "summary" }, { name: "status" }],
     },
   ];
-  const first = makeEvent(1, "Sự kiện甲");
-  const second = makeEvent(2, "Sự kiện乙");
+  const first = makeEvent(1, "Sự kiện A");
+  const second = makeEvent(2, "Sự kiện B");
   const relatedThread = createNode({
     type: "thread",
     seq: 3,
     fields: {
-      title: "Sự kiện甲余波",
-      summary: "Alice 被卷入的后续波动。",
+      title: "Dư ba sự kiện A",
+      summary: "Alice bị cuốn vào những dao động về sau.",
       status: "active",
     },
   });
@@ -2303,7 +2303,7 @@ async function testCompressTypeAcceptsTopLevelFieldsResult() {
         captured.push(params);
         return {
           title: "NénSự kiện",
-          summary: "顶层返回的合并tóm tắt",
+          summary: "Tóm tắt hợp nhất trả về ở tầng trên cùng",
           participants: "Alice",
           status: "done",
         };
@@ -2327,7 +2327,7 @@ async function testCompressTypeAcceptsTopLevelFieldsResult() {
     const compressed = graph.nodes.find(
       (node) => node.level === 1 && !node.archived,
     );
-    assert.equal(compressed?.fields?.summary, "顶层返回的合并tóm tắt");
+    assert.equal(compressed?.fields?.summary, "Tóm tắt hợp nhất trả về ở tầng trên cùng");
     assert.equal(compressed?.fields?.title, "NénSự kiện");
     assert.equal(captured.length, 1);
     const graphStatsBlock = (Array.isArray(captured[0].promptMessages)
@@ -2336,10 +2336,10 @@ async function testCompressTypeAcceptsTopLevelFieldsResult() {
     ).find((message) => message.sourceKey === "graphStats");
     assert.ok(graphStatsBlock, "compress graphStats block should exist");
     const graphStatsContent = String(graphStatsBlock.content || "");
-    assert.match(graphStatsContent, /### Nút đồ thị统计/);
+    assert.match(graphStatsContent, /### Nút đồ thịthống kê/);
     assert.match(graphStatsContent, /Sự kiện: 2/);
     assert.match(graphStatsContent, /tuyến chính: 1/);
-    assert.match(graphStatsContent, /\[G1\|tuyến chính\] Sự kiện甲余波/);
+    assert.match(graphStatsContent, /\[G1\|tuyến chính\] Dư ba sự kiện A/);
     assert.doesNotMatch(
       graphStatsContent,
       new RegExp(relatedThread.id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
@@ -2355,8 +2355,8 @@ async function testConsolidatorMergeFallbackKeepsNodeWhenTargetMissing() {
     type: "event",
     seq: 3,
     fields: {
-      title: "旧Ký ức",
-      summary: "旧tóm tắt",
+      title: "Ký ức cũ",
+      summary: "tóm tắt cũ",
       participants: "Alice",
       status: "active",
     },
@@ -2365,8 +2365,8 @@ async function testConsolidatorMergeFallbackKeepsNodeWhenTargetMissing() {
     type: "event",
     seq: 8,
     fields: {
-      title: "新Ký ức",
-      summary: "新tóm tắt",
+      title: "Ký ức mới",
+      summary: "tóm tắt mới",
       participants: "Alice",
       status: "updated",
     },
@@ -2397,7 +2397,7 @@ async function testConsolidatorMergeFallbackKeepsNodeWhenTargetMissing() {
               node_id: incoming.id,
               action: "merge",
               merge_target_id: "missing-node-id",
-              reason: "故意触发Không效 merge target Lùi về",
+              reason: "Cố ý kích hoạt fallback do merge target không hợp lệ",
             },
           ],
         };
@@ -2433,9 +2433,9 @@ async function testConsolidatorMergeFallbackKeepsNodeWhenTargetMissing() {
     ).find((message) => message.sourceKey === "graphStats");
     assert.ok(graphStatsBlock, "consolidation graphStats block should exist");
     const graphStatsContent = String(graphStatsBlock.content || "");
-    assert.match(graphStatsContent, /### Nút đồ thị统计/);
+    assert.match(graphStatsContent, /### Nút đồ thịthống kê/);
     assert.match(graphStatsContent, /Sự kiện: 2/);
-    assert.match(graphStatsContent, /\[G1\|Sự kiện\] 旧Ký ức/);
+    assert.match(graphStatsContent, /\[G1\|Sự kiện\] Ký ức cũ/);
     assert.doesNotMatch(
       graphStatsContent,
       new RegExp(target.id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
@@ -2460,7 +2460,7 @@ async function testExtractorFailsOnUnknownOperation() {
   try {
     const result = await extractMemories({
       graph,
-      messages: [{ seq: 4, role: "assistant", content: "Kiểm thử非法Thao tác" }],
+      messages: [{ seq: 4, role: "assistant", content: "Kiểm thử thao tác không hợp lệ" }],
       startSeq: 4,
       endSeq: 4,
       schema,
@@ -2486,9 +2486,9 @@ async function testExtractorNormalizesFlatCreateOperation() {
             {
               type: "event",
               id: "evt1",
-              title: "午夜越界",
-              summary: "两人在午夜越界相见，留下了新的冲突Manh mối。",
-              participants: "悟悟, 晗",
+              title: "Vượt ranh lúc nửa đêm",
+              summary: "Hai người gặp nhau vượt ranh lúc nửa đêm, để lại manh mối xung đột mới.",
+              participants: "Wuwu, Han",
             },
           ],
         };
@@ -2499,7 +2499,7 @@ async function testExtractorNormalizesFlatCreateOperation() {
   try {
     const result = await extractMemories({
       graph,
-      messages: [{ seq: 6, role: "assistant", content: "Kiểm thử扁平 create" }],
+      messages: [{ seq: 6, role: "assistant", content: "Kiểm thử create phẳng" }],
       startSeq: 6,
       endSeq: 6,
       schema,
@@ -2512,12 +2512,12 @@ async function testExtractorNormalizesFlatCreateOperation() {
     assert.equal(graph.lastProcessedSeq, 6);
     const created = graph.nodes.find((node) => !node.archived && node.type === "event");
     assert.ok(created);
-    assert.equal(created.fields.title, "午夜越界");
+    assert.equal(created.fields.title, "Vượt ranh lúc nửa đêm");
     assert.equal(
       created.fields.summary,
-      "两人在午夜越界相见，留下了新的冲突Manh mối。",
+      "Hai người gặp nhau vượt ranh lúc nửa đêm, để lại manh mối xung đột mới.",
     );
-    assert.equal(created.fields.participants, "悟悟, 晗");
+    assert.equal(created.fields.participants, "Wuwu, Han");
   } finally {
     restoreOverrides();
   }
@@ -2532,7 +2532,7 @@ async function testExtractorNormalizesArrayPayloadAndPreservesScopeField() {
           {
             type: "synopsis",
             id: "syn1",
-            summary: "Gần nhất的整体剧情进入高压对峙阶段。",
+            summary: "Toàn bộ cốt truyện gần đây đã bước vào giai đoạn đối đầu căng thẳng cao độ.",
             scope: "20-2-2",
           },
         ];
@@ -2543,7 +2543,7 @@ async function testExtractorNormalizesArrayPayloadAndPreservesScopeField() {
   try {
     const result = await extractMemories({
       graph,
-      messages: [{ seq: 8, role: "assistant", content: "Kiểm thử数组 payload" }],
+      messages: [{ seq: 8, role: "assistant", content: "Kiểm thử payload mảng" }],
       startSeq: 8,
       endSeq: 8,
       schema,
@@ -2557,7 +2557,7 @@ async function testExtractorNormalizesArrayPayloadAndPreservesScopeField() {
       (node) => !node.archived && node.type === "synopsis",
     );
     assert.ok(created);
-    assert.equal(created.fields.summary, "Gần nhất的整体剧情进入高压对峙阶段。");
+    assert.equal(created.fields.summary, "Toàn bộ cốt truyện gần đây đã bước vào giai đoạn đối đầu căng thẳng cao độ.");
     assert.equal(created.fields.scope, "20-2-2");
     assert.equal(created.scope?.layer, "objective");
   } finally {
@@ -2604,8 +2604,8 @@ async function testConsolidatorMergeUpdatesSeqRange() {
     seq: 3,
     seqRange: [3, 4],
     fields: {
-      title: "旧Ký ức",
-      summary: "旧tóm tắt",
+      title: "Ký ức cũ",
+      summary: "tóm tắt cũ",
       participants: "Alice",
       status: "active",
     },
@@ -2616,8 +2616,8 @@ async function testConsolidatorMergeUpdatesSeqRange() {
     seq: 8,
     seqRange: [8, 9],
     fields: {
-      title: "新Ký ức",
-      summary: "新tóm tắt",
+      title: "Ký ức mới",
+      summary: "tóm tắt mới",
       participants: "Alice",
       status: "updated",
     },
@@ -2645,7 +2645,7 @@ async function testConsolidatorMergeUpdatesSeqRange() {
               node_id: incoming.id,
               action: "merge",
               merge_target_id: target.id,
-              merged_fields: { summary: "合并后tóm tắt" },
+              merged_fields: { summary: "tóm tắt sau khi hợp nhất" },
             },
           ],
         };
@@ -2669,7 +2669,7 @@ async function testConsolidatorMergeUpdatesSeqRange() {
     assert.equal(stats.merged, 1);
     assert.deepEqual(target.seqRange, [3, 9]);
     assert.equal(target.seq, 8);
-    assert.equal(target.fields.summary, "合并后tóm tắt");
+    assert.equal(target.fields.summary, "tóm tắt sau khi hợp nhất");
     assert.equal(target.embedding, null);
     assert.equal(incoming.archived, true);
   } finally {
@@ -2683,13 +2683,13 @@ async function testBatchJournalVectorDeltaCapturesRecoveryFields() {
   const beforeNode = createNode({
     type: "event",
     seq: 1,
-    fields: { title: "旧", summary: "旧", participants: "A", status: "old" },
+    fields: { title: "cũ", summary: "cũ", participants: "A", status: "old" },
   });
   beforeNode.id = "node-before";
   const afterNode = createNode({
     type: "event",
     seq: 1,
-    fields: { title: "新", summary: "新", participants: "A", status: "new" },
+    fields: { title: "mới", summary: "mới", participants: "A", status: "new" },
   });
   afterNode.id = "node-before";
   addNode(before, beforeNode);
@@ -2815,8 +2815,8 @@ async function testReverseJournalRollbackStateFormsReplayClosure() {
     type: "event",
     seq: 1,
     fields: {
-      title: "稳定nút",
-      summary: "稳定tóm tắt",
+      title: "ổn địnhnút",
+      summary: "ổn địnhtóm tắt",
       participants: "Alice",
       status: "stable",
     },
@@ -2826,8 +2826,8 @@ async function testReverseJournalRollbackStateFormsReplayClosure() {
     type: "event",
     seq: 2,
     fields: {
-      title: "回滚前nút",
-      summary: "旧tóm tắt",
+      title: "nút trước hoàn tác",
+      summary: "tóm tắt cũ",
       participants: "Bob",
       status: "old",
     },
@@ -2837,8 +2837,8 @@ async function testReverseJournalRollbackStateFormsReplayClosure() {
     type: "event",
     seq: 5,
     fields: {
-      title: "回滚后nút",
-      summary: "新tóm tắt",
+      title: "nút sau hoàn tác",
+      summary: "tóm tắt mới",
       participants: "Bob",
       status: "updated",
     },
@@ -2848,8 +2848,8 @@ async function testReverseJournalRollbackStateFormsReplayClosure() {
     type: "event",
     seq: 6,
     fields: {
-      title: "新增nút",
-      summary: "新增tóm tắt",
+      title: "nút mới thêm",
+      summary: "tóm tắt mới thêm",
       participants: "Cara",
       status: "new",
     },
@@ -2949,8 +2949,8 @@ async function testReverseJournalRollbackStateFormsReplayClosure() {
   runtimeGraph.vectorIndexState.pendingRepairFromFloor =
     recoveryPlan.pendingRepairFromFloor;
   runtimeGraph.vectorIndexState.lastWarning = recoveryPlan.legacyGapFallback
-    ? "历史Khôi phục检测到 legacy-gap，Vector索引需按受影响后缀修复"
-    : "历史Khôi phục后需要修复受影响后缀的Vector索引";
+    ? "Khôi phục lịch sử phát hiện legacy-gap, chỉ mục vector cần được sửa theo hậu tố bị ảnh hưởng"
+    : "Sau khi khôi phục lịch sử cần sửa chỉ mục vector của hậu tố bị ảnh hưởng";
 
   assert.deepEqual(
     runtimeGraph.vectorIndexState.replayRequiredNodeIds.sort(),
@@ -2963,7 +2963,7 @@ async function testReverseJournalRollbackStateFormsReplayClosure() {
   );
   assert.equal(
     runtimeGraph.vectorIndexState.lastWarning,
-    "历史Khôi phục后需要修复受影响后缀的Vector索引",
+    "Sau khi khôi phục lịch sử cần sửa chỉ mục vector của hậu tố bị ảnh hưởng",
   );
   assert.deepEqual(runtimeGraph.vectorIndexState.hashToNodeId, {
     hash_stable: stableNode.id,
@@ -3074,7 +3074,7 @@ async function testBatchStatusStructuralPartialRemainsRecoverable() {
   assert.equal(effects.batchStatus.outcome, "partial");
   assert.equal(effects.batchStatus.completed, true);
   assert.equal(effects.batchStatus.consistency, "weak");
-  assert.match(effects.batchStatus.warnings[0], /Nén阶段Thất bại/);
+  assert.match(effects.batchStatus.warnings[0], /Néngiai đoạnThất bại/);
 }
 
 async function testBatchStatusSemanticFailureDoesNotHideCoreSuccess() {
@@ -3121,7 +3121,7 @@ async function testBatchStatusSemanticFailureDoesNotHideCoreSuccess() {
   assert.equal(effects.batchStatus.stages.finalize.outcome, "success");
   assert.equal(effects.batchStatus.outcome, "failed");
   assert.equal(effects.batchStatus.completed, true);
-  assert.match(effects.batchStatus.errors[0], /旧式Toàn cục概要Sinh thất bại/);
+  assert.match(effects.batchStatus.errors[0], /kiểu cũToàn cụctóm lượcSinh thất bại/);
 }
 
 async function testExtractionPostProcessStatusesExposeMaintenancePhases() {
@@ -3182,13 +3182,13 @@ async function testExtractionPostProcessStatusesExposeMaintenancePhases() {
   );
 
   const statusTexts = harness.extractionStatuses.map((entry) => entry[0]);
-  assert.ok(statusTexts.includes("Trích xuất收尾中"));
-  assert.ok(statusTexts.includes("Hợp nhất/进化中"));
-  assert.ok(statusTexts.includes("旧式Toàn cục概要Cập nhật中"));
-  assert.ok(statusTexts.includes("Phản tư生成中"));
-  assert.ok(statusTexts.includes("Lãng quên chủ động中"));
-  assert.ok(statusTexts.includes("Nén tự động中"));
-  assert.ok(statusTexts.includes("VectorĐồng bộ中"));
+  assert.ok(statusTexts.includes("Đang hoàn tất trích xuất"));
+  assert.ok(statusTexts.includes("Đang hợp nhất/tiến hóa"));
+  assert.ok(statusTexts.includes("Đang cập nhật tóm lược toàn cục kiểu cũ"));
+  assert.ok(statusTexts.includes("Đang sinh phản tư"));
+  assert.ok(statusTexts.includes("Đang lãng quên chủ động"));
+  assert.ok(statusTexts.includes("Đang nén tự động"));
+  assert.ok(statusTexts.includes("Đang đồng bộ vector"));
 }
 
 async function testAutoConsolidationRunsOnHighDuplicateRiskSingleNode() {
@@ -3209,7 +3209,7 @@ async function testAutoConsolidationRunsOnHighDuplicateRiskSingleNode() {
     return {
       triggered: true,
       reason:
-        "本批仅新增 1  nút，但与旧Ký ức高度相似（0.930 >= 0.85），已触发Tự độngHợp nhất",
+        "Lô này chỉ thêm 1 nút, nhưng có độ tương tự rất cao với ký ức cũ (0.930 >= 0.85), đã kích hoạt tự động hợp nhất",
       matchedScore: 0.93,
       matchedNodeId: "old-1",
     };
@@ -3264,12 +3264,12 @@ async function testAutoConsolidationRunsOnHighDuplicateRiskSingleNode() {
   assert.equal(effects.batchStatus.consolidationGateSimilarity, 0.93);
   assert.match(
     effects.batchStatus.consolidationGateReason,
-    /高度相似/,
+    /độ tương tự cao/,
   );
   assert.equal(effects.batchStatus.autoCompressionScheduled, false);
   assert.match(
     effects.batchStatus.autoCompressionSkippedReason,
-    /Nén tự động.*已Tắt/,
+    /Nén tự động.*Đã tắt/,
   );
 }
 
@@ -3288,7 +3288,7 @@ async function testAutoConsolidationSkipsLowRiskSingleNode() {
   harness.analyzeAutoConsolidationGate = async () => ({
     triggered: false,
     reason:
-      "本批新增少且最高相似度 0.420 未达到阈值 0.85，Bỏ quaTự độngHợp nhất",
+      "Lô này thêm mới ít và độ tương đồng cao nhất 0.420 chưa đạt ngưỡng 0.85, bỏ qua tự động hợp nhất",
     matchedScore: 0.42,
     matchedNodeId: "old-2",
   });
@@ -3455,7 +3455,7 @@ async function testAutoCompressionSkipsWhenNotScheduledOrNoCandidates() {
   assert.equal(offCycleEffects.batchStatus.autoCompressionScheduled, false);
   assert.match(
     offCycleEffects.batchStatus.autoCompressionSkippedReason,
-    /未到每 10 lầnChu kỳ nén tự động/,
+    /chưa tới chu kỳ nén tự động mỗi 10 lần/,
   );
   assert.equal(offCycleEffects.batchStatus.nextCompressionAtExtractionCount, 10);
 
@@ -3476,7 +3476,7 @@ async function testAutoCompressionSkipsWhenNotScheduledOrNoCandidates() {
   let scheduledCompressionCalls = 0;
   scheduledHarness.inspectAutoCompressionCandidates = () => ({
     hasCandidates: false,
-    reason: "已到Chu kỳ nén tự động，但Hiện không có达到内部Nén阈值的候选组",
+    reason: "Đã tới chu kỳ nén tự động, nhưng hiện không có nhóm ứng viên nén nội bộ đạt ngưỡng",
   });
   scheduledHarness.compressAll = async () => {
     scheduledCompressionCalls += 1;
@@ -3513,7 +3513,7 @@ async function testAutoCompressionSkipsWhenNotScheduledOrNoCandidates() {
   assert.equal(scheduledEffects.batchStatus.autoCompressionScheduled, true);
   assert.match(
     scheduledEffects.batchStatus.autoCompressionSkippedReason,
-    /没有达到内部Nén阈值的候选组/,
+    /không có nhóm ứng viên nén nào đạt ngưỡng nội bộ/,
   );
   assert.equal(
     scheduledEffects.batchStatus.stages.structural.artifacts.includes(
@@ -3645,7 +3645,7 @@ async function testProcessedHistoryAdvanceTracksCoreExtractionSuccess() {
 
 async function testGenerationRecallTransactionDedupesDoubleHookBySameKey() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "同一轮输入" }];
+  harness.chat = [{ is_user: true, mes: "đầu vào cùng một lượt" }];
 
   await harness.result.onGenerationAfterCommands("normal", {}, false);
   await harness.result.onBeforeCombinePrompts();
@@ -3656,7 +3656,7 @@ async function testGenerationRecallTransactionDedupesDoubleHookBySameKey() {
 
 async function testGenerationRecallTransactionDedupesReverseHookOrder() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "逆序同轮输入" }];
+  harness.chat = [{ is_user: true, mes: "đầu vào cùng lượt nhưng đảo thứ tự" }];
 
   await harness.result.onBeforeCombinePrompts();
   await harness.result.onGenerationAfterCommands("normal", {}, false);
@@ -3671,7 +3671,7 @@ async function testGenerationRecallTransactionDedupesReverseHookOrder() {
 async function testGenerationRecallHistoryModesUseSameBindingAcrossHooks() {
   for (const generationType of ["continue", "regenerate", "swipe"]) {
     const harness = await createGenerationRecallHarness();
-    const userMessage = `历史输入-${generationType}`;
+    const userMessage = `lịch sửđầu vào-${generationType}`;
     harness.chat = [
       { is_user: true, mes: userMessage },
       { is_user: false, mes: "assistant-tail" },
@@ -3683,7 +3683,7 @@ async function testGenerationRecallHistoryModesUseSameBindingAcrossHooks() {
     assert.equal(
       harness.runRecallCalls.length,
       1,
-      `${generationType} 应只执行一lầnTruy hồi`,
+      `${generationType} chỉ nên thực thi một lần truy hồi`,
     );
     assert.equal(
       harness.runRecallCalls[0].hookName,
@@ -3696,14 +3696,14 @@ async function testGenerationRecallHistoryModesUseSameBindingAcrossHooks() {
 
 async function testGenerationRecallFrozenBindingSurvivesCrossHookInputDrift() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "稳定输入-A" }];
+  harness.chat = [{ is_user: true, mes: "ổn địnhđầu vào-A" }];
 
   await harness.result.onGenerationAfterCommands("normal", {}, false);
-  harness.chat = [{ is_user: true, mes: "稳定输入-B" }];
+  harness.chat = [{ is_user: true, mes: "ổn địnhđầu vào-B" }];
   await harness.result.onBeforeCombinePrompts();
 
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "稳定输入-A");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "ổn địnhđầu vào-A");
 }
 
 async function testGenerationRecallSkipsUntilTargetUserFloorAvailable() {
@@ -3713,7 +3713,7 @@ async function testGenerationRecallSkipsUntilTargetUserFloorAvailable() {
   await harness.result.onGenerationAfterCommands("normal", {}, false);
   assert.equal(harness.runRecallCalls.length, 0);
 
-  harness.chat = [{ is_user: true, mes: "补齐 user tầng" }];
+  harness.chat = [{ is_user: true, mes: "bổ đủ tầng user" }];
   await harness.result.onBeforeCombinePrompts();
   assert.equal(harness.runRecallCalls.length, 1);
   assert.equal(
@@ -3725,9 +3725,9 @@ async function testGenerationRecallSkipsUntilTargetUserFloorAvailable() {
 async function testGenerationRecallBeforeCombineCanUseProvisionalSendIntentBinding() {
   const harness = await createGenerationRecallHarness();
   harness.chat = [{ is_user: false, mes: "assistant-tail" }];
-  harness.__sendTextareaValue = "发送前输入";
+  harness.__sendTextareaValue = "trước khi gửiđầu vào";
   harness.pendingRecallSendIntent = {
-    text: "发送前输入",
+    text: "trước khi gửiđầu vào",
     hash: "hash-send-intent",
     at: Date.now(),
   };
@@ -3740,9 +3740,9 @@ async function testGenerationRecallBeforeCombineCanUseProvisionalSendIntentBindi
     harness.runRecallCalls[0].hookName,
     "GENERATE_BEFORE_COMBINE_PROMPTS",
   );
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "发送前输入");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "trước khi gửiđầu vào");
   assert.equal(harness.runRecallCalls[0].overrideSource, "send-intent");
-  assert.equal(harness.runRecallCalls[0].overrideSourceLabel, "发送意图");
+  assert.equal(harness.runRecallCalls[0].overrideSourceLabel, "ý định gửi");
   assert.equal(
     harness.runRecallCalls[0].overrideReason,
     "send-intent-captured",
@@ -3753,7 +3753,7 @@ async function testGenerationRecallBeforeCombineCanUseProvisionalSendIntentBindi
 async function testGenerationRecallHostLifecycleSnapshotSurvivesTextareaClearWithoutDomIntent() {
   const harness = await createGenerationRecallHarness();
   harness.chat = [{ is_user: false, mes: "assistant-tail" }];
-  harness.__sendTextareaValue = "Host冻结输入";
+  harness.__sendTextareaValue = "đầu vào bị Host đóng băng";
 
   const frozenSnapshot = harness.result.freezeHostGenerationInputSnapshot(
     harness.__sendTextareaValue,
@@ -3772,12 +3772,12 @@ async function testGenerationRecallHostLifecycleSnapshotSurvivesTextareaClearWit
     harness.runRecallCalls[0].hookName,
     "GENERATE_BEFORE_COMBINE_PROMPTS",
   );
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "Host冻结输入");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "đầu vào bị Host đóng băng");
   assert.equal(
     harness.runRecallCalls[0].overrideSource,
     "host-generation-lifecycle",
   );
-  assert.equal(harness.runRecallCalls[0].overrideSourceLabel, "Host发送snapshot");
+  assert.equal(harness.runRecallCalls[0].overrideSourceLabel, "Hostgửisnapshot");
   assert.equal(
     harness.runRecallCalls[0].overrideReason,
     "host-snapshot-captured",
@@ -3795,9 +3795,9 @@ async function testGenerationRecallHostLifecycleSnapshotSurvivesTextareaClearWit
 async function testGenerationRecallAfterCommandsStillSkipsWithoutStableUserFloor() {
   const harness = await createGenerationRecallHarness();
   harness.chat = [{ is_user: false, mes: "assistant-tail" }];
-  harness.__sendTextareaValue = "发送前输入";
+  harness.__sendTextareaValue = "trước khi gửiđầu vào";
   harness.pendingRecallSendIntent = {
-    text: "发送前输入",
+    text: "trước khi gửiđầu vào",
     hash: "hash-send-intent",
     at: Date.now(),
   };
@@ -3807,13 +3807,13 @@ async function testGenerationRecallAfterCommandsStillSkipsWithoutStableUserFloor
   assert.equal(
     harness.runRecallCalls.length,
     0,
-    "after-commands 在缺失稳定 user floor 时应继续Bỏ qua，避免Lỗitầng绑定",
+    "after-commands nên tiếp tục bỏ qua khi thiếu tầng user ổn định để tránh lỗi gắn tầng",
   );
 }
 
 async function testGenerationRecallSameKeyCanRunAgainImmediatelyAsNewGeneration() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "同 key 连续生成" }];
+  harness.chat = [{ is_user: true, mes: "sinh liên tiếp cùng key" }];
 
   await harness.result.onGenerationAfterCommands("normal", {}, false);
   await harness.result.onGenerationAfterCommands("normal", {}, false);
@@ -3827,7 +3827,7 @@ async function testGenerationRecallSameKeyCanRunAgainImmediatelyAsNewGeneration(
 
 async function testGenerationRecallSameKeyCanRunAgainAfterBridgeWindow() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "同 key 重复生成" }];
+  harness.chat = [{ is_user: true, mes: "sinh trùng lặp cùng key" }];
 
   await harness.result.onGenerationAfterCommands("normal", {}, false);
   const transaction = [
@@ -3842,7 +3842,7 @@ async function testGenerationRecallSameKeyCanRunAgainAfterBridgeWindow() {
 
 async function testGenerationRecallBeforeCombineRunsStandalone() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "仅 before combine" }];
+  harness.chat = [{ is_user: true, mes: "chỉ before combine" }];
 
   await harness.result.onBeforeCombinePrompts();
 
@@ -3855,7 +3855,7 @@ async function testGenerationRecallBeforeCombineRunsStandalone() {
 
 async function testGenerationRecallDryRunPreviewDoesNotTriggerBeforeCombineRecall() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "Prompt Viewer 预览" }];
+  harness.chat = [{ is_user: true, mes: "xem trước Prompt Viewer" }];
 
   harness.result.onGenerationStarted("normal", {}, true);
   await harness.result.onBeforeCombinePrompts();
@@ -3865,10 +3865,10 @@ async function testGenerationRecallDryRunPreviewDoesNotTriggerBeforeCombineRecal
 
 async function testGenerationRecallDifferentKeyCanRunAgain() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "第一条" }];
+  harness.chat = [{ is_user: true, mes: "mục thứ nhất" }];
   await harness.result.onGenerationAfterCommands("normal", {}, false);
 
-  harness.chat = [{ is_user: true, mes: "第二条" }];
+  harness.chat = [{ is_user: true, mes: "mục thứ hai" }];
   await harness.result.onGenerationAfterCommands("normal", {}, false);
 
   assert.equal(harness.runRecallCalls.length, 2);
@@ -3880,7 +3880,7 @@ async function testGenerationRecallDifferentKeyCanRunAgain() {
 
 async function testGenerationRecallSkippedStateDoesNotLoopToBeforeCombine() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "同一条但本lầnBỏ qua" }];
+  harness.chat = [{ is_user: true, mes: "cùng một mục nhưng lần này bỏ qua" }];
   harness.runRecall = async (options = {}) => {
     harness.runRecallCalls.push({ ...options });
     return {
@@ -3904,13 +3904,13 @@ async function testGenerationRecallSkippedStateDoesNotLoopToBeforeCombine() {
 
 async function testGenerationRecallSentMessageClearsStaleTransactionForSameKey() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "同 key 发送后重开" }];
+  harness.chat = [{ is_user: true, mes: "mở lại sau khi gửi cùng key" }];
 
   await harness.result.onGenerationAfterCommands("normal", {}, false);
   assert.equal(harness.runRecallCalls.length, 1);
   assert.equal(harness.result.generationRecallTransactions.size, 1);
 
-  harness.recordRecallSentUserMessage(0, "同 key 发送后重开");
+  harness.recordRecallSentUserMessage(0, "mở lại sau khi gửi cùng key");
   await harness.result.onGenerationAfterCommands("normal", {}, false);
 
   assert.equal(harness.runRecallCalls.length, 2);
@@ -4018,7 +4018,7 @@ async function testChatChangedDoesNotClearCoreEventBindings() {
   assert.equal(
     clearCoreBindingsCalls,
     0,
-    "聊天切换不应清空核心Sự kiện监听，否则后续Tự động链会失联",
+    "Chuyển đổi chat không được xóa sạch listener sự kiện cốt lõi, nếu không chuỗi tự động về sau sẽ mất liên lạc",
   );
   assert.equal(clearPendingAutoExtractionCalls, 1);
 }
@@ -4078,9 +4078,9 @@ async function testMessageSentFallsBackToLatestUserWhenHostMessageIdInvalid() {
     {
       getContext: () => ({
         chat: [
-          { is_user: true, mes: "较早Người dùngtầng" },
+          { is_user: true, mes: "tầng người dùng sớm hơn" },
           { is_user: false, mes: "assistant-tail" },
-          { is_user: true, mes: "最新Người dùngtầng" },
+          { is_user: true, mes: "mới nhấtNgười dùngtầng" },
         ],
       }),
       recordRecallSentUserMessage(messageId, text, source = "message-sent") {
@@ -4096,7 +4096,7 @@ async function testMessageSentFallsBackToLatestUserWhenHostMessageIdInvalid() {
   assert.deepEqual(recorded, [
     {
       messageId: 2,
-      text: "最新Người dùngtầng",
+      text: "mới nhấtNgười dùngtầng",
       source: "message-sent",
     },
   ]);
@@ -4543,11 +4543,11 @@ async function testAutoExtractionDefersWhenGraphNotReady() {
       statuses.push(args);
     },
     getGraphMutationBlockReason: () =>
-      "Tự độngTrích xuấtĐã tạm dừng：正在加载 IndexedDB đồ thị。",
+      "Tự độngTrích xuấtĐã tạm dừng：đangtải IndexedDB đồ thị。",
   });
 
   assert.deepEqual(deferredReasons, ["graph-not-ready"]);
-  assert.equal(statuses[0]?.[0], "Đang chờđồ thị加载");
+  assert.equal(statuses[0]?.[0], "Đang chờđồ thịtải");
 }
 
 async function testAutoExtractionDefersWhenAlreadyExtracting() {
@@ -4610,7 +4610,7 @@ async function testRemoveNodeHandlesCyclicChildGraph() {
 
 async function testGenerationRecallAppliesFinalInjectionOncePerTransaction() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "同一轮仅一lần最终Tiêm" }];
+  harness.chat = [{ is_user: true, mes: "mỗi lượt chỉ tiêm cuối cùng một lần" }];
 
   await harness.result.onGenerationAfterCommands("normal", {}, false);
   await harness.result.onBeforeCombinePrompts();
@@ -4622,7 +4622,7 @@ async function testGenerationRecallAppliesFinalInjectionOncePerTransaction() {
 async function testGenerationRecallDeferredRewriteMutatesFinalMesSendPayload() {
   const harness = await createGenerationRecallHarness({ realApplyFinal: true });
   harness.chat = [{ is_user: false, mes: "assistant-tail" }];
-  harness.__sendTextareaValue = "发送前真实输入";
+  harness.__sendTextareaValue = "đầu vào thực trước khi gửi";
 
   await harness.result.onGenerationStarted("normal", {}, false);
   harness.__sendTextareaValue = "";
@@ -4632,7 +4632,7 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendPayload() {
     finalMesSend: [
       {
         injected: false,
-        message: "发送前真实输入",
+        message: "đầu vào thực trước khi gửi",
         extensionPrompts: [],
       },
     ],
@@ -4648,7 +4648,7 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendPayload() {
   assert.equal(resolution.rewrite.path, "finalMesSend");
   assert.match(
     promptData.finalMesSend[0].extensionPrompts.join("\n"),
-    /Tiêm:发送前真实输入/,
+    /Tiêm:đầu vào thực trước khi gửi/,
   );
   assert.equal(
     harness.moduleInjectionCalls.every((text) => text === ""),
@@ -4665,9 +4665,9 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendAuthoritati
   harness.extension_settings[MODULE_NAME] = {
     recallUseAuthoritativeGenerationInput: true,
   };
-  harness.chat = [{ is_user: true, mes: "tầng稳定输入" }];
+  harness.chat = [{ is_user: true, mes: "tầngổn địnhđầu vào" }];
   harness.pendingRecallSendIntent = {
-    text: "发送前真实输入",
+    text: "đầu vào thực trước khi gửi",
     hash: "hash-deferred-authoritative-rewrite",
     at: Date.now(),
     source: "dom-intent",
@@ -4680,7 +4680,7 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendAuthoritati
     finalMesSend: [
       {
         injected: false,
-        message: "tầng稳定输入",
+        message: "tầngổn địnhđầu vào",
         extensionPrompts: [],
       },
     ],
@@ -4696,22 +4696,22 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendAuthoritati
   const transaction = [...harness.result.generationRecallTransactions.values()][0];
   assert.ok(transaction);
   assert.equal(transaction.frozenRecallOptions.authoritativeInputUsed, true);
-  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "tầng稳定输入");
+  assert.equal(transaction.frozenRecallOptions.boundUserFloorText, "tầngổn địnhđầu vào");
   assert.equal(
     harness.runRecallCalls[0].authoritativeInputUsed,
     true,
   );
-  assert.equal(harness.runRecallCalls[0].boundUserFloorText, "tầng稳定输入");
-  assert.equal(promptData.finalMesSend[0].message, "发送前真实输入");
+  assert.equal(harness.runRecallCalls[0].boundUserFloorText, "tầngổn địnhđầu vào");
+  assert.equal(promptData.finalMesSend[0].message, "đầu vào thực trước khi gửi");
   assert.equal(resolution.applicationMode, "rewrite");
   assert.equal(resolution.authoritativeInputUsed, true);
-  assert.equal(resolution.boundUserFloorText, "tầng稳定输入");
+  assert.equal(resolution.boundUserFloorText, "tầngổn địnhđầu vào");
   assert.equal(resolution.inputRewrite.applied, true);
   assert.equal(resolution.inputRewrite.changed, true);
   assert.equal(resolution.inputRewrite.field, "finalMesSend[0].message");
   assert.match(
     promptData.finalMesSend[0].extensionPrompts.join("\n"),
-    /Tiêm:发送前真实输入/,
+    /Tiêm:đầu vào thực trước khi gửi/,
   );
   assert.equal(
     harness.recordedInjectionSnapshots.at(-1)?.inputRewrite?.applied,
@@ -4721,9 +4721,9 @@ async function testGenerationRecallDeferredRewriteMutatesFinalMesSendAuthoritati
 
 async function testGenerationRecallSendIntentBeatsChatTailAndStaysObservable() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "旧的 chat tail" }];
+  harness.chat = [{ is_user: true, mes: "cũ chat tail" }];
   harness.pendingRecallSendIntent = {
-    text: "刚触发发送的新输入",
+    text: "đầu vào mới vừa kích hoạt gửi",
     hash: "hash-send-intent-priority",
     at: Date.now(),
     source: "dom-intent",
@@ -4732,9 +4732,9 @@ async function testGenerationRecallSendIntentBeatsChatTailAndStaysObservable() {
   await harness.result.onGenerationAfterCommands("normal", {}, false);
 
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "旧的 chat tail");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "cũ chat tail");
   assert.equal(harness.runRecallCalls[0].overrideSource, "send-intent");
-  assert.equal(harness.runRecallCalls[0].overrideSourceLabel, "发送意图");
+  assert.equal(harness.runRecallCalls[0].overrideSourceLabel, "ý định gửi");
   assert.equal(
     harness.runRecallCalls[0].overrideReason,
     "send-intent-overrides-chat-tail",
@@ -4752,17 +4752,17 @@ async function testGenerationRecallSendIntentBeatsChatTailAndStaysObservable() {
   ][0];
   assert.equal(
     transaction.frozenRecallOptions.overrideUserMessage,
-    "旧的 chat tail",
+    "cũ chat tail",
   );
   assert.equal(transaction.frozenRecallOptions.lockedSource, "send-intent");
-  assert.equal(transaction.frozenRecallOptions.lockedSourceLabel, "发送意图");
+  assert.equal(transaction.frozenRecallOptions.lockedSourceLabel, "ý định gửi");
   assert.equal(
     transaction.frozenRecallOptions.lockedReason,
     "send-intent-overrides-chat-tail",
   );
   assert.equal(
     transaction.frozenRecallOptions.sourceCandidates[0]?.text,
-    "刚触发发送的新输入",
+    "đầu vào mới vừa kích hoạt gửi",
   );
 }
 
@@ -4770,13 +4770,13 @@ async function testGenerationRecallSendIntentWinsOverHostSnapshotStably() {
   const harness = await createGenerationRecallHarness();
   harness.chat = [{ is_user: false, mes: "assistant-tail" }];
   harness.pendingRecallSendIntent = {
-    text: "发送意图优先输入",
+    text: "ý định gửiưu tiênđầu vào",
     hash: "hash-send-intent-vs-host",
     at: Date.now(),
     source: "dom-intent",
   };
   const frozenSnapshot =
-    harness.result.freezeHostGenerationInputSnapshot("Hostsnapshot输入");
+    harness.result.freezeHostGenerationInputSnapshot("Hostsnapshotđầu vào");
 
   await harness.result.onGenerationAfterCommands(
     "normal",
@@ -4788,7 +4788,7 @@ async function testGenerationRecallSendIntentWinsOverHostSnapshotStably() {
   assert.equal(harness.runRecallCalls.length, 1);
   assert.equal(
     harness.runRecallCalls[0].overrideUserMessage,
-    "发送意图优先输入",
+    "ý định gửiưu tiênđầu vào",
   );
   assert.equal(harness.runRecallCalls[0].overrideSource, "send-intent");
   assert.equal(
@@ -4806,7 +4806,7 @@ async function testGenerationRecallLockedSourceDoesNotDriftWithinTransaction() {
   const harness = await createGenerationRecallHarness();
   harness.chat = [{ is_user: false, mes: "assistant-tail" }];
   harness.pendingRecallSendIntent = {
-    text: "事务锁定输入-A",
+    text: "đầu vào A bị khóa theo giao dịch",
     hash: "hash-locked-source",
     at: Date.now(),
     source: "dom-intent",
@@ -4814,7 +4814,7 @@ async function testGenerationRecallLockedSourceDoesNotDriftWithinTransaction() {
 
   await harness.result.onGenerationAfterCommands("normal", {}, false);
   harness.pendingRecallSendIntent = {
-    text: "事务漂移输入-B",
+    text: "đầu vào B bị trôi giao dịch",
     hash: "hash-drift-source",
     at: Date.now(),
     source: "dom-intent",
@@ -4822,16 +4822,16 @@ async function testGenerationRecallLockedSourceDoesNotDriftWithinTransaction() {
   await harness.result.onBeforeCombinePrompts();
 
   assert.equal(harness.runRecallCalls.length, 1);
-  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "事务漂移输入-B");
+  assert.equal(harness.runRecallCalls[0].overrideUserMessage, "đầu vào B bị trôi giao dịch");
   const transaction = [
     ...harness.result.generationRecallTransactions.values(),
   ][0];
   assert.equal(
     transaction.frozenRecallOptions.overrideUserMessage,
-    "事务漂移输入-B",
+    "đầu vào B bị trôi giao dịch",
   );
   assert.equal(transaction.frozenRecallOptions.lockedSource, "send-intent");
-  assert.equal(transaction.frozenRecallOptions.lockedSourceLabel, "发送意图");
+  assert.equal(transaction.frozenRecallOptions.lockedSourceLabel, "ý định gửi");
   assert.equal(
     transaction.frozenRecallOptions.lockedReason,
     "send-intent-captured",
@@ -4844,8 +4844,8 @@ async function testBeforeCombineRecallNotSkippedWhenGraphLoadingButRuntimeGraphR
   const graph = normalizeGraphRuntimeState(createEmptyGraph(), "chat-main");
   graph.nodes.push(
     createNode("event", {
-      title: "旧Sự kiện",
-      summary: "来自 runtime graph",
+      title: "Sự kiện cũ",
+      summary: "đến từ runtime graph",
     }),
   );
 
@@ -4861,16 +4861,16 @@ async function testBeforeCombineRecallNotSkippedWhenGraphLoadingButRuntimeGraphR
     }),
     isGraphReadable: () => false,
     isGraphReadableForRecall: () => true,
-    getGraphMutationBlockReason: () => "Truy hồiĐã tạm dừng：正在加载 IndexedDB đồ thị。",
+    getGraphMutationBlockReason: () => "Truy hồiĐã tạm dừng：đangtải IndexedDB đồ thị。",
     setLastRecallStatus: (...args) => {
       statuses.push(args);
     },
     isGraphMetadataWriteAllowed: () => false,
     recoverHistoryIfNeeded: async () => {
-      throw new Error("loading 期间不应触发历史Khôi phục");
+      throw new Error("Không nên kích hoạt khôi phục lịch sử trong lúc loading");
     },
     getContext: () => ({
-      chat: [{ is_user: true, mes: "发送前输入" }],
+      chat: [{ is_user: true, mes: "trước khi gửiđầu vào" }],
     }),
     nextRecallRunSequence: () => 1,
     setIsRecalling() {},
@@ -4882,18 +4882,18 @@ async function testBeforeCombineRecallNotSkippedWhenGraphLoadingButRuntimeGraphR
     ensureVectorReadyIfNeeded: async () => {},
     clampInt,
     resolveRecallInput: () => ({
-      userMessage: "发送前输入",
-      recentMessages: ["[user]: 发送前输入"],
+      userMessage: "trước khi gửiđầu vào",
+      recentMessages: ["[user]: trước khi gửiđầu vào"],
       source: "send-intent",
-      sourceLabel: "发送意图",
+      sourceLabel: "ý định gửi",
       generationType: "normal",
       targetUserMessageIndex: null,
     }),
     console,
-    getRecallHookLabel: () => "发送前拦截",
+    getRecallHookLabel: () => "Chặn trước khi gửi",
     retrieve: async ({ graph: passedGraph, userMessage }) => {
       assert.equal(passedGraph, graph);
-      assert.equal(userMessage, "发送前输入");
+      assert.equal(userMessage, "trước khi gửiđầu vào");
       return {
         stats: { recallCount: 1, coreCount: 1 },
         selectedNodeIds: [graph.nodes[0].id],
@@ -4932,11 +4932,11 @@ async function testBeforeCombineRecallNotSkippedWhenGraphLoadingButRuntimeGraphR
 
   assert.equal(result.status, "completed");
   assert.equal(result.didRecall, true);
-  assert.equal(result.injectionText, "Tiêm:发送前输入");
+  assert.equal(result.injectionText, "Tiêm:trước khi gửiđầu vào");
   assert.equal(
-    statuses.some(([title]) => title === "Đang chờđồ thị加载"),
+    statuses.some(([title]) => title === "Đang chờđồ thịtải"),
     false,
-    "runtime graph 可读时不应再被 loading 门禁误判为Đang chờđồ thị加载",
+    "Khi runtime graph đã đọc được thì không nên bị cổng loading phán nhầm là đang chờ tải đồ thị",
   );
 }
 
@@ -4945,18 +4945,18 @@ async function testHistoryGenerationReusesPersistedRecallForStableUserFloor() {
   const chat = [
     {
       is_user: true,
-      mes: "稳定 user tầng",
+      mes: "ổn định user tầng",
       extra: {
         bme_recall: buildPersistedRecallRecord({
           injectionText: "persisted-memory",
           selectedNodeIds: ["node-persisted-1"],
-          recallInput: "发送前Đầu vào chuẩn quyền",
+          recallInput: "trước khi gửiĐầu vào chuẩn quyền",
           recallSource: "send-intent",
           hookName: "GENERATION_AFTER_COMMANDS",
           tokenEstimate: 12,
           manuallyEdited: false,
           authoritativeInputUsed: true,
-          boundUserFloorText: "稳定 user tầng",
+          boundUserFloorText: "ổn định user tầng",
           nowIso: "2026-01-01T00:00:00.000Z",
         }),
       },
@@ -4995,18 +4995,18 @@ async function testHistoryGenerationReusesPersistedRecallForStableUserFloor() {
     ensureVectorReadyIfNeeded: async () => {},
     clampInt,
     resolveRecallInput: () => ({
-      userMessage: "稳定 user tầng",
-      recentMessages: ["[user]: 稳定 user tầng"],
+      userMessage: "ổn định user tầng",
+      recentMessages: ["[user]: ổn định user tầng"],
       source: "chat-last-user",
-      sourceLabel: "历史最后Người dùngtầng",
+      sourceLabel: "tầng người dùng cuối cùng trong lịch sử",
       generationType: "history",
       targetUserMessageIndex: 0,
       authoritativeInputUsed: false,
-      boundUserFloorText: "稳定 user tầng",
+      boundUserFloorText: "ổn định user tầng",
       sourceCandidates: [],
     }),
     console,
-    getRecallHookLabel: () => "历史生成",
+    getRecallHookLabel: () => "lịch sửsinh",
     retrieve: async () => {
       retrieveCalls += 1;
       return {
@@ -5073,7 +5073,7 @@ async function testHistoryGenerationReusesPersistedRecallForStableUserFloor() {
   assert.equal(applyCalls.length, 1);
   assert.equal(applyCalls[0].recallInput.source, "persisted-user-floor");
   assert.equal(applyCalls[0].recallInput.authoritativeInputUsed, true);
-  assert.equal(applyCalls[0].recallInput.boundUserFloorText, "稳定 user tầng");
+  assert.equal(applyCalls[0].recallInput.boundUserFloorText, "ổn định user tầng");
   assert.equal(
     readPersistedRecallFromUserMessage(chat, 0)?.generationCount,
     1,
@@ -5087,18 +5087,18 @@ async function testHistoryGenerationDoesNotReusePersistedRecallAfterUserFloorEdi
   const chat = [
     {
       is_user: true,
-      mes: "已Chỉnh sửa的新 user tầng",
+      mes: "user tầng mới đã được chỉnh sửa",
       extra: {
         bme_recall: buildPersistedRecallRecord({
           injectionText: "stale-persisted-memory",
           selectedNodeIds: ["node-stale-1"],
-          recallInput: "旧 user tầng",
+          recallInput: "user tầng cũ",
           recallSource: "chat-last-user",
           hookName: "GENERATION_AFTER_COMMANDS",
           tokenEstimate: 12,
           manuallyEdited: false,
           authoritativeInputUsed: false,
-          boundUserFloorText: "旧 user tầng",
+          boundUserFloorText: "user tầng cũ",
           nowIso: "2026-01-01T00:00:00.000Z",
         }),
       },
@@ -5134,18 +5134,18 @@ async function testHistoryGenerationDoesNotReusePersistedRecallAfterUserFloorEdi
     ensureVectorReadyIfNeeded: async () => {},
     clampInt,
     resolveRecallInput: () => ({
-      userMessage: "已Chỉnh sửa的新 user tầng",
-      recentMessages: ["[user]: 已Chỉnh sửa的新 user tầng"],
+      userMessage: "user tầng mới đã được chỉnh sửa",
+      recentMessages: ["[user]: user tầng mới đã được chỉnh sửa"],
       source: "chat-last-user",
-      sourceLabel: "历史最后Người dùngtầng",
+      sourceLabel: "tầng người dùng cuối cùng trong lịch sử",
       generationType: "history",
       targetUserMessageIndex: 0,
       authoritativeInputUsed: false,
-      boundUserFloorText: "已Chỉnh sửa的新 user tầng",
+      boundUserFloorText: "user tầng mới đã được chỉnh sửa",
       sourceCandidates: [],
     }),
     console,
-    getRecallHookLabel: () => "历史生成",
+    getRecallHookLabel: () => "lịch sửsinh",
     retrieve: async () => {
       retrieveCalls += 1;
       return {
@@ -5205,7 +5205,7 @@ async function testHistoryGenerationDoesNotReusePersistedRecallAfterUserFloorEdi
   assert.equal(retrieveCalls, 1);
   assert.equal(result.status, "completed");
   assert.equal(result.reason, "Truy hồiHoàn tất");
-  assert.equal(result.injectionText, "fresh:已Chỉnh sửa的新 user tầng");
+  assert.equal(result.injectionText, "fresh:user tầng mới đã được chỉnh sửa");
   assert.equal(
     readPersistedRecallFromUserMessage(chat, 0)?.generationCount,
     0,
@@ -5228,7 +5228,7 @@ async function testPersistentRecallDataLayerLifecycleAndCompatibility() {
     tokenEstimate: 24,
     manuallyEdited: false,
     authoritativeInputUsed: true,
-    boundUserFloorText: "稳定tầng输入",
+    boundUserFloorText: "ổn địnhtầngđầu vào",
     nowIso: "2026-01-01T00:00:00.000Z",
   });
 
@@ -5240,7 +5240,7 @@ async function testPersistentRecallDataLayerLifecycleAndCompatibility() {
   assert.equal(loaded.generationCount, 0);
   assert.equal(loaded.manuallyEdited, false);
   assert.equal(loaded.authoritativeInputUsed, true);
-  assert.equal(loaded.boundUserFloorText, "稳定tầng输入");
+  assert.equal(loaded.boundUserFloorText, "ổn địnhtầngđầu vào");
 
   chat[2].mes = "u2 edited";
   assert.equal(
@@ -5345,10 +5345,10 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
   {
     const harness = await createGenerationRecallHarness({ realApplyFinal: true });
     harness.chat = [
-      { is_user: true, mes: "当前输入" },
+      { is_user: true, mes: "hiện tạiđầu vào" },
       { is_user: false, mes: "assistant-tail" },
     ];
-    harness.result.recordRecallSentUserMessage(0, "当前输入", "message-sent");
+    harness.result.recordRecallSentUserMessage(0, "hiện tạiđầu vào", "message-sent");
 
     const resolution =
       harness.result.applyFinalRecallInjectionForGeneration({
@@ -5359,13 +5359,13 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
           didRecall: true,
           injectionText: "fresh-memory",
           authoritativeInputUsed: true,
-          boundUserFloorText: "稳定tầng输入",
+          boundUserFloorText: "ổn địnhtầngđầu vào",
         },
         transaction: {
           frozenRecallOptions: {
             generationType: "normal",
             targetUserMessageIndex: null,
-            overrideUserMessage: "当前输入",
+            overrideUserMessage: "hiện tạiđầu vào",
             lockedSource: "send-intent",
             hookName: "GENERATION_AFTER_COMMANDS",
           },
@@ -5375,7 +5375,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
     assert.equal(resolution.source, "fresh");
     assert.equal(resolution.targetUserMessageIndex, 0);
     assert.equal(resolution.authoritativeInputUsed, true);
-    assert.equal(resolution.boundUserFloorText, "稳定tầng输入");
+    assert.equal(resolution.boundUserFloorText, "ổn địnhtầngđầu vào");
     assert.equal(
       harness.chat[0]?.extra?.bme_recall?.injectionText,
       "fresh-memory",
@@ -5388,7 +5388,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
     assert.equal(harness.chat[0]?.extra?.bme_recall?.authoritativeInputUsed, true);
     assert.equal(
       harness.chat[0]?.extra?.bme_recall?.boundUserFloorText,
-      "稳定tầng输入",
+      "ổn địnhtầngđầu vào",
     );
     assert.equal(harness.metadataSaveCalls > 0, true);
   }
@@ -5396,7 +5396,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
   {
     const harness = await createGenerationRecallHarness({ realApplyFinal: true });
     harness.chat = [
-      { is_user: true, mes: "尾部 user 仍可匹配" },
+      { is_user: true, mes: "phần đuôi user vẫn còn khớp" },
       { is_user: false, mes: "assistant-tail" },
     ];
 
@@ -5410,7 +5410,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
           injectionText: "fresh-memory",
           sourceCandidates: [
             {
-              text: "尾部 user 仍可匹配",
+              text: "phần đuôi user vẫn còn khớp",
             },
           ],
         },
@@ -5418,7 +5418,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
           frozenRecallOptions: {
             generationType: "normal",
             targetUserMessageIndex: null,
-            overrideUserMessage: "尾部 user 仍可匹配",
+            overrideUserMessage: "phần đuôi user vẫn còn khớp",
             lockedSource: "send-intent",
             hookName: "GENERATION_AFTER_COMMANDS",
           },
@@ -5431,10 +5431,10 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
   {
     const harness = await createGenerationRecallHarness({ realApplyFinal: true });
     harness.chat = [
-      { is_user: true, mes: "酒馆最终写入的Người dùngtầng文本" },
+      { is_user: true, mes: "văn bản tầng người dùng do SillyTavern ghi vào cuối cùng" },
       { is_user: false, mes: "assistant-tail" },
     ];
-    harness.result.recordRecallSentUserMessage(0, "发送前捕获的原始文本", "message-sent");
+    harness.result.recordRecallSentUserMessage(0, "văn bản gốc đã bắt được trước khi gửi", "message-sent");
 
     const resolution =
       harness.result.applyFinalRecallInjectionForGeneration({
@@ -5446,7 +5446,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
           injectionText: "fresh-memory",
           sourceCandidates: [
             {
-              text: "发送前捕获的原始文本",
+              text: "văn bản gốc đã bắt được trước khi gửi",
             },
           ],
         },
@@ -5454,7 +5454,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
           frozenRecallOptions: {
             generationType: "normal",
             targetUserMessageIndex: null,
-            overrideUserMessage: "发送前捕获的原始文本",
+            overrideUserMessage: "văn bản gốc đã bắt được trước khi gửi",
             lockedSource: "send-intent",
             hookName: "GENERATION_AFTER_COMMANDS",
           },
@@ -5464,7 +5464,7 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
     assert.equal(
       resolution.targetUserMessageIndex,
       0,
-      "normal 生成时即便Người dùng文本被Host改写，也应回绑到最新 user tầng",
+      "Trong lúc sinh normal, dù văn bản người dùng bị Host viết lại thì vẫn phải buộc lại vào tầng user mới nhất",
     );
   }
 }
@@ -5472,10 +5472,10 @@ async function testGenerationRecallFinalInjectionRebindsLatestMatchingUserFloor(
 async function testGenerationRecallFinalInjectionBackfillsPersistedRecord() {
   const harness = await createGenerationRecallHarness({ realApplyFinal: true });
   harness.chat = [
-    { is_user: true, mes: "最终阶段补写目标" },
+    { is_user: true, mes: "cuối cùnggiai đoạnghi bùmục tiêu" },
     { is_user: false, mes: "assistant-tail" },
   ];
-  harness.result.recordRecallSentUserMessage(0, "最终阶段补写目标", "message-sent");
+  harness.result.recordRecallSentUserMessage(0, "cuối cùnggiai đoạnghi bùmục tiêu", "message-sent");
 
   const resolution =
     harness.result.applyFinalRecallInjectionForGeneration({
@@ -5487,13 +5487,13 @@ async function testGenerationRecallFinalInjectionBackfillsPersistedRecord() {
         injectionText: "fresh-memory",
         selectedNodeIds: ["node-a", "node-b"],
         authoritativeInputUsed: true,
-        boundUserFloorText: "稳定tầng输入",
+        boundUserFloorText: "ổn địnhtầngđầu vào",
       },
       transaction: {
         frozenRecallOptions: {
           generationType: "normal",
           targetUserMessageIndex: null,
-          overrideUserMessage: "最终阶段补写目标",
+          overrideUserMessage: "cuối cùnggiai đoạnghi bùmục tiêu",
           lockedSource: "send-intent",
           hookName: "GENERATION_AFTER_COMMANDS",
         },
@@ -5514,15 +5514,15 @@ async function testGenerationRecallFinalInjectionBackfillsPersistedRecord() {
   assert.equal(harness.chat[0]?.extra?.bme_recall?.authoritativeInputUsed, true);
   assert.equal(
     harness.chat[0]?.extra?.bme_recall?.boundUserFloorText,
-    "稳定tầng输入",
+    "ổn địnhtầngđầu vào",
   );
   assert.equal(harness.metadataSaveCalls > 0, true);
 }
 
 async function testGenerationRecallImmediateAfterCommandsBackfillsPersistedRecord() {
   const harness = await createGenerationRecallHarness();
-  harness.chat = [{ is_user: true, mes: "即时模式补写目标" }];
-  harness.result.recordRecallSentUserMessage(0, "即时模式补写目标", "message-sent");
+  harness.chat = [{ is_user: true, mes: "tức thờichế độghi bùmục tiêu" }];
+  harness.result.recordRecallSentUserMessage(0, "tức thờichế độghi bùmục tiêu", "message-sent");
 
   const result = await harness.result.onGenerationAfterCommands(
     "normal",
@@ -5533,7 +5533,7 @@ async function testGenerationRecallImmediateAfterCommandsBackfillsPersistedRecor
   assert.equal(result?.status, "completed");
   assert.equal(
     harness.chat[0]?.extra?.bme_recall?.injectionText,
-    "Tiêm:即时模式补写目标",
+    "Tiêm:tức thờichế độghi bùmục tiêu",
   );
   assert.equal(
     JSON.stringify(harness.chat[0]?.extra?.bme_recall?.selectedNodeIds || []),
@@ -5544,7 +5544,7 @@ async function testGenerationRecallImmediateAfterCommandsBackfillsPersistedRecor
 
 async function testGenerationEndedBackfillsRecentRecallAndSchedulesHideRefresh() {
   const harness = await createGenerationRecallHarness({ realApplyFinal: true });
-  harness.chat = [{ is_user: true, mes: "生成结束后补写目标" }];
+  harness.chat = [{ is_user: true, mes: "sinhsau khi kết thúcghi bùmục tiêu" }];
   const transaction = harness.result.beginGenerationRecallTransaction({
     chatId: "chat-main",
     generationType: "normal",
@@ -5554,7 +5554,7 @@ async function testGenerationEndedBackfillsRecentRecallAndSchedulesHideRefresh()
   transaction.frozenRecallOptions = {
     generationType: "normal",
     targetUserMessageIndex: null,
-    overrideUserMessage: "生成结束后补写目标",
+    overrideUserMessage: "sinhsau khi kết thúcghi bùmục tiêu",
     lockedSource: "send-intent",
     hookName: "GENERATION_AFTER_COMMANDS",
   };
@@ -5570,7 +5570,7 @@ async function testGenerationEndedBackfillsRecentRecallAndSchedulesHideRefresh()
     didRecall: true,
     injectionText: "generation-ended-memory",
     selectedNodeIds: ["node-z"],
-    sourceCandidates: [{ text: "生成结束后补写目标" }],
+    sourceCandidates: [{ text: "sinhsau khi kết thúcghi bùmục tiêu" }],
     hookName: "GENERATION_AFTER_COMMANDS",
   };
   transaction.updatedAt = Date.now();
@@ -5592,12 +5592,12 @@ async function testRecallSubGraphAndDataLayerEntryPoints() {
 
   const graph = {
     nodes: [
-      { id: "n1", type: "character", name: "赵管家", importance: 7 },
-      { id: "n2", type: "event", name: "喂食", importance: 5 },
+      { id: "n1", type: "character", name: "Quản gia Triệu", importance: 7 },
+      { id: "n2", type: "event", name: "Cho ăn", importance: 5 },
       {
         id: "n3",
         type: "location",
-        name: "厨房",
+        name: "Nhà bếp",
         importance: 3,
         archived: true,
       },
@@ -5857,13 +5857,13 @@ async function testNotifyHistoryDirtyUsesStageNoticeWithoutGenericWarningToast()
 
   harness.result.notifyHistoryDirty(
     12,
-    "Tầng đã xử lý超出Chat hiện tại长度，检测到历史截断",
+    "Tầng đã xử lý vượt quá độ dài chat hiện tại, phát hiện lịch sử bị cắt ngắn",
   );
 
   assert.equal(harness.notices.length, 1);
   assert.equal(harness.warningToasts.length, 0);
   assert.equal(harness.notices[0][0], "history");
-  assert.equal(harness.notices[0][1], "检测到tầng历史变化");
+  assert.equal(harness.notices[0][1], "phát hiệntầnglịch sửthay đổi");
 }
 
 async function testHistoryRecoveryStandardSuffixReplayDoesNotEmitCompletionToast() {
@@ -5963,7 +5963,7 @@ async function testHistoryRecoveryFullRebuildStillWarnsUser() {
   assert.equal(result, true);
   assert.equal(harness.toastCalls.success.length, 0);
   assert.equal(harness.toastCalls.warning.length, 1);
-  assert.match(String(harness.toastCalls.warning[0]?.[0] || ""), /全量重建/);
+  assert.match(String(harness.toastCalls.warning[0]?.[0] || ""), /toàn lượngxây lại/);
 }
 
 async function testHistoryRecoveryFallbackFullRebuildCarriesResultCode() {
@@ -6351,7 +6351,7 @@ async function testEmbeddingUsesConfigTimeoutInsteadOfDefault() {
         model: "text-embedding-test",
         timeoutMs: 7,
       }),
-      /Embedding 请求超时/,
+      /Embedding yêu cầuquá thời gian/,
     );
     assert.equal(capturedDelay, 7);
   } finally {
@@ -6474,8 +6474,8 @@ async function testSynopsisUsesPromptMessagesWithoutFallbackSystemPrompt() {
       type: "event",
       seq: 1,
       fields: {
-        title: "起点",
-        summary: "剧情开始，Nhân vật进入新的冲突环境。",
+        title: "điểm bắt đầu",
+        summary: "cốt truyệnbắt đầu，Nhân vậtđi vàomớixung độtmôi trường。",
         participants: "Alice",
         status: "active",
       },
@@ -6487,8 +6487,8 @@ async function testSynopsisUsesPromptMessagesWithoutFallbackSystemPrompt() {
       type: "event",
       seq: 2,
       fields: {
-        title: "升级",
-        summary: "Nhân vật发现关键Manh mối，冲突升级。",
+        title: "Nâng cấp",
+        summary: "Nhân vật phát hiện ra manh mối then chốt, xung đột leo thang.",
         participants: "Alice, Bob",
         status: "active",
       },
@@ -6500,8 +6500,8 @@ async function testSynopsisUsesPromptMessagesWithoutFallbackSystemPrompt() {
       type: "event",
       seq: 3,
       fields: {
-        title: "转折",
-        summary: "双方对峙，局势进入新的阶段。",
+        title: "Bước ngoặt",
+        summary: "Hai bên đối đầu, cục diện bước sang giai đoạn mới.",
         participants: "Alice, Bob",
         status: "active",
       },
@@ -6514,7 +6514,7 @@ async function testSynopsisUsesPromptMessagesWithoutFallbackSystemPrompt() {
       async callLLMForJSON(params = {}) {
         captured.push(params);
         return {
-          summary: "这是新的概要",
+          summary: "Đây là tóm lược mới",
         };
       },
     },
@@ -6540,7 +6540,7 @@ async function testSynopsisUsesPromptMessagesWithoutFallbackSystemPrompt() {
         (node) =>
           node.type === "synopsis" &&
           !node.archived &&
-          node.fields.summary === "这是新的概要",
+          node.fields.summary === "Đây là tóm lược mới",
       ),
       true,
     );
@@ -6551,8 +6551,8 @@ async function testSynopsisUsesPromptMessagesWithoutFallbackSystemPrompt() {
 
 async function testRecallUsesSectionedPromptMessagesForContextAndTarget() {
   const graph = createEmptyGraph();
-  addNode(graph, makeEvent(1, "仓库争执"));
-  addNode(graph, makeEvent(2, "走廊追问"));
+  addNode(graph, makeEvent(1, "Tranh cãi ở kho"));
+  addNode(graph, makeEvent(2, "Truy hỏi ở hành lang"));
 
   const captured = [];
   const restoreOverrides = pushTestOverrides({
@@ -6561,7 +6561,7 @@ async function testRecallUsesSectionedPromptMessagesForContextAndTarget() {
         captured.push(params);
         return {
           selected_keys: ["R1"],
-          reason: "R1: 与当前追问直接相关",
+          reason: "R1: liên quan trực tiếp tới truy hỏi hiện tại",
           active_owner_keys: [],
           active_owner_scores: [],
         };
@@ -6572,11 +6572,11 @@ async function testRecallUsesSectionedPromptMessagesForContextAndTarget() {
   try {
     const result = await retrieve({
       graph,
-      userMessage: "她为什么突然改口？",
+      userMessage: "Vì sao cô ấy đột nhiên đổi lời?",
       recentMessages: [
-        "[assistant]: 她先否认自己去过仓库。",
-        "[user]: 我记得她当时很紧张。",
-        "[user]: 她为什么突然改口？",
+        "[assistant]: Lúc đầu cô ấy không nhận là mình đã từng tới kho.",
+        "[user]: Tôi nhớ lúc đó cô ấy rất căng thẳng.",
+        "[user]: Vì sao cô ấy đột nhiên đổi lời?",
       ],
       embeddingConfig: null,
       schema,
@@ -6619,9 +6619,9 @@ async function testRecallUsesSectionedPromptMessagesForContextAndTarget() {
     assert.equal(recentMessageSections[1].transcriptSection, "target");
     assert.match(recentMessageSections[0].content, new RegExp(EXTRACTION_CONTEXT_REVIEW_HEADER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
     assert.match(recentMessageSections[1].content, new RegExp(RECALL_TARGET_CONTENT_HEADER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-    assert.match(recentMessageSections[0].content, /她先否认自己去过仓库/);
-    assert.match(recentMessageSections[0].content, /我记得她当时很紧张/);
-    assert.match(recentMessageSections[1].content, /她为什么突然改口/);
+    assert.match(recentMessageSections[0].content, /cô ấy ban đầu không thừa nhận mình đã tới nhà kho/);
+    assert.match(recentMessageSections[0].content, /tôi nhớ khi đó cô ấy rất căng thẳng/);
+    assert.match(recentMessageSections[1].content, /vì sao cô ấy đột nhiên đổi lời/);
   } finally {
     restoreOverrides();
   }
@@ -6635,8 +6635,8 @@ async function testReflectionUsesPromptMessagesWithoutFallbackSystemPrompt() {
       type: "event",
       seq: 4,
       fields: {
-        title: "Sự kiện一",
-        summary: "Nhân vật开始怀疑盟友的动机。",
+        title: "Sự kiện 1",
+        summary: "Nhân vật bắt đầu nghi ngờ động cơ của đồng minh.",
         participants: "Alice, Bob",
         status: "active",
       },
@@ -6648,8 +6648,8 @@ async function testReflectionUsesPromptMessagesWithoutFallbackSystemPrompt() {
       type: "event",
       seq: 5,
       fields: {
-        title: "Sự kiện二",
-        summary: "隐藏矛盾被进一步Phóng to。",
+        title: "Sự kiện 2",
+        summary: "Mâu thuẫn ngầm bị khuếch đại thêm nữa.",
         participants: "Alice, Bob",
         status: "active",
       },
@@ -6662,7 +6662,7 @@ async function testReflectionUsesPromptMessagesWithoutFallbackSystemPrompt() {
       seq: 5,
       fields: {
         name: "Alice",
-        state: "戒备",
+        state: "cảnh giác",
       },
     }),
   );
@@ -6670,7 +6670,7 @@ async function testReflectionUsesPromptMessagesWithoutFallbackSystemPrompt() {
     type: "thread",
     seq: 5,
     fields: {
-      title: "信任危机",
+      title: "Khủng hoảng niềm tin",
       status: "active",
     },
   });
@@ -6693,9 +6693,9 @@ async function testReflectionUsesPromptMessagesWithoutFallbackSystemPrompt() {
       async callLLMForJSON(params = {}) {
         captured.push(params);
         return {
-          insight: "Gần nhất的关系裂痕正在固定化。",
-          trigger: "连续两lần试探与怀疑",
-          suggestion: "后续检索时优先关注信任破裂相关nút",
+          insight: "Rạn nứt quan hệ gần đây đang dần cố định lại.",
+          trigger: "Hai lần thử dò và hoài nghi liên tiếp",
+          suggestion: "Khi truy xuất về sau hãy ưu tiên chú ý tới các nút liên quan đến đổ vỡ niềm tin",
           importance: 7,
         };
       },
@@ -6724,11 +6724,11 @@ async function testReflectionUsesPromptMessagesWithoutFallbackSystemPrompt() {
     ).find((message) => message.sourceKey === "graphStats");
     assert.ok(graphStatsBlock, "reflection graphStats block should exist");
     const graphStatsContent = String(graphStatsBlock.content || "");
-    assert.match(graphStatsContent, /### Nút đồ thị统计/);
+    assert.match(graphStatsContent, /### Nút đồ thịthống kê/);
     assert.match(graphStatsContent, /Sự kiện: 2/);
     assert.match(graphStatsContent, /Nhân vật: 1/);
     assert.match(graphStatsContent, /tuyến chính: 1/);
-    assert.match(graphStatsContent, /\[G1\|tuyến chính\] 信任危机/);
+    assert.match(graphStatsContent, /\[G1\|tuyến chính\] Khủng hoảng niềm tin/);
     assert.doesNotMatch(
       graphStatsContent,
       new RegExp(threadNode.id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
@@ -6736,7 +6736,7 @@ async function testReflectionUsesPromptMessagesWithoutFallbackSystemPrompt() {
     const reflectionNode = graph.nodes.find((node) => node.id === result);
     assert.equal(
       reflectionNode?.fields?.insight,
-      "Gần nhất的关系裂痕正在固定化。",
+      "Rạn nứt quan hệ gần đây đang dần cố định lại.",
     );
   } finally {
     restoreOverrides();
@@ -6788,7 +6788,7 @@ async function testManualCompressSkipsWithoutCandidatesAndDoesNotPretendItRan() 
   assert.equal(calls.recordGraphMutation, 0);
   assert.equal(result?.handledToast, true);
   assert.equal(result?.requestDispatched, false);
-  assert.match(String(toastMessages[0]?.[1] || ""), /未发起 LLM Nén/);
+  assert.match(String(toastMessages[0]?.[1] || ""), /chưa khởi phát LLM nén/);
 }
 
 async function testManualCompressUsesForcedCompressionAndPersistsRealMutation() {
@@ -6866,7 +6866,7 @@ async function testManualCompressUpdatesRuntimeStatusForPanelUi() {
 
   assert.equal(result?.handledToast, true);
   assert.equal(result?.mutated, true);
-  assert.equal(statusUpdates[0]?.text, "Nén thủ công中");
+  assert.equal(statusUpdates[0]?.text, "Đang nén thủ công");
   assert.equal(statusUpdates[0]?.level, "running");
   assert.equal(statusUpdates.at(-1)?.text, "Nén thủ công hoàn tất");
   assert.equal(statusUpdates.at(-1)?.level, "success");
@@ -6927,7 +6927,7 @@ async function testManualEvolveFallsBackToLatestExtractionBatchAfterRefresh() {
       };
     },
     recordMaintenanceAction() {
-      throw new Error("keep-only Kết quả不应写入维护账本");
+      throw new Error("Kết quả keep-only không được ghi vào sổ cái bảo trì");
     },
     recordGraphMutation: async () => {
       recordGraphMutationCalls += 1;
@@ -6950,7 +6950,7 @@ async function testManualEvolveFallsBackToLatestExtractionBatchAfterRefresh() {
   assert.equal(result?.handledToast, true);
   assert.equal(result?.requestDispatched, true);
   assert.equal(result?.mutated, false);
-  assert.match(String(toastMessages[0]?.[1] || ""), /lô gần nhấtTrích xuất落盘/);
+  assert.match(String(toastMessages[0]?.[1] || ""), /lô trích xuất gần nhất đã ghi xuống đĩa/);
 }
 
 async function testManualEvolveWarnsOnInvalidVectorConfigInsteadOfPretendingComplete() {
@@ -6967,7 +6967,7 @@ async function testManualEvolveWarnsOnInvalidVectorConfigInsteadOfPretendingComp
     getEmbeddingConfig: () => ({ mode: "direct" }),
     validateVectorConfig: () => ({
       valid: false,
-      error: "Embedding Cấu hìnhKhông效",
+      error: "Cấu hình Embedding không hợp lệ",
     }),
     getLastExtractedItems: () => [{ id: "evt-2" }],
     consolidateMemories: async () => {
@@ -6994,7 +6994,7 @@ async function testManualEvolveWarnsOnInvalidVectorConfigInsteadOfPretendingComp
   assert.equal(consolidateCalls, 0);
   assert.equal(result?.handledToast, true);
   assert.equal(result?.requestDispatched, false);
-  assert.match(String(toastMessages[0]?.[1] || ""), /Cấu hìnhKhông效/);
+  assert.match(String(toastMessages[0]?.[1] || ""), /Cấu hình không hợp lệ/);
 }
 
 async function testManualSleepExplainsThatItIsLocalOnlyWhenNothingChanges() {
@@ -7008,7 +7008,7 @@ async function testManualSleepExplainsThatItIsLocalOnlyWhenNothingChanges() {
     sleepCycle: () => ({ forgotten: 0 }),
     getSettings: () => ({ forgetThreshold: 0.5 }),
     recordMaintenanceAction() {
-      throw new Error("KhôngLưu trữ时不应写入维护账本");
+      throw new Error("Khi không lưu trữ thì không được ghi vào sổ cái bảo trì");
     },
     recordGraphMutation: async () => {
       recordGraphMutationCalls += 1;
@@ -7026,7 +7026,7 @@ async function testManualSleepExplainsThatItIsLocalOnlyWhenNothingChanges() {
   assert.equal(recordGraphMutationCalls, 0);
   assert.equal(result?.handledToast, true);
   assert.equal(result?.requestDispatched, false);
-  assert.match(String(toastMessages[0]?.[1] || ""), /不会发送 LLM 请求/);
+  assert.match(String(toastMessages[0]?.[1] || ""), /sẽ không gửi yêu cầu LLM/);
 }
 
 await testCompressorMigratesEdgesToCompressedNode();
@@ -7140,3 +7140,6 @@ await testManualEvolveWarnsOnInvalidVectorConfigInsteadOfPretendingComplete();
 await testManualSleepExplainsThatItIsLocalOnlyWhenNothingChanges();
 
 console.log("p0-regressions tests passed");
+
+
+

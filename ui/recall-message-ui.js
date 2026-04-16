@@ -17,7 +17,7 @@ function _hostUserPovAliasHintsForRecallCanvas() {
   }
 }
 
-// ==================== 常量 ====================
+// ==================== hằng số ====================
 
 export const RECALL_CARD_FORCE_CONFIG = {
   repulsion: 1200,
@@ -35,10 +35,10 @@ export const RECALL_CARD_FORCE_CONFIG = {
 
 const DELETE_CONFIRM_TIMEOUT_MS = 3000;
 
-// ==================== 子图构建 ====================
+// ==================== Xây dựng đồ thị con ====================
 
 /**
- * 从完整đồ thịTrung bìnhTrích xuấtTruy hồinút子图
+ * Trích xuất đồ thị con của các nút truy hồi từ đồ thị đầy đủ
  * @param {object} graph - currentGraph
  * @param {string[]} selectedNodeIds
  * @returns {{ nodes: Array, edges: Array }}
@@ -65,7 +65,7 @@ export function buildRecallSubGraph(graph, selectedNodeIds) {
   return { nodes, edges };
 }
 
-// ==================== 辅助 DOM ====================
+// ==================== hỗ trợ DOM ====================
 
 function el(tag, className, textContent) {
   const element = document.createElement(tag);
@@ -196,10 +196,10 @@ function buildExpandedRenderSignature({
   });
 }
 
-// ==================== 卡片 DOM 构建 ====================
+// ==================== thẻ DOM xây dựng ====================
 
 /**
- * 创建tin nhắn级Truy hồi卡片 DOM
+ * Tạo DOM thẻ truy hồi cấp tin nhắn
  * @param {object} params
  * @param {number} params.messageIndex
  * @param {object} params.record - bme_recall record
@@ -232,7 +232,7 @@ export function createRecallCardElement({
   );
   let expandedRenderSignature = "";
 
-  // -- Người dùngtin nhắn区 --
+  // -- Khu tin nhắn người dùng --
   const userLabel = el("div", "bme-recall-user-label");
   userLabel.innerHTML = "💬 <span>Đầu vào người dùng của lượt này</span>";
   card.appendChild(userLabel);
@@ -240,7 +240,7 @@ export function createRecallCardElement({
   const userText = el("div", "bme-recall-user-text", activeUserMessageText || "(empty)");
   card.appendChild(userText);
 
-  // -- Truy hồi条 --
+  // -- Thanh truy hồi --
   const initialNodeCount = Array.isArray(activeRecord?.selectedNodeIds)
     ? activeRecord.selectedNodeIds.length
     : 0;
@@ -272,11 +272,11 @@ export function createRecallCardElement({
 
   card.appendChild(bar);
 
-  // -- 展开Nội dung区 --
+  // -- Khu nội dung mở rộng --
   const body = el("div", "bme-recall-body");
   card.appendChild(body);
 
-  // renderer 实例管理
+  // Quản lý instance renderer
   let renderer = null;
 
   function destroyRenderer() {
@@ -304,13 +304,13 @@ export function createRecallCardElement({
       );
       body.appendChild(emptyMsg);
     } else {
-      // Canvas 容器
+      // Vùng chứa Canvas
       const canvasWrap = el("div", "bme-recall-canvas-wrap");
       const canvas = document.createElement("canvas");
       canvasWrap.appendChild(canvas);
       body.appendChild(canvasWrap);
 
-      // 创建小画布 GraphRenderer
+      // Tạo GraphRenderer cỡ nhỏ
       renderer = new GraphRenderer(canvas, {
         theme: themeName,
         forceConfig: RECALL_CARD_FORCE_CONFIG,
@@ -331,7 +331,7 @@ export function createRecallCardElement({
       });
     }
 
-    // 元信息行
+    // Dòng siêu dữ liệu
     const meta = el("div", "bme-recall-meta", formatMetaLine(activeRecord || {}));
     if (activeRecord?.manuallyEdited) {
       const tag = el("span", "bme-recall-meta-tag", "✍ Chỉnh sửa thủ công");
@@ -339,7 +339,7 @@ export function createRecallCardElement({
     }
     body.appendChild(meta);
 
-    // Thao tác按钮行
+    // Dòng nút thao tác
     const actions = el("div", "bme-recall-actions");
 
     const editBtn = el("button", "bme-recall-action-btn");
@@ -439,7 +439,7 @@ export function createRecallCardElement({
 
   card._bmeUpdateRecallCard = applyCardRuntimeData;
 
-  // 点击Truy hồi条 toggle 展开/折叠
+  // Nhấn thanh truy hồi để bật/tắt mở rộng
   bar.addEventListener("click", (e) => {
     e.stopPropagation();
     const isExpanded = card.classList.toggle("expanded");
@@ -456,7 +456,7 @@ export function createRecallCardElement({
 
   applyCardRuntimeData({}, { skipExpandedRerender: true });
 
-  // 暴露清理方法
+  // Expose phương thức dọn dẹp
   card._bmeDestroyRenderer = () => {
     destroyRenderer();
     expandedRenderSignature = "";
@@ -468,7 +468,7 @@ export function createRecallCardElement({
 
 
 /**
- * Cập nhật已有卡片的 badge / token hint / meta（不重建整个卡片）
+ * Cập nhật badge / token hint / meta của thẻ đã có (không xây lại toàn bộ thẻ)
  */
 export function updateRecallCardData(cardElement, record, options = {}) {
   if (!cardElement || !record) return;
@@ -487,7 +487,7 @@ export function updateRecallCardData(cardElement, record, options = {}) {
   cardElement.dataset.updatedAt = String(record.updatedAt || "");
 }
 
-// ==================== Xóa二lầnXác nhận ====================
+// ==================== Xóa với xác nhận hai lần ====================
 
 export function setupDeleteConfirmation(button, onConfirm) {
   let confirmTimer = null;
@@ -532,7 +532,7 @@ export function setRecallButtonLoading(button, loading) {
   }
 }
 
-// ==================== 侧边栏 ====================
+// ==================== Thanh bên ====================
 
 let sidebarBackdrop = null;
 let sidebarElement = null;
@@ -550,12 +550,12 @@ function ensureSidebarDOM() {
 }
 
 /**
- * 打开Truy hồiChỉnh sửa/查看侧边栏
+ * Mở thanh bên chỉnh sửa/xem truy hồi
  * @param {object} params
  * @param {'view'|'edit'} params.mode
  * @param {number} params.messageIndex
  * @param {object} params.record
- * @param {object|null} params.node - 点击的nút（view 模式）
+ * @param {object|null} params.node - nút được nhấn (chế độ xem)
  * @param {object|null} params.graph
  * @param {object} params.callbacks
  */
@@ -615,7 +615,7 @@ export function openRecallSidebar({
       if (relatedEdges.length > 0) {
         const edgeRow = el("div", "bme-recall-sidebar-node-info-row");
         const edgeLabel = el("span", "bme-recall-sidebar-node-info-label", "Liên kết");
-        const edgeValue = el("span", "", `${relatedEdges.length} 条边`);
+        const edgeValue = el("span", "", `${relatedEdges.length} cạnh`);
         edgeRow.appendChild(edgeLabel);
         edgeRow.appendChild(edgeValue);
         nodeInfo.appendChild(edgeRow);

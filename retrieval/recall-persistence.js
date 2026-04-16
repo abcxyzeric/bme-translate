@@ -1,4 +1,4 @@
-// ST-BME: Lưu bềnTruy hồi记录纯函数
+// ST-BME: Lưu bềnTruy hồibản ghihàm thuần
 
 export const BME_RECALL_EXTRA_KEY = "bme_recall";
 export const BME_RECALL_VERSION = 1;
@@ -138,8 +138,8 @@ export function resolveGenerationTargetUserMessageIndex(
 
   const normalizedType = String(generationType || "normal").trim() || "normal";
 
-  // normal：取「最后一条非系统Người dùngtầng」。若直接 return 末条非 user（常见为刚Nối thêm的trợ lý回合），
-  // 会得到 null，导致Lưu bềnKhông法回绑到本轮 user，`hasRecordForLatest` 长期为 false。
+  // Với normal: lấy "tầng người dùng cuối cùng không phải hệ thống". Nếu trực tiếp return mục không phải user cuối cùng (thường là lượt trợ lý vừa được nối thêm),
+  // thì sẽ nhận về null, khiến lưu bền không thể buộc lại vào user của lượt này và `hasRecordForLatest` sẽ luôn là false.
   if (normalizedType === "normal") {
     for (let index = chat.length - 1; index >= 0; index--) {
       const message = chat[index];

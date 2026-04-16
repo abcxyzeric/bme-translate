@@ -1,4 +1,4 @@
-// ST-BME: Chế độ vector、Chỉ mục backend与Fallback trực tiếp
+// ST-BME: chế độ vector, chỉ mục backend và fallback trực tiếp
 
 import { getRequestHeaders } from "../../../../../script.js";
 import { embedBatch, embedText, searchSimilar } from "./embedding.js";
@@ -112,7 +112,7 @@ async function fetchWithTimeout(
     () =>
       controller.abort(
         new DOMException(
-          `Vector请求超时 (${Math.round(timeoutMs / 1000)}s)`,
+          `Vectoryêu cầuquá thời gian (${Math.round(timeoutMs / 1000)}s)`,
           "AbortError",
         ),
       ),
@@ -220,25 +220,25 @@ export function getVectorModelScope(config) {
 
 export function validateVectorConfig(config) {
   if (!config) {
-    return { valid: false, error: "未找到VectorCấu hình" };
+    return { valid: false, error: "Không tìm thấy cấu hình vector" };
   }
 
   if (isDirectVectorConfig(config)) {
     if (!config.apiUrl) {
-      return { valid: false, error: "请填写直连 Địa chỉ API Embedding" };
+      return { valid: false, error: "Hãy điền địa chỉ API Embedding cho kết nối trực tiếp" };
     }
     if (!config.model) {
-      return { valid: false, error: "请填写直连 Model Embedding" };
+      return { valid: false, error: "Hãy điền model Embedding cho kết nối trực tiếp" };
     }
     return { valid: true, error: "" };
   }
 
   if (!config.model) {
-    return { valid: false, error: "请填写BackendVectorModel" };
+    return { valid: false, error: "Hãy điền BackendVectorModel" };
   }
 
   if (BACKEND_SOURCES_REQUIRING_API_URL.has(config.source) && !config.apiUrl) {
-    return { valid: false, error: "当前Nguồn vector backend需要填写 API 地址" };
+    return { valid: false, error: "Nguồn vector backend hiện tại yêu cầu phải điền địa chỉ API" };
   }
 
   return { valid: true, error: "" };
@@ -492,7 +492,7 @@ function markBackendVectorStateDirty(
   graph,
   config,
   reason = "backend-query-failed",
-  warning = "BackendVectorTruy vấn thất bại，已标记待重建",
+  warning = "Truy vấn BackendVector thất bại, đã đánh dấu chờ xây lại",
 ) {
   if (!graph?.vectorIndexState || !isBackendVectorConfig(config)) {
     return;
@@ -529,7 +529,7 @@ function markBackendVectorStateDirty(
     stale: Math.max(previousStale, total > 0 ? 1 : 0),
     pending: total > 0 ? Math.max(1, previousPending) : previousPending,
   };
-  state.lastWarning = String(warning || "BackendVectorTruy vấn thất bại，已标记待重建");
+  state.lastWarning = String(warning || "Truy vấn BackendVector thất bại, đã đánh dấu chờ xây lại");
 }
 
 export async function syncGraphVectorIndex(
@@ -709,7 +709,7 @@ export async function syncGraphVectorIndex(
     state.collectionId = collectionId;
     state.dirty = directSyncHadFailures;
     state.lastWarning = directSyncHadFailures
-      ? "部分nút embedding Sinh thất bại，Vector索引仍待修复"
+      ? "Một phần nút sinh embedding thất bại, chỉ mục vector vẫn đang chờ sửa"
       : "";
   }
 
@@ -793,7 +793,7 @@ export async function findSimilarNodesByText(
         graph,
         config,
         "backend-query-failed",
-        `BackendVectorTruy vấn thất bại（${message}），已标记待重建`,
+        `Truy vấn BackendVector thất bại (${message}), đã đánh dấu chờ xây lại`,
       );
       return [];
     }
@@ -819,7 +819,7 @@ export async function findSimilarNodesByText(
       graph,
       config,
       "backend-query-failed",
-      `BackendVectorTruy vấn thất bại（${message}），已标记待重建`,
+      `Truy vấn BackendVector thất bại (${message}), đã đánh dấu chờ xây lại`,
     );
     throw error;
   }
@@ -837,7 +837,7 @@ export async function testVectorConnection(config, chatId = "connection-test") {
       if (vec) {
         return { success: true, dimensions: vec.length, error: "" };
       }
-      return { success: false, dimensions: 0, error: "API 返回空Kết quả" };
+      return { success: false, dimensions: 0, error: "API trả về kết quả rỗng" };
     } catch (error) {
       return { success: false, dimensions: 0, error: String(error) };
     }
@@ -952,7 +952,7 @@ async function fetchJsonEndpoint(url, { method = "POST" } = {}) {
 async function fetchBackendStatusModelList(source) {
   const chatCompletionSource = BACKEND_STATUS_MODEL_SOURCES[source];
   if (!chatCompletionSource) {
-    throw new Error("当前Nguồn vector backend暂不支持Tự độngLấy model，请Thủ công填写");
+    throw new Error("Nguồn vector backend hiện tại tạm thời chưa hỗ trợ tự động lấy model, hãy tự điền");
   }
 
   const response = await fetchWithTimeout(
@@ -984,7 +984,7 @@ async function fetchBackendStatusModelList(source) {
 async function fetchOpenAICompatibleModelList(apiUrl, apiKey = "") {
   const normalizedUrl = normalizeOpenAICompatibleBaseUrl(apiUrl);
   if (!normalizedUrl) {
-    throw new Error("请先填写 API 地址");
+    throw new Error("Hãy điền địa chỉ API trước");
   }
 
   const response = await fetchWithTimeout(`${normalizedUrl}/models`, {
@@ -1012,7 +1012,7 @@ async function fetchOllamaModelList(apiUrl) {
     "",
   );
   if (!normalizedUrl) {
-    throw new Error("请先填写 Ollama API 地址");
+    throw new Error("Hãy điền địa chỉ API của Ollama trước");
   }
 
   const response = await fetchWithTimeout(`${normalizedUrl}/api/tags`, {
@@ -1049,7 +1049,7 @@ export async function fetchAvailableEmbeddingModels(config) {
         return {
           success: false,
           models: [],
-          error: "未拉取到可用 Model Embedding",
+          error: "Không lấy được model Embedding khả dụng",
         };
       }
       return { success: true, models, error: "" };
@@ -1061,7 +1061,7 @@ export async function fetchAvailableEmbeddingModels(config) {
         return {
           success: false,
           models: [],
-          error: "未拉取到可用 Ollama Model",
+          error: "Không lấy được model Ollama khả dụng",
         };
       }
       return { success: true, models, error: "" };
@@ -1078,7 +1078,7 @@ export async function fetchAvailableEmbeddingModels(config) {
         return {
           success: false,
           models: [],
-          error: "未拉取到可用 Model Embedding",
+          error: "Không lấy được model Embedding khả dụng",
         };
       }
       return { success: true, models, error: "" };
@@ -1090,7 +1090,7 @@ export async function fetchAvailableEmbeddingModels(config) {
         return {
           success: false,
           models: [],
-          error: "未拉取到可用 Model Embedding",
+          error: "Không lấy được model Embedding khả dụng",
         };
       }
       return { success: true, models, error: "" };
@@ -1104,7 +1104,7 @@ export async function fetchAvailableEmbeddingModels(config) {
         return {
           success: false,
           models: [],
-          error: "未拉取到可用 Model Embedding",
+          error: "Không lấy được model Embedding khả dụng",
         };
       }
       return { success: true, models, error: "" };
@@ -1113,7 +1113,7 @@ export async function fetchAvailableEmbeddingModels(config) {
     return {
       success: false,
       models: [],
-      error: "当前Nguồn vector backend暂不支持Tự độngLấy model，请Thủ công填写",
+      error: "Nguồn vector backend hiện tại tạm thời chưa hỗ trợ tự động lấy model, hãy tự điền",
     };
   } catch (error) {
     return { success: false, models: [], error: String(error) };

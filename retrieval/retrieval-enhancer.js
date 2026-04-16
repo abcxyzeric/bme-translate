@@ -1,4 +1,4 @@
-import { embedText, searchSimilar } from "../vector/embedding.js";
+﻿import { embedText, searchSimilar } from "../vector/embedding.js";
 import { getNode } from "../graph/graph.js";
 import { isDirectVectorConfig } from "../vector/vector-index.js";
 
@@ -18,7 +18,7 @@ export function splitIntentSegments(
   if (!raw) return [];
 
   const segments = raw
-    .split(/[，,。.；;！!？?\n]+|(?:顺便|另外|还有|对了|然后|而且|并且|同时)/)
+    .split(/[，,】【。；;！!？?\n]+|(?:tiện thể|ngoài ra|còn nữa|à mà|sau đó|hơn nữa|và cả|đồng thời)/)
     .map((item) => item.trim())
     .filter((item) => item.length >= minLength);
 
@@ -793,3 +793,5 @@ function createDeterministicRandom(seed) {
     return current / 0xffffffff;
   };
 }
+
+

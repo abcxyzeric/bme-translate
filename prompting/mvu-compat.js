@@ -1,4 +1,4 @@
-// ST-BME: MVU (MagVarUpdate) compatibility helpers for private task prompts.
+﻿// ST-BME: MVU (MagVarUpdate) compatibility helpers for private task prompts.
 // These rules are intentionally narrow so we strip MVU artifacts without
 // disturbing normal prompt or world info content.
 
@@ -18,11 +18,11 @@ const MVU_GETVAR_REFERENCE_REGEX =
 const MVU_STATEFUL_TEMPLATE_TAG_REGEX =
   /<%[-=]?[\s\S]*?(?:SafeGetValue|getvar\(\s*["'](?:stat_data|display_data|delta_data)["']\s*\)|\b(?:stat_data|display_data|delta_data)\b)[\s\S]*?%>/gi;
 const EJS_TEMPLATE_TAG_REGEX = /<%[-=]?[\s\S]*?%>/gi;
-const MVU_VARIABLE_OUTPUT_ENTRY_REGEX = /变量Định dạng đầu ra:\s*[\s\S]*?<UpdateVariable>/i;
+const MVU_VARIABLE_OUTPUT_ENTRY_REGEX = /biếnĐịnh dạng đầu ra:\s*[\s\S]*?<UpdateVariable>/i;
 const MVU_VARIABLE_RULES_ENTRY_REGEX =
-  /变量Cập nhậtQuy tắc:\s*[\s\S]*?(?:type:\s*|check:\s*|当前时间:|近期事务:)/i;
+  /biếnCập nhậtQuy tắc:\s*[\s\S]*?(?:type:\s*|check:\s*|thời gian hiện tại:|sự vụ gần đây:)/i;
 const MVU_FORMAT_EMPHASIS_ENTRY_REGEX =
-  /(?:变量Định dạng đầu ra强调|格式强调[：:]?-?变量Cập nhậtQuy tắc|格式强调[：:]?-?剧情演绎|The following must be inserted to the end of (?:each )?reply,? and cannot be omitted)[\s\S]*?format:\s*\|-?/i;
+  /(?:biếnNhấn mạnh định dạng đầu ra|nhấn mạnh định dạng[：:]?-?biếnCập nhậtQuy tắc|nhấn mạnh định dạng[：:]?-?diễn giải cốt truyện|The following must be inserted to the end of (?:each )?reply,? and cannot be omitted)[\s\S]*?format:\s*\|-?/i;
 const MVU_STATE_OBJECT_FIELD_REGEX =
   /["']?(?:stat_data|display_data|delta_data)["']?\s*:/i;
 const MVU_STATE_PATH_REFERENCE_REGEX =
@@ -235,3 +235,4 @@ export function sanitizeMvuContent(
     artifactRemovedCount: artifactResult.artifactRemovedCount,
   };
 }
+

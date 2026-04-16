@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import { diffuseAndRank } from "../retrieval/diffusion.js";
 import {
   addEdge,
@@ -15,19 +15,19 @@ const graph = createEmptyGraph();
 const event1 = createNode({
   type: "event",
   seq: 1,
-  fields: { summary: "初始Sự kiện" },
+  fields: { summary: "Sự kiện ban đầu" },
   importance: 5,
 });
 const event2 = createNode({
   type: "event",
   seq: 2,
-  fields: { summary: "后续Sự kiện" },
+  fields: { summary: "về sauSự kiện" },
   importance: 6,
 });
 const character = createNode({
   type: "character",
   seq: 2,
-  fields: { name: "Ailin", state: "警觉" },
+  fields: { name: "Ailin", state: "cảnh giác" },
   importance: 7,
 });
 
@@ -88,3 +88,4 @@ assert.ok(diffusion.some((item) => item.nodeId === character.id));
 assert.ok(diffusion.some((item) => item.nodeId === event1.id));
 
 console.log("graph-retrieval tests passed");
+

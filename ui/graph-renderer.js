@@ -1,0 +1,1520 @@
+// ST-BME: Canvas đồ thị渲染器 — 分区「神经视图」布局
+// 零依赖：Khách quan层 / POV nhân vật / POV người dùng 分区内 Vogel 初值 + 一lần性力导向稳定，Không帧循环抖动
+
+import { getNodeColors } from './themes.js';
+import {
+    isUsableGraphCanvasSize,
+    remapPositionBetweenRects,
+} from './graph-renderer-utils.js';
+import { getGraphNodeLabel, getNodeDisplayName } from '../graph/node-labels.js';
+import { normalizeMemoryScope } from '../graph/memory-scope.js';
+import {
+    aliasSetMatchesValue,
+    buildUserPovAliasNormalizedSet,
+} from '../runtime/user-alias-utils.js';
+import {
+    GraphNativeLayoutBridge,
+    normalizeGraphNativeRuntimeOptions,
+} from './graph-native-bridge.js';
+
+/**
+ * @typedef {Object} GraphNode
+ * @property {string} id
+ * @property {string} type
+ * @property {string} name
+ * @property {number} importance
+ * @property {number} x
+ * @property {number} y
+ * @property {number} vx
+ * @property {number} vy
+ * @property {boolean} pinned
+ */
+
+const DEFAULT_LAYOUT_CONFIG = {
+    minNodeRadius: 6,
+    maxNodeRadius: 17,
+    labelFontSize: 10,
+    gridSpacing: 48,
+    gridColor: 'rgba(255,255,255,0.028)',
+    /** 主画布左侧Khách quan区占比（余下为右侧 POV 列） */
+    objectiveWidthRatio: 0.62,
+    /** 分区内类神经布局：力导向迭代lần数（Không持续动画，仅一lần性稳定） */
+    neuralIterations: 120,
+    neuralRepulsion: 2800,
+    neuralSpringK: 0.048,
+    neuralDamping: 0.88,
+    neuralCenterGravity: 0.014,
+    /** nút最小间距（除半径外） */
+    neuralMinGap: 12,
+};
+
+const ADAPTIVE_NEURAL_LAYOUT_POLICY = Object.freeze({
+    reduceIterationsNodes: 220,
+    reduceIterationsEdges: 1200,
+    reduceIterationsCap: 56,
+    strongReduceNodes: 360,
+    strongReduceEdges: 2200,
+    strongReduceCap: 24,
+    skipSimulationNodes: 520,
+    skipSimulationEdges: 3600,
+});
+
+const MIN_USABLE_CANVAS_DIMENSION = 48;
+const RUNTIME_DEBUG_STATE_KEY = '__stBmeRuntimeDebugState';
+
+function cloneGraphLayoutDebugValue(value, fallback = null) {
+    if (value == null) return fallback;
+    if (typeof globalThis.structuredClone === 'function') {
+        try {
+            return globalThis.structuredClone(value);
+        } catch {}
+    }
+    try {
+        return JSON.parse(JSON.stringify(value));
+    } catch {
+        return fallback;
+    }
+}
+
+function recordGraphLayoutDebugSnapshot(snapshot = null) {
+    if (!globalThis || typeof globalThis !== 'object') return;
+    if (!globalThis[RUNTIME_DEBUG_STATE_KEY] || typeof globalThis[RUNTIME_DEBUG_STATE_KEY] !== 'object') {
+        globalThis[RUNTIME_DEBUG_STATE_KEY] = {
+            updatedAt: '',
+            graphLayout: null,
+        };
+    }
+    const state = globalThis[RUNTIME_DEBUG_STATE_KEY];
+    state.graphLayout = snapshot && typeof snapshot === 'object'
+        ? {
+            updatedAt: new Date().toISOString(),
+            ...cloneGraphLayoutDebugValue(snapshot, {}),
+        }
+        : null;
+    state.updatedAt = new Date().toISOString();
+}
+
+/** 兼容旧版 forceConfig（Truy hồi卡片等） */
+function layoutKeysFromForceConfig(fc) {
+    if (!fc || typeof fc !== 'object') return {};
+    const o = {};
+    if (fc.minNodeRadius != null) o.minNodeRadius = fc.minNodeRadius;
+    if (fc.maxNodeRadius != null) o.maxNodeRadius = fc.maxNodeRadius;
+    if (fc.labelFontSize != null) o.labelFontSize = fc.labelFontSize;
+    if (fc.gridSpacing != null) o.gridSpacing = fc.gridSpacing;
+    if (fc.gridColor != null) o.gridColor = fc.gridColor;
+    if (fc.maxIterations != null) {
+        o.neuralIterations = Math.min(
+            160,
+            Math.max(32, Math.round(fc.maxIterations * 0.85)),
+        );
+    }
+    return o;
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+    const W = Math.max(0, Number(w) || 0);
+    const H = Math.max(0, Number(h) || 0);
+    const rr = Math.max(0, Number(r) || 0);
+    const radius = Math.min(rr, W / 2, H / 2);
+    if (W < 1 || H < 1) {
+        ctx.rect(x, y, Math.max(1, W), Math.max(1, H));
+        return;
+    }
+    if (radius < 1e-6) {
+        ctx.rect(x, y, W, H);
+        return;
+    }
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + W, y, x + W, y + H, radius);
+    ctx.arcTo(x + W, y + H, x, y + H, radius);
+    ctx.arcTo(x, y + H, x, y, radius);
+    ctx.arcTo(x, y, x + W, y, radius);
+    ctx.closePath();
+}
+
+const SCOPE_OUTLINE_COLORS = {
+    objective: '#57c7ff',
+    character: '#ffb347',
+    user: '#7dff9b',
+};
+
+function hashId(id) {
+    let h = 0;
+    const s = String(id || '');
+    for (let i = 0; i < s.length; i++) {
+        h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+    }
+    return h;
+}
+
+/** 与 memory-scope Trung bình normalizeKey 一致，用于分区键（模块内未Xuất故Cục bộ复制） */
+function normalizeKeyForPartition(value) {
+    return String(value ?? '').trim().toLowerCase();
+}
+
+function scopeMatchesHostUserAliases(scope, aliasSet) {
+    if (!(aliasSet instanceof Set) || aliasSet.size === 0) return false;
+    for (const field of [scope.ownerName, scope.ownerId]) {
+        if (aliasSetMatchesValue(aliasSet, field)) return true;
+    }
+    return false;
+}
+
+function characterPovLabelFromNodes(arr) {
+    if (!arr?.length) return '·';
+    for (const n of arr) {
+        const s = normalizeMemoryScope(n.raw?.scope);
+        if (s.ownerName) return s.ownerName;
+    }
+    for (const n of arr) {
+        const s = normalizeMemoryScope(n.raw?.scope);
+        if (s.ownerId) return s.ownerId;
+    }
+    return '·';
+}
+
+function partitionNodesByScope(nodes, userPovAliasSet = null) {
+    const objective = [];
+    const userPov = [];
+    const charMap = new Map();
+    const aliasSet =
+        userPovAliasSet instanceof Set ? userPovAliasSet : new Set();
+
+    for (const node of nodes) {
+        const scope = normalizeMemoryScope(node.raw?.scope);
+        if (scope.layer !== 'pov') {
+            objective.push(node);
+            node.regionKey = 'objective';
+            continue;
+        }
+        // 优先：HostNgười dùng显示名与 ownerName/ownerId 一致时一律归POV người dùng（修正Trích xuất阶段误标 character）
+        if (scopeMatchesHostUserAliases(scope, aliasSet)) {
+            userPov.push(node);
+            node.regionKey = 'user';
+            continue;
+        }
+        if (scope.ownerType === 'user') {
+            userPov.push(node);
+            node.regionKey = 'user';
+            continue;
+        }
+        if (scope.ownerType === 'character') {
+            // 与 UUID+姓名、仅姓名 等存法兼容：优先用展示名归并，避免同一Nhân vật拆成多个 POV 区
+            const nameKey = normalizeKeyForPartition(scope.ownerName);
+            const idKey = normalizeKeyForPartition(scope.ownerId);
+            const key = nameKey || idKey || '·';
+            if (!charMap.has(key)) charMap.set(key, []);
+            charMap.get(key).push(node);
+            node.regionKey = `char:${key}`;
+            continue;
+        }
+        objective.push(node);
+        node.regionKey = 'objective';
+    }
+
+    return { objective, userPov, charMap };
+}
+
+export class GraphRenderer {
+    /**
+     * @param {HTMLCanvasElement} canvas
+     * @param {string|object} [options] - 主题Tên字符串（向后兼容）或Cấu hìnhđối tượng
+     *   options.theme {string} - 主题Tên
+     *   options.layoutConfig {object} - 布局参数覆盖
+     *   options.forceConfig {object} - 兼容旧力导向Cấu hình（仅Đọcnút半径、网格、局部松弛lần数等）
+     *   options.onNodeClick {function} - nút点击回调
+     *   options.onNodeDoubleClick {function} - nút双击回调
+     */
+    constructor(canvas, options = 'crimson') {
+        const isLegacy = typeof options === 'string';
+        const themeName = isLegacy ? options : (options?.theme || 'crimson');
+        const layoutOverride = isLegacy ? {} : (options?.layoutConfig || {});
+        const fromForce = isLegacy ? {} : layoutKeysFromForceConfig(options?.forceConfig);
+        const runtimeConfig = isLegacy ? {} : (options?.runtimeConfig || {});
+
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.nodes = [];
+        this.edges = [];
+        this.nodeMap = new Map();
+        this.colors = getNodeColors(themeName);
+        this.themeName = themeName;
+        this.config = { ...DEFAULT_LAYOUT_CONFIG, ...fromForce, ...layoutOverride };
+        this.runtimeConfig = normalizeGraphNativeRuntimeOptions(runtimeConfig);
+        this._userPovAliasSet = buildUserPovAliasNormalizedSet(
+            isLegacy ? null : options?.userPovAliases,
+        );
+        this._nativeLayoutBridge = null;
+        this._layoutSolveRevision = 0;
+        this._lastLayoutDiagnostics = null;
+
+        this._regionPanels = [];
+        this._lastGraph = null;
+        this._lastLayoutHints = {};
+        this._lastCanvasCssWidth = 0;
+        this._lastCanvasCssHeight = 0;
+        this._lastDevicePixelRatio = window.devicePixelRatio || 1;
+
+        // View transform
+        this.scale = 1;
+        this.offsetX = 0;
+        this.offsetY = 0;
+
+        // Interaction state
+        this.dragNode = null;
+        this.hoveredNode = null;
+        this.selectedNode = null;
+        this.isDragging = false;
+        this.isPanning = false;
+        this.lastMouse = { x: 0, y: 0 };
+        /** @type {{ startX: number, startY: number, lastX: number, lastY: number, nodeCandidate: object|null, moved: boolean } | null} */
+        this._touchSession = null;
+        this._suppressMouseUntil = 0;
+
+        this.animId = null;
+        this.enabled = true;
+
+        // Callbacks
+        this.onNodeSelect = isLegacy ? null : (options?.onNodeSelect || null);
+        this.onNodeClick = isLegacy ? null : (options?.onNodeClick || null);
+        this.onNodeDoubleClick = isLegacy ? null : (options?.onNodeDoubleClick || null);
+
+        this._bindEvents();
+        this._resizeObserver = new ResizeObserver(() => this._resize());
+        this._resizeObserver.observe(canvas.parentElement);
+        this._resize();
+    }
+
+    /**
+     * 加载đồ thịDữ liệu
+     * @param {object} graph - 完整的 graph state
+     */
+    /**
+     * @param {object} graph
+     * @param {{ userPovAliases?: string|string[]|object }} [layoutHints]
+     */
+    loadGraph(graph, layoutHints = {}) {
+        const loadStartedAt = performance.now();
+        const prevSelectedId = this.selectedNode?.id || null;
+        const solveRevision = this._nextLayoutSolveRevision();
+        this._nativeLayoutBridge?.cancelPending?.('graph-load-replaced');
+        this._lastGraph = graph;
+        this._lastLayoutHints = layoutHints && typeof layoutHints === 'object'
+            ? { ...layoutHints }
+            : {};
+        if (layoutHints && Object.prototype.hasOwnProperty.call(layoutHints, 'userPovAliases')) {
+            this._userPovAliasSet = buildUserPovAliasNormalizedSet(
+                layoutHints.userPovAliases,
+            );
+        }
+
+        if (!this.enabled) {
+            return;
+        }
+
+        this.nodeMap.clear();
+
+        const dpr = window.devicePixelRatio || 1;
+        const W = this.canvas.width / dpr;
+        const H = this.canvas.height / dpr;
+
+        const activeNodes = graph.nodes.filter(n => !n.archived);
+        this.nodes = activeNodes.map((n) => {
+            const node = {
+                id: n.id,
+                type: n.type || 'event',
+                name: getNodeDisplayName(n),
+                label: getGraphNodeLabel(n),
+                importance: n.importance || 5,
+                x: 0,
+                y: 0,
+                vx: 0,
+                vy: 0,
+                pinned: false,
+                raw: n,
+                regionKey: 'objective',
+                regionRect: null,
+            };
+            this.nodeMap.set(n.id, node);
+            return node;
+        });
+
+        this.edges = graph.edges
+            .filter(e => !e.invalidAt && !e.expiredAt && this.nodeMap.has(e.fromId) && this.nodeMap.has(e.toId))
+            .map(e => ({
+                from: this.nodeMap.get(e.fromId),
+                to: this.nodeMap.get(e.toId),
+                strength: e.strength || 0.5,
+                relation: e.relation || 'related',
+            }));
+        const prepareFinishedAt = performance.now();
+
+        const parts = partitionNodesByScope(this.nodes, this._userPovAliasSet);
+        this._regionPanels = this._computeRegionPanels(W, H, parts);
+        this._layoutAllPartitions(parts);
+        const layoutFinishedAt = performance.now();
+        const neuralPlan = this._resolveNeuralSimulationPlan();
+        const shouldTryNativeLayout = this._shouldTryNativeLayout(
+            this.nodes.length,
+            this.edges.length,
+        );
+
+        let solvePath = neuralPlan.skip ? 'skipped' : 'js-main';
+        let solveMs = 0;
+        let nativeSolvePromise = null;
+
+        if (!neuralPlan.skip && neuralPlan.iterations > 0) {
+            if (shouldTryNativeLayout) {
+                solvePath = 'native-worker-pending';
+                nativeSolvePromise = this._simulateNeuralWithNativeBridge(
+                    neuralPlan.iterations,
+                    solveRevision,
+                    {
+                        loadStartedAt,
+                        prepareFinishedAt,
+                        layoutFinishedAt,
+                    },
+                );
+            } else {
+                const solveStartedAt = performance.now();
+                this._simulateNeuralWithinRegions(neuralPlan.iterations);
+                solveMs = Math.max(0, performance.now() - solveStartedAt);
+            }
+        }
+
+        if (prevSelectedId) {
+            this.selectedNode = this.nodeMap.get(prevSelectedId) || null;
+        }
+
+        this._cancelAnim();
+        this._render();
+
+        if (!nativeSolvePromise) {
+            this._setLastLayoutDiagnostics({
+                mode: solvePath,
+                nodeCount: this.nodes.length,
+                edgeCount: this.edges.length,
+                prepareMs: Math.max(0, prepareFinishedAt - loadStartedAt),
+                layoutSeedMs: Math.max(0, layoutFinishedAt - prepareFinishedAt),
+                solveMs,
+                totalMs: Math.max(0, performance.now() - loadStartedAt),
+                at: Date.now(),
+            });
+            return;
+        }
+
+        nativeSolvePromise
+            .then((result) => {
+                if (!result) return;
+                this._setLastLayoutDiagnostics({
+                    ...result.diagnostics,
+                    at: Date.now(),
+                });
+                if (result.applied && this.enabled) {
+                    this._scheduleRender();
+                }
+            })
+            .catch(() => {
+                // fail-open 路径由 bridge 内部控制
+            });
+    }
+
+    /**
+     * Chuyển chủ đề
+     */
+    setTheme(themeName) {
+        this.themeName = themeName;
+        this.colors = getNodeColors(themeName);
+        if (this.enabled) this._render();
+    }
+
+    setRuntimeConfig(runtimeConfig = {}) {
+        this.runtimeConfig = normalizeGraphNativeRuntimeOptions(runtimeConfig);
+        if (this._nativeLayoutBridge) {
+            this._nativeLayoutBridge.updateRuntimeOptions(this.runtimeConfig);
+        }
+    }
+
+    getLastLayoutDiagnostics() {
+        return this._lastLayoutDiagnostics
+            ? { ...this._lastLayoutDiagnostics }
+            : null;
+    }
+
+    _setLastLayoutDiagnostics(diagnostics = null) {
+        this._lastLayoutDiagnostics = diagnostics && typeof diagnostics === 'object'
+            ? { ...diagnostics }
+            : null;
+        recordGraphLayoutDebugSnapshot(
+            this._lastLayoutDiagnostics
+                ? {
+                    ...this._lastLayoutDiagnostics,
+                    enabled: this.enabled !== false,
+                }
+                : null,
+        );
+    }
+
+    /**
+     * Cao亮指定nút
+     */
+    highlightNode(nodeId) {
+        this.selectedNode = this.nodeMap.get(nodeId) || null;
+        if (this.enabled) this._render();
+    }
+
+    _clearCanvas() {
+        const ctx = this.ctx;
+        if (!ctx) return;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.canvas.style.cursor = 'default';
+    }
+
+    setEnabled(enabled = true) {
+        const nextEnabled = enabled !== false;
+        if (this.enabled === nextEnabled) {
+            if (!nextEnabled) this._clearCanvas();
+            return;
+        }
+        this._nextLayoutSolveRevision();
+        this._nativeLayoutBridge?.cancelPending?.('graph-renderer-state-changed');
+        this.enabled = nextEnabled;
+        if (this._lastLayoutDiagnostics) {
+            this._setLastLayoutDiagnostics(this._lastLayoutDiagnostics);
+        }
+        this._cancelAnim();
+        this.dragNode = null;
+        this.isDragging = false;
+        this.isPanning = false;
+        this._touchSession = null;
+        this._dragStartMouse = null;
+        this.hoveredNode = null;
+        if (!nextEnabled) {
+            this.nodeMap.clear();
+            this.nodes = [];
+            this.edges = [];
+            this._regionPanels = [];
+            this._clearCanvas();
+            return;
+        }
+        this.canvas.style.cursor = 'grab';
+        if (this._lastGraph) {
+            this.loadGraph(this._lastGraph, this._lastLayoutHints);
+        } else {
+            this._render();
+        }
+    }
+
+    // ==================== 分区布局 ====================
+
+    _computeRegionPanels(W, H, { objective, userPov, charMap }) {
+        const pad = 14;
+        const gutter = 10;
+        const topPad = 20;
+        const hasRight = userPov.length > 0 || charMap.size > 0;
+        const splitX = hasRight ? W * this.config.objectiveWidthRatio : W;
+
+        const panels = [];
+
+        const objectivePanel = {
+            x: pad,
+            y: pad + 6,
+            w: Math.max(
+                0,
+                (hasRight ? splitX : W) - pad * 2 - (hasRight ? gutter / 2 : 0),
+            ),
+            h: Math.max(0, H - pad * 2 - 6),
+            label: 'Khách quan层',
+            tint: 'rgba(26, 35, 50, 0.42)',
+            key: 'objective',
+        };
+        panels.push(objectivePanel);
+
+        const innerObjective = {
+            x: objectivePanel.x + 10,
+            y: objectivePanel.y + topPad,
+            w: Math.max(1, objectivePanel.w - 20),
+            h: Math.max(1, objectivePanel.h - topPad - 10),
+        };
+        for (const n of objective) n.regionRect = innerObjective;
+
+        if (!hasRight) return panels;
+
+        const rightX = splitX + gutter / 2;
+        const rightW = Math.max(0, W - pad - rightX);
+        const yBottom = H - pad;
+        let yTop = pad + 6;
+
+        const charEntries = [...charMap.entries()].sort((a, b) =>
+            String(a[0]).localeCompare(String(b[0]), 'zh'),
+        );
+        const charCount = charEntries.length;
+        const hasUserStrip = userPov.length > 0;
+
+        if (charCount === 0 && hasUserStrip) {
+            const fullH = yBottom - yTop;
+            panels.push({
+                x: rightX,
+                y: yTop,
+                w: rightW,
+                h: fullH,
+                label: 'POV người dùng',
+                tint: 'rgba(32, 48, 40, 0.42)',
+                key: 'user',
+            });
+            const innerU = {
+                x: rightX + 10,
+                y: yTop + topPad,
+                w: Math.max(1, rightW - 20),
+                h: Math.max(1, fullH - topPad - 8),
+            };
+            for (const n of userPov) n.regionRect = innerU;
+            return panels;
+        }
+
+        const userStripH = hasUserStrip
+            ? Math.max(72, Math.min(108, (yBottom - yTop) * 0.2))
+            : 0;
+        const charZoneBottom = yBottom - (hasUserStrip ? userStripH + 8 : 0);
+        const gap = 6;
+        const charZoneH = charZoneBottom - yTop;
+        const slice = charCount > 0
+            ? (charZoneH - gap * Math.max(0, charCount - 1)) / charCount
+            : 0;
+
+        let yc = yTop;
+        for (let i = 0; i < charCount; i++) {
+            const [key, arr] = charEntries[i];
+            const ph = Math.max(52, slice);
+            const displayName = characterPovLabelFromNodes(arr);
+            panels.push({
+                x: rightX,
+                y: yc,
+                w: rightW,
+                h: ph,
+                label: `POV nhân vật · ${displayName}`,
+                tint: 'rgba(55, 42, 28, 0.38)',
+                key: `char:${key}`,
+            });
+            const inner = {
+                x: rightX + 10,
+                y: yc + topPad,
+                w: Math.max(1, rightW - 20),
+                h: Math.max(1, ph - topPad - 8),
+            };
+            for (const n of arr) n.regionRect = inner;
+            yc += ph + gap;
+        }
+
+        if (hasUserStrip) {
+            const uy = yBottom - userStripH;
+            panels.push({
+                x: rightX,
+                y: uy,
+                w: rightW,
+                h: userStripH,
+                label: 'POV người dùng',
+                tint: 'rgba(32, 48, 40, 0.42)',
+                key: 'user',
+            });
+            const innerU = {
+                x: rightX + 10,
+                y: uy + topPad,
+                w: Math.max(1, rightW - 20),
+                h: Math.max(1, userStripH - topPad - 8),
+            };
+            for (const n of userPov) n.regionRect = innerU;
+        }
+
+        return panels;
+    }
+
+    _layoutAllPartitions({ objective, userPov, charMap }) {
+        this._seedNeuralCloudInRect(objective, objective[0]?.regionRect);
+        if (userPov.length) {
+            this._seedNeuralCloudInRect(userPov, userPov[0]?.regionRect);
+        }
+        for (const [, arr] of charMap) {
+            this._seedNeuralCloudInRect(arr, arr[0]?.regionRect);
+        }
+    }
+
+    _rebuildLayoutForCurrentViewport(W, H) {
+        const previousRectsByRegion = new Map();
+        for (const node of this.nodes) {
+            if (!node?.regionKey || previousRectsByRegion.has(node.regionKey) || !node.regionRect) {
+                continue;
+            }
+            previousRectsByRegion.set(node.regionKey, {
+                x: node.regionRect.x,
+                y: node.regionRect.y,
+                w: node.regionRect.w,
+                h: node.regionRect.h,
+            });
+        }
+
+        const parts = partitionNodesByScope(this.nodes, this._userPovAliasSet);
+        this._regionPanels = this._computeRegionPanels(W, H, parts);
+
+        for (const node of this.nodes) {
+            const nextRect = node.regionRect;
+            const previousRect = previousRectsByRegion.get(node.regionKey) || nextRect;
+            const nextPosition = remapPositionBetweenRects(
+                node.x,
+                node.y,
+                previousRect,
+                nextRect,
+            );
+            node.x = nextPosition.x;
+            node.y = nextPosition.y;
+            node.vx = 0;
+            node.vy = 0;
+            this._clampNodeToRegion(node);
+        }
+    }
+
+    /**
+     * 椭圆 Vogel 螺旋初值：有机疏密，Deterministic，Không网格感
+     */
+    _seedNeuralCloudInRect(nodes, rect) {
+        if (!rect || !nodes.length) return;
+        const pad = Math.max(10, this.config.neuralMinGap);
+        const cx = rect.x + rect.w / 2;
+        const cy = rect.y + rect.h / 2;
+        const rx = Math.max(14, rect.w / 2 - pad);
+        const ry = Math.max(14, rect.h / 2 - pad);
+        const sorted = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+        const n = sorted.length;
+        const golden = Math.PI * (3 - Math.sqrt(5));
+        sorted.forEach((node, i) => {
+            const t = (i + 0.5) / Math.max(n, 1);
+            const radScale = Math.sqrt(t) * 0.9;
+            const phase = ((hashId(node.id) & 0x3ff) / 1024) * 0.62;
+            const theta = i * golden + phase;
+            node.x = cx + Math.cos(theta) * radScale * rx;
+            node.y = cy + Math.sin(theta) * radScale * ry;
+            node.vx = 0;
+            node.vy = 0;
+        });
+    }
+
+    _idealSpringLengthsByRegion() {
+        const countBy = new Map();
+        for (const n of this.nodes) {
+            const k = n.regionKey;
+            countBy.set(k, (countBy.get(k) || 0) + 1);
+        }
+        const ideal = new Map();
+        for (const n of this.nodes) {
+            if (ideal.has(n.regionKey)) continue;
+            const rect = n.regionRect;
+            const c = Math.max(1, countBy.get(n.regionKey) || 1);
+            const area = (rect?.w || 1) * (rect?.h || 1);
+            const len = Math.max(
+                36,
+                Math.min(92, 0.78 * Math.sqrt(area / c)),
+            );
+            ideal.set(n.regionKey, len);
+        }
+        return ideal;
+    }
+
+    _resolveNeuralSimulationPlan() {
+        const nodeCount = Array.isArray(this.nodes) ? this.nodes.length : 0;
+        const edgeCount = Array.isArray(this.edges) ? this.edges.length : 0;
+        const baseIterations = Math.max(
+            8,
+            Math.min(220, Number(this.config.neuralIterations) || 80),
+        );
+
+        let iterations = baseIterations;
+        let skip = false;
+
+        if (
+            nodeCount >= ADAPTIVE_NEURAL_LAYOUT_POLICY.skipSimulationNodes ||
+            edgeCount >= ADAPTIVE_NEURAL_LAYOUT_POLICY.skipSimulationEdges
+        ) {
+            skip = true;
+            iterations = 0;
+        } else if (
+            nodeCount >= ADAPTIVE_NEURAL_LAYOUT_POLICY.strongReduceNodes ||
+            edgeCount >= ADAPTIVE_NEURAL_LAYOUT_POLICY.strongReduceEdges
+        ) {
+            iterations = Math.min(
+                iterations,
+                ADAPTIVE_NEURAL_LAYOUT_POLICY.strongReduceCap,
+            );
+        } else if (
+            nodeCount >= ADAPTIVE_NEURAL_LAYOUT_POLICY.reduceIterationsNodes ||
+            edgeCount >= ADAPTIVE_NEURAL_LAYOUT_POLICY.reduceIterationsEdges
+        ) {
+            iterations = Math.min(
+                iterations,
+                ADAPTIVE_NEURAL_LAYOUT_POLICY.reduceIterationsCap,
+            );
+        }
+
+        return {
+            skip,
+            iterations,
+        };
+    }
+
+    _nextLayoutSolveRevision() {
+        this._layoutSolveRevision = Math.max(1, Number(this._layoutSolveRevision || 0) + 1);
+        return this._layoutSolveRevision;
+    }
+
+    _ensureNativeLayoutBridge() {
+        if (this._nativeLayoutBridge) {
+            this._nativeLayoutBridge.updateRuntimeOptions(this.runtimeConfig);
+            return this._nativeLayoutBridge;
+        }
+        this._nativeLayoutBridge = new GraphNativeLayoutBridge(this.runtimeConfig);
+        return this._nativeLayoutBridge;
+    }
+
+    _shouldTryNativeLayout(nodeCount = 0, edgeCount = 0) {
+        if (this.runtimeConfig.graphNativeForceDisable) return false;
+        if (!this.runtimeConfig.graphUseNativeLayout) return false;
+        const bridge = this._ensureNativeLayoutBridge();
+        if (!bridge) return false;
+        return bridge.shouldRunForGraph(nodeCount, edgeCount);
+    }
+
+    _buildNativeLayoutPayload(iterations) {
+        const nodeIndexById = new Map();
+        const nodes = this.nodes.map((node, index) => {
+            nodeIndexById.set(node.id, index);
+            return {
+                x: node.x,
+                y: node.y,
+                vx: node.vx,
+                vy: node.vy,
+                pinned: node.pinned === true,
+                radius: this._nodeRadius(node),
+                regionKey: node.regionKey,
+                regionRect: node.regionRect
+                    ? {
+                        x: node.regionRect.x,
+                        y: node.regionRect.y,
+                        w: node.regionRect.w,
+                        h: node.regionRect.h,
+                    }
+                    : null,
+            };
+        });
+
+        const edges = this.edges
+            .map((edge) => {
+                const from = nodeIndexById.get(edge.from?.id);
+                const to = nodeIndexById.get(edge.to?.id);
+                if (!Number.isFinite(from) || !Number.isFinite(to) || from === to) {
+                    return null;
+                }
+                return {
+                    from,
+                    to,
+                    strength: edge.strength || 0.5,
+                };
+            })
+            .filter(Boolean);
+
+        return {
+            nodes,
+            edges,
+            config: {
+                iterations,
+                repulsion: this.config.neuralRepulsion ?? 2800,
+                springK: this.config.neuralSpringK ?? 0.048,
+                damping: this.config.neuralDamping ?? 0.88,
+                centerGravity: this.config.neuralCenterGravity ?? 0.014,
+                minGap: this.config.neuralMinGap ?? 12,
+                speedCap: 3.8,
+            },
+        };
+    }
+
+    _applyLayoutPositions(positions) {
+        if (!(positions instanceof Float32Array)) return false;
+        if (positions.length < this.nodes.length * 2) return false;
+
+        for (let i = 0; i < this.nodes.length; i++) {
+            const node = this.nodes[i];
+            if (!node || node.pinned) continue;
+            node.x = positions[i * 2];
+            node.y = positions[i * 2 + 1];
+            node.vx = 0;
+            node.vy = 0;
+            this._clampNodeToRegion(node);
+        }
+        return true;
+    }
+
+    async _simulateNeuralWithNativeBridge(iterations, solveRevision, timings = {}) {
+        const loadStartedAt = Number(timings.loadStartedAt) || performance.now();
+        const prepareFinishedAt = Number(timings.prepareFinishedAt) || loadStartedAt;
+        const layoutFinishedAt = Number(timings.layoutFinishedAt) || prepareFinishedAt;
+
+        const bridge = this._ensureNativeLayoutBridge();
+        const solveStartedAt = performance.now();
+        let nativeResult = null;
+
+        try {
+            nativeResult = await bridge.solveLayout(this._buildNativeLayoutPayload(iterations), {
+                timeoutMs: this.runtimeConfig.graphNativeLayoutWorkerTimeoutMs,
+            });
+        } catch (error) {
+            nativeResult = {
+                ok: false,
+                skipped: true,
+                reason: 'native-layout-bridge-error',
+                error: error?.message || String(error),
+            };
+        }
+
+        if (solveRevision !== this._layoutSolveRevision) {
+            return {
+                applied: false,
+                diagnostics: {
+                    mode: 'native-stale',
+                    nodeCount: this.nodes.length,
+                    edgeCount: this.edges.length,
+                    prepareMs: Math.max(0, prepareFinishedAt - loadStartedAt),
+                    layoutSeedMs: Math.max(0, layoutFinishedAt - prepareFinishedAt),
+                    solveMs: Math.max(0, performance.now() - solveStartedAt),
+                    totalMs: Math.max(0, performance.now() - loadStartedAt),
+                    reason: 'stale-layout-result',
+                },
+            };
+        }
+
+        if (nativeResult?.ok && this._applyLayoutPositions(nativeResult.positions)) {
+            const workerElapsedMs = Number(nativeResult?.diagnostics?.elapsedMs);
+            return {
+                applied: true,
+                diagnostics: {
+                    mode: nativeResult.usedNative ? 'rust-wasm-worker' : 'js-worker',
+                    nodeCount: this.nodes.length,
+                    edgeCount: this.edges.length,
+                    prepareMs: Math.max(0, prepareFinishedAt - loadStartedAt),
+                    layoutSeedMs: Math.max(0, layoutFinishedAt - prepareFinishedAt),
+                    solveMs: Math.max(0, performance.now() - solveStartedAt),
+                    workerSolveMs: Number.isFinite(workerElapsedMs)
+                        ? Math.max(0, workerElapsedMs)
+                        : 0,
+                    totalMs: Math.max(0, performance.now() - loadStartedAt),
+                    reason: '',
+                },
+            };
+        }
+
+        if (!this.runtimeConfig.nativeEngineFailOpen) {
+            return {
+                applied: false,
+                diagnostics: {
+                    mode: 'native-failed-hard',
+                    nodeCount: this.nodes.length,
+                    edgeCount: this.edges.length,
+                    prepareMs: Math.max(0, prepareFinishedAt - loadStartedAt),
+                    layoutSeedMs: Math.max(0, layoutFinishedAt - prepareFinishedAt),
+                    solveMs: Math.max(0, performance.now() - solveStartedAt),
+                    totalMs: Math.max(0, performance.now() - loadStartedAt),
+                    reason: nativeResult?.reason || 'native-layout-failed',
+                },
+            };
+        }
+
+        const fallbackStartedAt = performance.now();
+        this._simulateNeuralWithinRegions(iterations);
+        const fallbackSolveMs = Math.max(0, performance.now() - fallbackStartedAt);
+        return {
+            applied: true,
+            diagnostics: {
+                mode: 'js-fallback',
+                nodeCount: this.nodes.length,
+                edgeCount: this.edges.length,
+                prepareMs: Math.max(0, prepareFinishedAt - loadStartedAt),
+                layoutSeedMs: Math.max(0, layoutFinishedAt - prepareFinishedAt),
+                solveMs: Math.max(0, performance.now() - solveStartedAt) + fallbackSolveMs,
+                fallbackSolveMs,
+                totalMs: Math.max(0, performance.now() - loadStartedAt),
+                reason: nativeResult?.reason || 'native-layout-failed',
+            },
+        };
+    }
+
+    /**
+     * 分区内一lần性力导向：斥力 + 同区边弹簧 + 弱向心，稳定后停止（Không帧循环）
+     */
+    _simulateNeuralWithinRegions(iterations) {
+        const iters = Math.max(8, Math.min(220, iterations || 80));
+        const repulsion = this.config.neuralRepulsion ?? 2800;
+        const springK = this.config.neuralSpringK ?? 0.048;
+        const damping = this.config.neuralDamping ?? 0.88;
+        const cg = this.config.neuralCenterGravity ?? 0.014;
+        const extraGap = this.config.neuralMinGap ?? 12;
+        const springIdeal = this._idealSpringLengthsByRegion();
+        const nodes = this.nodes;
+
+        for (let it = 0; it < iters; it++) {
+            for (const n of nodes) {
+                n._fx = 0;
+                n._fy = 0;
+            }
+
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const a = nodes[i];
+                    const b = nodes[j];
+                    if (a.regionKey !== b.regionKey) continue;
+                    let dx = b.x - a.x;
+                    let dy = b.y - a.y;
+                    let distSq = dx * dx + dy * dy;
+                    if (distSq < 0.25) distSq = 0.25;
+                    const dist = Math.sqrt(distSq);
+                    const minSep =
+                        this._nodeRadius(a) + this._nodeRadius(b) + extraGap;
+                    let f = repulsion / distSq;
+                    if (dist < minSep) {
+                        f += (minSep - dist) * 0.22;
+                    }
+                    const fx = (dx / dist) * f;
+                    const fy = (dy / dist) * f;
+                    a._fx -= fx;
+                    a._fy -= fy;
+                    b._fx += fx;
+                    b._fy += fy;
+                }
+            }
+
+            for (const edge of this.edges) {
+                const { from, to, strength } = edge;
+                if (from.regionKey !== to.regionKey) continue;
+                const ideal =
+                    springIdeal.get(from.regionKey) ?? 68;
+                let dx = to.x - from.x;
+                let dy = to.y - from.y;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+                const displacement = dist - ideal * (0.82 + 0.18 * strength);
+                const f = springK * displacement * (0.45 + 0.55 * strength);
+                const fx = (dx / dist) * f;
+                const fy = (dy / dist) * f;
+                from._fx += fx;
+                from._fy += fy;
+                to._fx -= fx;
+                to._fy -= fy;
+            }
+
+            for (const node of nodes) {
+                const rect = node.regionRect;
+                if (!rect) continue;
+                const ccx = rect.x + rect.w / 2;
+                const ccy = rect.y + rect.h / 2;
+                node._fx += (ccx - node.x) * cg;
+                node._fy += (ccy - node.y) * cg;
+            }
+
+            for (const node of nodes) {
+                node.vx = (node.vx + node._fx) * damping;
+                node.vy = (node.vy + node._fy) * damping;
+                const sp = Math.hypot(node.vx, node.vy);
+                const cap = 3.8;
+                if (sp > cap) {
+                    node.vx = (node.vx / sp) * cap;
+                    node.vy = (node.vy / sp) * cap;
+                }
+                node.x += node.vx;
+                node.y += node.vy;
+                delete node._fx;
+                delete node._fy;
+                this._clampNodeToRegion(node);
+            }
+        }
+    }
+
+    _clampNodeToRegion(node) {
+        const rect = node.regionRect;
+        if (!rect) return;
+        const r = this._nodeRadius(node) + 6;
+        node.x = Math.max(rect.x + r, Math.min(rect.x + rect.w - r, node.x));
+        node.y = Math.max(rect.y + r, Math.min(rect.y + rect.h - r, node.y));
+    }
+
+    // ==================== 渲染 ====================
+
+    _drawRegionPanels(ctx) {
+        for (const p of this._regionPanels) {
+            const pw = Number(p.w) || 0;
+            const ph = Number(p.h) || 0;
+            if (pw < 2 || ph < 2) continue;
+            ctx.beginPath();
+            roundRectPath(ctx, p.x, p.y, pw, ph, 12);
+            ctx.fillStyle = p.tint;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(87, 199, 255, 0.12)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(228, 225, 230, 0.55)';
+            ctx.font = '600 10px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(p.label, p.x + 12, p.y + 16);
+        }
+    }
+
+    _drawSynapseEdge(ctx, edge, idx) {
+        const { from, to, strength } = edge;
+        const sameZone = from.regionKey === to.regionKey;
+        const mx = (from.x + to.x) / 2;
+        const my = (from.y + to.y) / 2;
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+        const sign = idx % 2 === 0 ? 1 : -1;
+        let bend = sameZone ? 16 + strength * 22 : 32 + strength * 36;
+        bend *= sign;
+        const cx = mx + nx * bend;
+        const cy = my + ny * bend;
+
+        const alpha = sameZone ? 0.06 + strength * 0.14 : 0.05 + strength * 0.1;
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.quadraticCurveTo(cx, cy, to.x, to.y);
+        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        ctx.lineWidth = 0.45 + strength * 1.35;
+        ctx.stroke();
+    }
+
+    _render() {
+        if (!this.enabled) {
+            this._clearCanvas();
+            return;
+        }
+        const ctx = this.ctx;
+        const dpr = window.devicePixelRatio || 1;
+        const W = this.canvas.width / dpr;
+        const H = this.canvas.height / dpr;
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.save();
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        ctx.translate(this.offsetX, this.offsetY);
+        ctx.scale(this.scale, this.scale);
+
+        if (this._regionPanels.length) {
+            this._drawRegionPanels(ctx);
+        }
+
+        this._drawGrid(W, H);
+
+        this.edges.forEach((e, i) => this._drawSynapseEdge(ctx, e, i));
+
+        for (const node of this.nodes) {
+            const r = this._nodeRadius(node);
+            const color = this.colors[node.type] || this.colors.event;
+            const isSelected = node === this.selectedNode;
+            const isHovered = node === this.hoveredNode;
+            const scope = normalizeMemoryScope(node.raw?.scope);
+            const outlineColor = scope.layer === 'pov'
+                ? (scope.ownerType === 'user'
+                    ? SCOPE_OUTLINE_COLORS.user
+                    : SCOPE_OUTLINE_COLORS.character)
+                : SCOPE_OUTLINE_COLORS.objective;
+
+            if (isSelected || isHovered) {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, r + 9, 0, Math.PI * 2);
+                const glow = ctx.createRadialGradient(node.x, node.y, r, node.x, node.y, r + 9);
+                glow.addColorStop(0, color + '55');
+                glow.addColorStop(1, color + '00');
+                ctx.fillStyle = glow;
+                ctx.fill();
+            }
+
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+            ctx.fillStyle = isSelected ? color : color + 'dd';
+            ctx.fill();
+
+            ctx.strokeStyle = isSelected ? '#fff' : outlineColor;
+            ctx.lineWidth = isSelected ? 2.25 : 1.35;
+            ctx.stroke();
+
+            ctx.fillStyle = `rgba(255,255,255,${isHovered || isSelected ? 0.94 : 0.66})`;
+            ctx.font = `${this.config.labelFontSize}px Inter, sans-serif`;
+            ctx.textAlign = 'center';
+            const rect = node.regionRect;
+            let maxLabelW = 118;
+            if (rect) {
+                const frac =
+                    node.regionKey === 'user' ? 0.4
+                    : node.regionKey.startsWith('char:') ? 0.46
+                    : 0.52;
+                maxLabelW = Math.max(36, Math.min(220, rect.w * frac));
+            }
+            const labelDraw = this._ellipsisLabel(
+                ctx,
+                node.label || node.name,
+                maxLabelW,
+            );
+            ctx.fillText(labelDraw, node.x, node.y + r + 14);
+        }
+
+        ctx.restore();
+    }
+
+    _scheduleRender() {
+        if (!this.enabled || this.animId) return;
+        this.animId = requestAnimationFrame(() => {
+            this.animId = null;
+            this._render();
+        });
+    }
+
+    _drawGrid(W, H) {
+        const sp = this.config.gridSpacing;
+        if (!sp || sp <= 0) return;
+
+        const ctx = this.ctx;
+        ctx.strokeStyle = this.config.gridColor;
+        ctx.lineWidth = 0.5;
+        const startX = Math.floor(-this.offsetX / this.scale / sp) * sp;
+        const startY = Math.floor(-this.offsetY / this.scale / sp) * sp;
+        const endX = startX + W / this.scale + sp * 2;
+        const endY = startY + H / this.scale + sp * 2;
+
+        for (let x = startX; x < endX; x += sp) {
+            ctx.beginPath();
+            ctx.moveTo(x, startY);
+            ctx.lineTo(x, endY);
+            ctx.stroke();
+        }
+        for (let y = startY; y < endY; y += sp) {
+            ctx.beginPath();
+            ctx.moveTo(startX, y);
+            ctx.lineTo(endX, y);
+            ctx.stroke();
+        }
+    }
+
+    _nodeRadius(node) {
+        const min = this.config.minNodeRadius;
+        const max = this.config.maxNodeRadius;
+        return min + ((node.importance || 5) / 10) * (max - min);
+    }
+
+    _ellipsisLabel(ctx, text, maxW) {
+        const s = String(text ?? "").trim() || "—";
+        if (!maxW || maxW < 12) return s;
+        if (ctx.measureText(s).width <= maxW) return s;
+        const ell = "…";
+        let lo = 0;
+        let hi = s.length;
+        while (lo < hi) {
+            const mid = Math.ceil((lo + hi) / 2);
+            const trial = s.slice(0, mid) + ell;
+            if (ctx.measureText(trial).width <= maxW) lo = mid;
+            else hi = mid - 1;
+        }
+        return lo <= 0 ? ell : s.slice(0, lo) + ell;
+    }
+
+    _cancelAnim() {
+        if (this.animId) {
+            cancelAnimationFrame(this.animId);
+            this.animId = null;
+        }
+    }
+
+    stopAnimation() {
+        this._cancelAnim();
+    }
+
+    _bindEvents() {
+        const c = this.canvas;
+
+        c.addEventListener('mousedown', (e) => this._onMouseDown(e));
+        c.addEventListener('mousemove', (e) => this._onMouseMove(e));
+        c.addEventListener('mouseup', (e) => this._onMouseUp(e));
+        c.addEventListener('wheel', (e) => this._onWheel(e), { passive: false });
+        c.addEventListener('dblclick', (e) => this._onDoubleClick(e));
+
+        c.addEventListener('touchstart', (e) => {
+            if (!this.enabled) return;
+            if (e.touches.length !== 1) {
+                this._touchSession = null;
+                return;
+            }
+            e.preventDefault();
+            this._markTouchInteraction();
+            this.dragNode = null;
+            this.isDragging = false;
+            this.isPanning = false;
+            this._dragStartMouse = null;
+            const t = e.touches[0];
+            const { x, y } = this._canvasToWorld(t.clientX, t.clientY);
+            this._touchSession = {
+                startX: t.clientX,
+                startY: t.clientY,
+                lastX: t.clientX,
+                lastY: t.clientY,
+                nodeCandidate: this._findNodeAt(x, y),
+                moved: false,
+            };
+        }, { passive: false });
+        c.addEventListener('touchmove', (e) => {
+            if (!this.enabled || !this._touchSession || e.touches.length !== 1) return;
+            e.preventDefault();
+            this._markTouchInteraction();
+            const t = e.touches[0];
+            const dx = t.clientX - this._touchSession.lastX;
+            const dy = t.clientY - this._touchSession.lastY;
+            const fromStartX = t.clientX - this._touchSession.startX;
+            const fromStartY = t.clientY - this._touchSession.startY;
+            if (Math.abs(fromStartX) > 5 || Math.abs(fromStartY) > 5) {
+                this._touchSession.moved = true;
+            }
+            this.offsetX += dx;
+            this.offsetY += dy;
+            this._touchSession.lastX = t.clientX;
+            this._touchSession.lastY = t.clientY;
+            this._scheduleRender();
+        }, { passive: false });
+        c.addEventListener('touchend', () => {
+            if (!this.enabled || !this._touchSession) return;
+            this._markTouchInteraction();
+            const sess = this._touchSession;
+            this._touchSession = null;
+            this.dragNode = null;
+            this.isDragging = false;
+            this.isPanning = false;
+            this._dragStartMouse = null;
+            if (!sess.moved && sess.nodeCandidate) {
+                this.selectedNode = sess.nodeCandidate;
+                if (this.onNodeSelect) this.onNodeSelect(sess.nodeCandidate);
+                if (this.onNodeClick) this.onNodeClick(sess.nodeCandidate);
+                this._render();
+            }
+        });
+        c.addEventListener('touchcancel', () => {
+            if (!this.enabled) return;
+            this._markTouchInteraction();
+            this._touchSession = null;
+            this.dragNode = null;
+            this.isDragging = false;
+            this.isPanning = false;
+            this._dragStartMouse = null;
+        });
+    }
+
+    _markTouchInteraction() {
+        this._suppressMouseUntil = Date.now() + 650;
+    }
+
+    _shouldIgnoreMouseEvent() {
+        return !this.enabled || Date.now() < this._suppressMouseUntil;
+    }
+
+    _canvasToWorld(clientX, clientY) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (clientX - rect.left - this.offsetX) / this.scale;
+        const y = (clientY - rect.top - this.offsetY) / this.scale;
+        return { x, y };
+    }
+
+    _findNodeAt(wx, wy) {
+        for (let i = this.nodes.length - 1; i >= 0; i--) {
+            const n = this.nodes[i];
+            const r = this._nodeRadius(n);
+            const dx = n.x - wx;
+            const dy = n.y - wy;
+            if (dx * dx + dy * dy <= (r + 4) * (r + 4)) return n;
+        }
+        return null;
+    }
+
+    _onMouseDown(e) {
+        if (this._shouldIgnoreMouseEvent()) return;
+        const { x, y } = this._canvasToWorld(e.clientX, e.clientY);
+        const node = this._findNodeAt(x, y);
+        this.lastMouse = { x: e.clientX, y: e.clientY };
+        this._dragStartMouse = { x: e.clientX, y: e.clientY };
+
+        if (node) {
+            this.dragNode = node;
+            node.pinned = true;
+            this.isDragging = true;
+        } else {
+            this.isPanning = true;
+        }
+    }
+
+    _onMouseMove(e) {
+        if (this._shouldIgnoreMouseEvent()) return;
+        const { x, y } = this._canvasToWorld(e.clientX, e.clientY);
+
+        if (this.isDragging && this.dragNode) {
+            this.dragNode.x = x;
+            this.dragNode.y = y;
+            this._clampNodeToRegion(this.dragNode);
+            this._scheduleRender();
+        } else if (this.isPanning) {
+            this.offsetX += e.clientX - this.lastMouse.x;
+            this.offsetY += e.clientY - this.lastMouse.y;
+            this._scheduleRender();
+        } else {
+            const node = this._findNodeAt(x, y);
+            if (node !== this.hoveredNode) {
+                this.hoveredNode = node;
+                this.canvas.style.cursor = node ? 'pointer' : 'grab';
+                this._scheduleRender();
+            }
+        }
+        this.lastMouse = { x: e.clientX, y: e.clientY };
+    }
+
+    _onMouseUp() {
+        if (this._shouldIgnoreMouseEvent()) return;
+        if (this.dragNode) {
+            this._clampNodeToRegion(this.dragNode);
+            this.dragNode.pinned = false;
+            if (this.isDragging) {
+                const start = this._dragStartMouse || { x: 0, y: 0 };
+                const dx = (this.lastMouse.x - start.x);
+                const dy = (this.lastMouse.y - start.y);
+                const movedDistance = Math.sqrt(dx * dx + dy * dy);
+                if (movedDistance < 6) {
+                    this.selectedNode = this.dragNode;
+                    if (this.onNodeSelect) this.onNodeSelect(this.dragNode);
+                    if (this.onNodeClick) this.onNodeClick(this.dragNode);
+                }
+            }
+        }
+        this.dragNode = null;
+        this.isDragging = false;
+        this.isPanning = false;
+        this._dragStartMouse = null;
+        this._render();
+    }
+
+    _onWheel(e) {
+        if (!this.enabled) return;
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.max(0.2, Math.min(5, this.scale * factor));
+
+        const rect = this.canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        this.offsetX = mx - (mx - this.offsetX) * (newScale / this.scale);
+        this.offsetY = my - (my - this.offsetY) * (newScale / this.scale);
+        this.scale = newScale;
+        this._render();
+    }
+
+    _onDoubleClick(e) {
+        if (this._shouldIgnoreMouseEvent()) return;
+        const { x, y } = this._canvasToWorld(e.clientX, e.clientY);
+        const node = this._findNodeAt(x, y);
+        if (node) {
+            this.selectedNode = node;
+            if (this.onNodeSelect) this.onNodeSelect(node);
+            if (this.onNodeDoubleClick) this.onNodeDoubleClick(node);
+            this._render();
+        }
+    }
+
+    // ==================== 工具 ====================
+
+    zoomIn() {
+        if (!this.enabled) return;
+        this.scale = Math.min(5, this.scale * 1.2);
+        this._render();
+    }
+
+    zoomOut() {
+        if (!this.enabled) return;
+        this.scale = Math.max(0.2, this.scale * 0.8);
+        this._render();
+    }
+
+    resetView() {
+        if (!this.enabled) return;
+        this.scale = 1;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this._render();
+    }
+
+    _resize() {
+        const dpr = window.devicePixelRatio || 1;
+        const parent = this.canvas.parentElement;
+        if (!parent) return;
+        const w = Math.round(parent.clientWidth || 0);
+        const h = Math.round(parent.clientHeight || 0);
+        if (!isUsableGraphCanvasSize(w, h, MIN_USABLE_CANVAS_DIMENSION)) {
+            return;
+        }
+
+        if (
+            w === this._lastCanvasCssWidth
+            && h === this._lastCanvasCssHeight
+            && dpr === this._lastDevicePixelRatio
+        ) {
+            return;
+        }
+
+        this._lastCanvasCssWidth = w;
+        this._lastCanvasCssHeight = h;
+        this._lastDevicePixelRatio = dpr;
+
+        this.canvas.width = w * dpr;
+        this.canvas.height = h * dpr;
+        this.canvas.style.width = w + 'px';
+        this.canvas.style.height = h + 'px';
+
+        if (!this.enabled) {
+            this._clearCanvas();
+            return;
+        }
+
+        if (this.nodes.length > 0 && this._regionPanels.length > 0) {
+            this._nextLayoutSolveRevision();
+            this._nativeLayoutBridge?.cancelPending?.('viewport-resize-layout-reset');
+            this._rebuildLayoutForCurrentViewport(w, h);
+            this._render();
+        } else if (this._lastGraph) {
+            this.loadGraph(this._lastGraph, this._lastLayoutHints);
+        } else {
+            this._render();
+        }
+    }
+
+    destroy() {
+        this._nextLayoutSolveRevision();
+        this._cancelAnim();
+        this._nativeLayoutBridge?.dispose?.();
+        this._nativeLayoutBridge = null;
+        recordGraphLayoutDebugSnapshot(
+            this._lastLayoutDiagnostics
+                ? {
+                    ...this._lastLayoutDiagnostics,
+                    enabled: false,
+                    destroyed: true,
+                }
+                : {
+                    enabled: false,
+                    destroyed: true,
+                },
+        );
+        this._resizeObserver?.disconnect();
+    }
+}

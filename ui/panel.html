@@ -1,0 +1,3085 @@
+<div id="st-bme-panel-overlay">
+  <div id="st-bme-panel">
+    <div class="bme-panel-header">
+      <div class="bme-panel-title">
+        <i class="fa-solid fa-brain"></i>
+        <span>ST-BME đồ thị ký ức</span>
+        <span class="bme-panel-subtitle" id="bme-panel-status"
+          >SYSTEM_ACTIVE</span
+        >
+      </div>
+      <button
+        class="bme-fab-toggle-btn"
+        id="bme-fab-toggle-btn"
+        title="Hiện/ẩn bóng nổi"
+        type="button"
+      >
+        <i class="fa-solid fa-circle-dot"></i>
+      </button>
+      <div class="bme-theme-picker">
+        <button
+          class="bme-theme-picker-btn"
+          id="bme-theme-picker-btn"
+          title="Chuyển chủ đề"
+          type="button"
+        >
+          <i class="fa-solid fa-palette"></i>
+        </button>
+        <div class="bme-theme-dropdown" id="bme-theme-dropdown">
+          <button class="bme-theme-option" data-theme="crimson" type="button">
+            <span class="bme-theme-swatch" style="background: #e94560"></span
+            >Tổng hợp đỏ thẫm
+          </button>
+          <button class="bme-theme-option" data-theme="cyan" type="button">
+            <span class="bme-theme-swatch" style="background: #00e5ff"></span
+            >Neon lam ngọc
+          </button>
+          <button class="bme-theme-option" data-theme="amber" type="button">
+            <span class="bme-theme-swatch" style="background: #ffb300"></span
+            >Terminal hổ phách
+          </button>
+          <button class="bme-theme-option" data-theme="violet" type="button">
+            <span class="bme-theme-swatch" style="background: #b388ff"></span
+            >Sương tím mờ ảo
+          </button>
+          <button class="bme-theme-option" data-theme="paperDawn" type="button">
+            <span class="bme-theme-swatch" style="background: #0d9488"></span
+            >Giấy sáng ban mai
+          </button>
+          <button class="bme-theme-option" data-theme="glacierSky" type="button">
+            <span class="bme-theme-swatch" style="background: #2563eb"></span
+            >Bầu trời băng hà
+          </button>
+        </div>
+      </div>
+      <button
+        class="bme-panel-close"
+        id="bme-panel-close"
+        title="Tắt"
+        type="button"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="bme-panel-body">
+      <div class="bme-panel-sidebar">
+        <div class="bme-tab-list">
+          <button class="bme-tab-btn active" data-tab="dashboard" type="button">
+            <i class="fa-solid fa-chart-simple"></i>
+            <span>Tổng quan</span>
+          </button>
+          <button class="bme-tab-btn" data-tab="task" type="button">
+            <i class="fa-solid fa-list-check"></i>
+            <span>Tác vụ</span>
+          </button>
+          <button class="bme-tab-btn" data-tab="actions" type="button">
+            <i class="fa-solid fa-gear"></i>
+            <span>Thao tác</span>
+          </button>
+          <button class="bme-tab-btn" data-tab="config" type="button">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Cấu hình</span>
+          </button>
+        </div>
+
+        <div class="bme-config-sidebar" id="bme-config-sidebar">
+          <div class="bme-config-sidebar-header">
+            <div class="bme-config-sidebar-kicker">Không gian cấu hình</div>
+            <div class="bme-config-sidebar-title">Cài đặt ST-BME</div>
+            <div class="bme-config-sidebar-help">
+              Chuyển trang cấu hình ở cột trái, xem biểu mẫu cài đặt đầy đủ tương ứng ở cột phải.
+            </div>
+          </div>
+          <div class="bme-config-nav bme-config-nav-desktop">
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="api"
+              type="button"
+            >
+              <i class="fa-solid fa-plug"></i>
+              <span>Cấu hình API</span>
+            </button>
+            <button
+              class="bme-config-nav-btn active"
+              data-config-section="toggles"
+              type="button"
+            >
+              <i class="fa-solid fa-toggle-on"></i>
+              <span>Công tắc chức năng</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="advanced"
+              type="button"
+            >
+              <i class="fa-solid fa-sliders"></i>
+              <span>Tham số chi tiết</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="prompts"
+              type="button"
+            >
+              <i class="fa-solid fa-scroll"></i>
+              <span>Preset tác vụ</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="appearance"
+              type="button"
+            >
+              <i class="fa-solid fa-palette"></i>
+              <span>Giao diện bảng</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="cleanup"
+              type="button"
+            >
+              <i class="fa-solid fa-broom"></i>
+              <span>Dọn dữ liệu</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bme-task-sidebar" id="bme-task-sidebar">
+          <div class="bme-task-sidebar-header">
+            <div class="bme-task-sidebar-kicker">Giám sát tác vụ</div>
+            <div class="bme-task-sidebar-title">Luồng tác vụ ST-BME</div>
+            <div class="bme-task-sidebar-help">
+              Chuyển chế độ giám sát ở cột trái, xem trạng thái tác vụ thời gian thực ở cột phải.
+            </div>
+          </div>
+          <div class="bme-task-nav bme-task-nav-desktop">
+            <button
+              class="bme-task-nav-btn active"
+              data-task-section="pipeline"
+              type="button"
+            >
+              <i class="fa-solid fa-gauge-high"></i>
+              <span>Tổng quan pipeline</span>
+            </button>
+            <button
+              class="bme-task-nav-btn"
+              data-task-section="timeline"
+              type="button"
+            >
+              <i class="fa-solid fa-timeline"></i>
+              <span>Dòng thời gian tác vụ</span>
+            </button>
+            <button
+              class="bme-task-nav-btn"
+              data-task-section="memory"
+              type="button"
+            >
+              <i class="fa-solid fa-brain"></i>
+              <span>Duyệt ký ức</span>
+            </button>
+            <button
+              class="bme-task-nav-btn"
+              data-task-section="injection"
+              type="button"
+            >
+              <i class="fa-solid fa-syringe"></i>
+              <span>Xem trước tiêm</span>
+            </button>
+            <button
+              class="bme-task-nav-btn"
+              data-task-section="trace"
+              type="button"
+            >
+              <i class="fa-solid fa-route"></i>
+              <span>Theo dõi tin nhắn</span>
+            </button>
+            <button
+              class="bme-task-nav-btn"
+              data-task-section="persistence"
+              type="button"
+            >
+              <i class="fa-solid fa-database"></i>
+              <span>Lưu bền</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="bme-tab-content">
+          <div class="bme-tab-pane active" id="bme-pane-dashboard">
+            <div class="bme-stats-grid">
+              <div class="bme-stat-card">
+                <div class="bme-stat-label">Nút hoạt động</div>
+                <div class="bme-stat-value" id="bme-stat-nodes">0</div>
+              </div>
+              <div class="bme-stat-card">
+                <div class="bme-stat-label">Liên kết cạnh</div>
+                <div class="bme-stat-value" id="bme-stat-edges">0</div>
+              </div>
+              <div class="bme-stat-card">
+                <div class="bme-stat-label">Đã lưu trữ</div>
+                <div class="bme-stat-value" id="bme-stat-archived">0</div>
+              </div>
+              <div class="bme-stat-card">
+                <div class="bme-stat-label">Tỷ lệ phân mảnh</div>
+                <div class="bme-stat-value warning" id="bme-stat-frag">0%</div>
+              </div>
+            </div>
+
+            <div class="bme-config-card">
+              <div class="bme-section-header">Trạng thái chạy</div>
+              <div class="bme-config-row">
+                <label>Chat hiện tại</label>
+                <div class="bme-recent-meta" id="bme-status-chat-id">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label>Trạng thái lịch sử</label>
+                <div class="bme-recent-meta" id="bme-status-history">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label>Trạng thái vector</label>
+                <div class="bme-recent-meta" id="bme-status-vector">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label>Khôi phục gần nhất</label>
+                <div class="bme-recent-meta" id="bme-status-recovery">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label>Trích xuất gần nhất</label>
+                <div class="bme-recent-meta" id="bme-status-last-extract">
+                  —
+                </div>
+              </div>
+              <div class="bme-config-row">
+                <label>Lưu bền gần nhất</label>
+                <div class="bme-recent-meta" id="bme-status-last-persist">—</div>
+              </div>
+              <div class="bme-config-help" id="bme-persist-repair-help" hidden></div>
+              <div class="bme-config-row">
+                <label>Vector gần nhất</label>
+                <div class="bme-recent-meta" id="bme-status-last-vector">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label>Truy hồi gần nhất</label>
+                <div class="bme-recent-meta" id="bme-status-last-recall">—</div>
+              </div>
+            </div>
+
+            <div class="bme-config-card">
+              <div class="bme-section-header">Nhận thức / không gian</div>
+              <div class="bme-config-row">
+                <label><i class="fa-solid fa-user" style="margin-right:4px;opacity:0.5"></i>Neo cảnh hiện tại</label>
+                <div class="bme-recent-meta" id="bme-cognition-active-owner">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label><i class="fa-solid fa-location-dot" style="margin-right:4px;opacity:0.5"></i>Khu vực hiện tại</label>
+                <div class="bme-recent-meta" id="bme-cognition-active-region">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label><i class="fa-solid fa-diagram-project" style="margin-right:4px;opacity:0.5"></i>Khu vực kề</label>
+                <div class="bme-recent-meta" id="bme-cognition-adjacent-regions">—</div>
+              </div>
+              <div class="bme-config-row">
+                <label><i class="fa-solid fa-users" style="margin-right:4px;opacity:0.5"></i>Số nhân vật nhận thức</label>
+                <div class="bme-recent-meta" id="bme-cognition-owner-count">0</div>
+              </div>
+              <button
+                class="bme-config-secondary-btn bme-cognition-jump-btn"
+                id="bme-cognition-jump-to-view"
+                type="button"
+              >
+                <i class="fa-solid fa-brain"></i>
+                <span>Xem toàn bộ nhận thức trong chế độ nhận thức →</span>
+              </button>
+            </div>
+
+            <div class="bme-config-card">
+              <div class="bme-section-header">Giám sát tác vụ</div>
+              <div class="bme-config-help">
+                Mặc định đi theo công tắc gỡ lỗi tổng; bật lên sẽ hiển thị các tác vụ ký ức gần đây.
+              </div>
+              <ul class="bme-recent-list" id="bme-ai-monitor-list"></ul>
+            </div>
+
+            <div class="bme-section-header">Trích xuất gần nhất</div>
+            <ul class="bme-recent-list" id="bme-recent-extract"></ul>
+
+            <div class="bme-section-header">Truy hồi gần nhất</div>
+            <ul class="bme-recent-list" id="bme-recent-recall"></ul>
+          </div>
+
+          <div class="bme-tab-pane" id="bme-pane-actions">
+            <div class="bme-action-groups">
+              <div class="bme-action-guard-banner" id="bme-action-guard-banner" hidden></div>
+              <!-- Thao tác ký ức -->
+              <div class="bme-action-group">
+                <div class="bme-action-group-header">
+                  <span class="bme-action-group-title">Thao tác ký ức</span>
+                  <span class="bme-action-group-sub">Gọi LLM xử lý các nút ký ức</span>
+                </div>
+                <div class="bme-action-grid">
+                  <button class="bme-action-btn" id="bme-act-extract" type="button">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>Trích xuất lại</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-compress" type="button">
+                    <i class="fa-solid fa-compress"></i>
+                    <span>Nén thủ công</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-synopsis" type="button">
+                    <i class="fa-solid fa-scroll"></i>
+                    <span>Tạo tóm tắt ngắn</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-summary-rollup" type="button">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Thực hiện gộp tóm tắt</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-summary-rebuild" type="button">
+                    <i class="fa-solid fa-sitemap"></i>
+                    <span>Xây lại trạng thái tóm tắt</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-evolve" type="button">
+                    <i class="fa-solid fa-dna"></i>
+                    <span>Tiến hóa cưỡng bức</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-sleep" type="button">
+                    <i class="fa-solid fa-moon"></i>
+                    <span>Thực hiện lãng quên</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-undo-maintenance" type="button">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Hoàn tác lần bảo trì gần nhất</span>
+                  </button>
+                </div>
+                <div class="bme-action-group-extra">
+                  <div class="bme-config-help">
+                    Trích xuất lại: đếm theo tổng số tầng (người dùng + AI, greeting đầu tiên là 0). System thật không được tính, và không bị ảnh hưởng bởi việc ẩn trợ lý.
+                  </div>
+                  <div class="bme-config-row" style="margin-top:8px">
+                    <label for="bme-extract-mode">Chế độ trích xuất</label>
+                    <select id="bme-extract-mode" class="bme-config-select">
+                      <option value="pending">Trích xuất phần chưa xử lý</option>
+                      <option value="rerun">Trích xuất lại theo phạm vi</option>
+                    </select>
+                  </div>
+                  <div class="bme-action-range-row">
+                    <div class="bme-config-row">
+                      <label for="bme-extract-start-floor">Tầng bắt đầu</label>
+                      <input
+                        id="bme-extract-start-floor"
+                        class="bme-config-input"
+                        type="number"
+                        min="0"
+                        max="999999"
+                        placeholder="Để trống = trích xuất lại hiện tại"
+                      />
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-extract-end-floor">Tầng kết thúc</label>
+                      <input
+                        id="bme-extract-end-floor"
+                        class="bme-config-input"
+                        type="number"
+                        min="0"
+                        max="999999"
+                        placeholder="Để trống = đến mới nhất"
+                      />
+                    </div>
+                  </div>
+                  <div class="bme-config-help" style="margin-top:8px">
+                    Phạm vi trích xuất lại: để trống cả bắt đầu/kết thúc = trích xuất lại hiện tại; chỉ điền bắt đầu = từ bắt đầu đến mới nhất.
+                  </div>
+                  <div class="bme-config-help" style="margin-top:12px">
+                    Xây lại trạng thái tóm tắt: dùng chung phạm vi tầng bắt đầu/kết thúc bên trên; để trống sẽ xây lại theo phạm vi tóm tắt liên quan hiện tại.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Thao tác vector -->
+              <div class="bme-action-group">
+                <div class="bme-action-group-header">
+                  <span class="bme-action-group-title">Thao tác vector</span>
+                  <span class="bme-action-group-sub">Gọi Embedding API để tính vector cho nút</span>
+                </div>
+                <div class="bme-action-grid">
+                  <button class="bme-action-btn" id="bme-act-vector-rebuild" type="button">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Xây lại vector</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-vector-range" type="button">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Xây lại theo phạm vi</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-vector-reembed" type="button">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Nhúng lại trực tiếp</span>
+                  </button>
+                </div>
+                <div class="bme-action-group-extra">
+                  <div class="bme-config-help">
+                    Xây lại theo phạm vi: chỉ xây lại vector của các nút giao với phạm vi tầng chỉ định. Để trống sẽ xử lý toàn bộ đoạn chat.
+                  </div>
+                  <div class="bme-action-range-row">
+                    <div class="bme-config-row">
+                      <label for="bme-range-start">Tầng bắt đầu</label>
+                      <input
+                        id="bme-range-start"
+                        class="bme-config-input"
+                        type="number"
+                        min="0"
+                        max="999999"
+                      />
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-range-end">Tầng kết thúc</label>
+                      <input
+                        id="bme-range-end"
+                        class="bme-config-input"
+                        type="number"
+                        min="0"
+                        max="999999"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quản lý đồ thị -->
+              <div class="bme-action-group">
+                <div class="bme-action-group-header">
+                  <span class="bme-action-group-title">Quản lý đồ thị</span>
+                  <span class="bme-action-group-sub">Nhập xuất và thao tác nguy hiểm</span>
+                </div>
+                <div class="bme-action-grid">
+                  <button class="bme-action-btn" id="bme-act-export" type="button">
+                    <i class="fa-solid fa-file-export"></i>
+                    <span>Xuất đồ thị</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-import" type="button">
+                    <i class="fa-solid fa-file-import"></i>
+                    <span>Nhập đồ thị</span>
+                  </button>
+                  <button class="bme-action-btn danger" id="bme-act-rebuild" type="button">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Xây lại đồ thị</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="bme-action-group" id="bme-luker-sidecar-group">
+                <div class="bme-action-group-header">
+                  <span class="bme-action-group-title">Sửa lưu bền</span>
+                  <span class="bme-action-group-sub">Khu vực sửa hợp nhất cho lưu bền cục bộ và sidecar chính của Luker</span>
+                </div>
+                <div class="bme-action-grid">
+                  <button class="bme-action-btn" id="bme-act-retry-persist" type="button">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Thử lưu bền lại</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-probe-graph-load" type="button">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <span>Thăm dò lại đồ thị</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-rebuild-luker-cache" type="button">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Xây lại bộ đệm cục bộ</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-repair-luker-sidecar" type="button">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>Sửa Sidecar chính</span>
+                  </button>
+                  <button class="bme-action-btn" id="bme-act-compact-luker-sidecar" type="button">
+                    <i class="fa-solid fa-box-archive"></i>
+                    <span>Nén gọn Sidecar chính</span>
+                  </button>
+                </div>
+                <div class="bme-action-group-extra">
+                  <div class="bme-config-help" id="bme-actions-persist-repair-help"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bme-tab-pane" id="bme-pane-config">
+            <div class="bme-config-placeholder">
+              <div class="bme-config-placeholder-title">
+                Cấu hình đã chuyển sang không gian bên phải
+              </div>
+              <div class="bme-config-placeholder-help">
+                Điều hướng phụ bên trái dùng để chuyển trang, bên phải hiển thị biểu mẫu cấu hình đầy đủ.
+              </div>
+            </div>
+          </div>
+
+          <div class="bme-tab-pane" id="bme-pane-graph">
+            <div class="bme-graph-subtabs">
+              <button class="bme-graph-subtab active" data-mobile-graph-view="graph" type="button">
+                <i class="fa-solid fa-diagram-project"></i>
+                <span>Đồ thị thời gian thực</span>
+              </button>
+              <button class="bme-graph-subtab" data-mobile-graph-view="cognition" type="button">
+                <i class="fa-solid fa-brain"></i>
+                <span>Chế độ nhận thức</span>
+              </button>
+              <button class="bme-graph-subtab" data-mobile-graph-view="summary" type="button">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Chế độ tóm tắt</span>
+              </button>
+            </div>
+
+            <div class="bme-graph-view-content">
+              <div class="bme-mobile-graph-pane active" id="bme-mobile-graph-pane" data-mobile-graph-view="graph">
+                <div class="bme-mobile-canvas-wrap">
+                  <canvas id="bme-mobile-graph-canvas"></canvas>
+                  <div class="bme-graph-overlay" id="bme-mobile-graph-overlay" hidden>
+                    <div class="bme-graph-overlay__text" id="bme-mobile-graph-overlay-text">
+                      Đang tải đồ thị của chat hiện tại
+                    </div>
+                  </div>
+                  <div class="bme-mobile-graph-float-controls">
+                    <button id="bme-mobile-render-toggle" title="Tạm dừng dựng đồ thị" type="button">
+                      <i class="fa-solid fa-pause"></i>
+                    </button>
+                    <button id="bme-mobile-zoom-in" title="Phóng to" type="button">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                    <button id="bme-mobile-zoom-out" title="Thu nhỏ" type="button">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <button id="bme-mobile-zoom-reset" title="Đặt lại" type="button">
+                      <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="bme-graph-legend" id="bme-mobile-graph-legend"></div>
+                <div class="bme-graph-statusbar">
+                  <span><span class="bme-status-dot"></span><span id="bme-mobile-status-text">READY</span></span>
+                  <span id="bme-mobile-status-meta">NODES: 0 | EDGES: 0</span>
+                  <span id="bme-mobile-graph-layout-meta" class="bme-graph-layout-meta">LAYOUT: --</span>
+                </div>
+              </div>
+
+              <div class="bme-mobile-graph-pane" id="bme-mobile-cognition-pane" data-mobile-graph-view="cognition">
+                <div class="bme-cognition-workspace" id="bme-mobile-cognition-full">
+                  <div class="bme-cog-status-strip" id="bme-mobile-cog-status-strip"></div>
+                  <div class="bme-cog-body">
+                    <div class="bme-cog-column bme-cog-column--owners">
+                      <div class="bme-cog-section-title">
+                        <i class="fa-solid fa-users"></i> Danh sách nhận thức của nhân vật
+                      </div>
+                      <div class="bme-cog-owner-scroll" id="bme-mobile-cog-owner-list"></div>
+                      <div class="bme-cog-owner-detail" id="bme-mobile-cog-owner-detail"></div>
+                    </div>
+                    <div class="bme-cog-column bme-cog-column--space">
+                      <div class="bme-cog-section-title">
+                        <i class="fa-solid fa-map-location-dot"></i> Bảng điều khiển không gian
+                      </div>
+                      <div class="bme-cog-space-tools" id="bme-mobile-cog-space-tools"></div>
+                      <div class="bme-cog-section-title" style="margin-top:16px">
+                        <i class="fa-solid fa-wave-square"></i> Giám sát tác vụ
+                      </div>
+                      <div class="bme-cog-monitor-mini" id="bme-mobile-cog-monitor-mini"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bme-mobile-graph-pane" id="bme-mobile-summary-pane-full" data-mobile-graph-view="summary">
+                <div class="bme-cognition-workspace" id="bme-mobile-summary-full"></div>
+              </div>
+            </div>
+
+            <div
+              class="bme-node-detail-scrim"
+              id="bme-mobile-node-detail-scrim"
+              hidden
+            ></div>
+            <div class="bme-node-detail" id="bme-mobile-node-detail">
+              <div class="bme-node-detail-header">
+                <h3 id="bme-mobile-detail-title">Chi tiết nút</h3>
+                <div class="bme-node-detail-actions">
+                  <button class="bme-detail-action-btn bme-detail-action-danger" id="bme-mobile-detail-delete" type="button" title="Xóa nút">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                  <button class="bme-detail-action-btn" id="bme-mobile-detail-save" type="button" title="Lưu thay đổi">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                  </button>
+                  <button class="bme-panel-close" id="bme-mobile-detail-close" type="button" title="Tắt">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="bme-mobile-detail-body"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bme-resize-handle" id="bme-resize-handle"></div>
+
+      <div class="bme-panel-main">
+        <div class="bme-graph-workspace" id="bme-graph-workspace">
+          <div class="bme-graph-toolbar">
+            <div class="bme-graph-view-tabs">
+              <button class="bme-graph-view-tab active" data-graph-view="graph" type="button">
+                <i class="fa-solid fa-diagram-project"></i>
+                <span>Đồ thị thời gian thực</span>
+              </button>
+              <button class="bme-graph-view-tab" data-graph-view="cognition" type="button">
+                <i class="fa-solid fa-brain"></i>
+                <span>Chế độ nhận thức</span>
+              </button>
+              <button class="bme-graph-view-tab" data-graph-view="summary" type="button">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Chế độ tóm tắt</span>
+              </button>
+            </div>
+            <div class="bme-graph-controls">
+              <button id="bme-graph-render-toggle" title="Tạm dừng dựng đồ thị" type="button">
+                <i class="fa-solid fa-pause"></i>
+              </button>
+              <button id="bme-graph-zoom-in" title="Phóng to" type="button">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+              <button id="bme-graph-zoom-out" title="Thu nhỏ" type="button">
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <button id="bme-graph-reset" title="Đặt lại" type="button">
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </button>
+            </div>
+          </div>
+
+          <canvas id="bme-graph-canvas"></canvas>
+          <div class="bme-graph-overlay" id="bme-graph-overlay" hidden>
+            <div class="bme-graph-overlay__text" id="bme-graph-overlay-text">
+              Đang tải đồ thị của chat hiện tại
+            </div>
+          </div>
+
+          <div class="bme-graph-legend" id="bme-graph-legend"></div>
+
+          <div class="bme-graph-statusbar">
+            <span
+              ><span class="bme-status-dot"></span
+              ><span id="bme-status-text">READY</span></span
+            >
+            <span id="bme-status-meta">NODES: 0 | EDGES: 0</span>
+            <span id="bme-graph-layout-meta" class="bme-graph-layout-meta">LAYOUT: --</span>
+          </div>
+
+
+          <div class="bme-cognition-workspace" id="bme-cognition-workspace" hidden>
+            <div class="bme-cog-status-strip" id="bme-cog-status-strip"></div>
+            <div class="bme-cog-body">
+              <div class="bme-cog-column bme-cog-column--owners">
+                <div class="bme-cog-section-title">
+                  <i class="fa-solid fa-users"></i> Danh sách nhận thức của nhân vật
+                </div>
+                <div class="bme-cog-owner-scroll" id="bme-cog-owner-list"></div>
+                <div class="bme-cog-owner-detail" id="bme-cog-owner-detail"></div>
+              </div>
+              <div class="bme-cog-column bme-cog-column--space">
+                <div class="bme-cog-section-title">
+                  <i class="fa-solid fa-map-location-dot"></i> Bảng điều khiển không gian
+                </div>
+                <div class="bme-cog-space-tools" id="bme-cog-space-tools"></div>
+                <div class="bme-cog-section-title" style="margin-top:16px">
+                  <i class="fa-solid fa-wave-square"></i> Giám sát tác vụ
+                </div>
+                <div class="bme-cog-monitor-mini" id="bme-cog-monitor-mini"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bme-cognition-workspace" id="bme-summary-workspace" hidden></div>
+
+          <div class="bme-node-detail" id="bme-node-detail">
+            <div class="bme-node-detail-header">
+              <h3 id="bme-detail-title">Chi tiết nút</h3>
+              <div class="bme-node-detail-actions">
+                <button
+                  class="bme-detail-action-btn bme-detail-action-danger"
+                  id="bme-detail-delete"
+                  type="button"
+                  title="Xóa nút"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+                <button
+                  class="bme-detail-action-btn"
+                  id="bme-detail-save"
+                  type="button"
+                  title="Lưu thay đổi"
+                >
+                  <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+                <button
+                  class="bme-panel-close"
+                  id="bme-detail-close"
+                  type="button"
+                  title="Tắt"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            <div id="bme-detail-body"></div>
+          </div>
+        </div>
+
+        <div class="bme-config-workspace" id="bme-config-workspace">
+          <div class="bme-config-workspace-header">
+            <div>
+              <div class="bme-config-workspace-kicker">Cấu hình</div>
+              <h2 class="bme-config-workspace-title">Không gian cấu hình ST-BME</h2>
+              <p class="bme-config-workspace-desc">
+                Tập trung cấu hình mô hình bộ nhớ thứ hai, công tắc chức năng, tham số chi tiết, preset tác vụ và chủ đề bảng tại đây.
+              </p>
+            </div>
+            <div class="bme-config-workspace-actions">
+              <button class="bme-config-launch-btn" id="bme-open-ena-planner" type="button">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>Cài đặt Ena Planner</span>
+              </button>
+              <div class="bme-config-launch-hint" id="bme-open-ena-planner-hint">
+                Đang kiểm tra...
+              </div>
+            </div>
+          </div>
+
+          <div class="bme-config-nav bme-config-nav-mobile">
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="api"
+              type="button"
+            >
+              <i class="fa-solid fa-plug"></i>
+              <span>Cấu hình API</span>
+            </button>
+            <button
+              class="bme-config-nav-btn active"
+              data-config-section="toggles"
+              type="button"
+            >
+              <i class="fa-solid fa-toggle-on"></i>
+              <span>Công tắc chức năng</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="advanced"
+              type="button"
+            >
+              <i class="fa-solid fa-sliders"></i>
+              <span>Tham số chi tiết</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="prompts"
+              type="button"
+            >
+              <i class="fa-solid fa-scroll"></i>
+              <span>Preset tác vụ</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="appearance"
+              type="button"
+            >
+              <i class="fa-solid fa-palette"></i>
+              <span>Giao diện bảng</span>
+            </button>
+            <button
+              class="bme-config-nav-btn"
+              data-config-section="cleanup"
+              type="button"
+            >
+              <i class="fa-solid fa-broom"></i>
+              <span>Dọn dữ liệu</span>
+            </button>
+          </div>
+
+          <div class="bme-config-sections">
+            <section
+              class="bme-config-section"
+              data-config-section="api"
+            >
+              <div class="bme-config-section-head">
+                <div class="bme-config-section-kicker">Cấu hình API</div>
+                <h3 class="bme-config-section-title">Kết nối model và truy cập vector</h3>
+                <p class="bme-config-section-desc">
+                  Quản lý thống nhất LLM bộ nhớ riêng và Embedding
+                  theo cách kết nối thống nhất, đồng thời giữ logic proxy backend và fallback trực tiếp hiện có.
+                </p>
+              </div>
+
+              <div class="bme-config-grid bme-config-grid-2">
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">LLM bộ nhớ</div>
+                      <div class="bme-config-card-subtitle">
+                        Để trống sẽ dùng lại model chat hiện tại; khi điền vào sẽ tự nhận diện các kênh phổ biến, nếu không nhận ra sẽ xử lý như giao diện OpenAI tương thích tùy chỉnh.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bme-config-row bme-llm-preset-row">
+                    <label for="bme-llm-preset-select">Mẫu cấu hình LLM</label>
+                    <div class="bme-llm-preset-controls">
+                      <select
+                        id="bme-llm-preset-select"
+                        class="bme-config-input"
+                      >
+                        <option value="">-- Chế độ thủ công --</option>
+                      </select>
+                      <div class="bme-llm-preset-actions">
+                        <button
+                          id="bme-llm-preset-save"
+                          class="bme-config-secondary-btn"
+                          title="Ghi đè lưu mẫu hiện tại"
+                          type="button"
+                        >
+                          <i class="fa-solid fa-floppy-disk"></i>
+                          <span>Lưu</span>
+                        </button>
+                        <button
+                          id="bme-llm-preset-save-as"
+                          class="bme-config-secondary-btn"
+                          title="Lưu thành mẫu mới"
+                          type="button"
+                        >
+                          <i class="fa-solid fa-file-circle-plus"></i>
+                          <span>Lưu thành</span>
+                        </button>
+                        <button
+                          id="bme-llm-preset-delete"
+                          class="bme-config-secondary-btn"
+                          title="Xóa mẫu hiện tại"
+                          type="button"
+                        >
+                          <i class="fa-solid fa-trash-can"></i>
+                          <span>Xóa</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-llm-url">Địa chỉ API của LLM</label>
+                    <input
+                      id="bme-setting-llm-url"
+                      class="bme-config-input"
+                      type="text"
+                      placeholder="https://api.openai.com/v1"
+                    />
+                  </div>
+                  <div class="bme-config-help" id="bme-memory-llm-provider-help">
+                    Để trống sẽ dùng lại model chat hiện tại. Hỗ trợ tự động nhận diện kênh OpenAI tương thích, Anthropic Claude, Google AI Studio / Gemini; khi điền endpoint đầy đủ sẽ tự chuẩn hóa thành base URL có thể tái sử dụng.
+                  </div>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-llm-key">LLM API Key</label>
+                    <input
+                      id="bme-setting-llm-key"
+                      class="bme-config-input"
+                      type="password"
+                      placeholder="sk-..."
+                    />
+                  </div>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-llm-model">Model LLM</label>
+                    <input
+                      id="bme-setting-llm-model"
+                      class="bme-config-input"
+                      type="text"
+                      placeholder="gpt-4.1-mini / qwen-max / deepseek-chat"
+                    />
+                  </div>
+                  <div class="bme-model-fetch-block">
+                    <button
+                      class="bme-config-secondary-btn"
+                      id="bme-fetch-llm-models"
+                      type="button"
+                    >
+                      <i class="fa-solid fa-rotate"></i>
+                      <span>Lấy model</span>
+                    </button>
+                    <select
+                      id="bme-select-llm-model"
+                      class="bme-config-input bme-model-select"
+                      style="display: none"
+                    >
+                      <option value="">Chọn model từ kết quả tải về</option>
+                    </select>
+                  </div>
+                  <div class="bme-config-actions">
+                    <button
+                      class="bme-config-test-btn"
+                      id="bme-test-llm"
+                      type="button"
+                    >
+                      <i class="fa-solid fa-plug"></i>
+                      <span>Kiểm tra LLM bộ nhớ</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">Embedding</div>
+                      <div class="bme-config-card-subtitle">
+                        Chế độ backend ưu tiên dùng lại nguồn vector của SillyTavern, chế độ trực tiếp giữ cấu hình riêng
+                        URL/Key/Model。
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-embed-mode">Chế độ vector</label>
+                    <select
+                      id="bme-setting-embed-mode"
+                      class="bme-config-input"
+                    >
+                      <option value="backend">Chỉ mục backend</option>
+                      <option value="direct">Fallback trực tiếp</option>
+                    </select>
+                  </div>
+
+                  <div id="bme-embed-backend-fields">
+                    <div class="bme-config-row">
+                      <label for="bme-setting-embed-backend-source"
+                        >Nguồn vector backend</label
+                      >
+                      <select
+                        id="bme-setting-embed-backend-source"
+                        class="bme-config-input"
+                      >
+                        <option value="openai">OpenAI</option>
+                        <option value="openrouter">OpenRouter</option>
+                        <option value="cohere">Cohere</option>
+                        <option value="mistral">Mistral</option>
+                        <option value="electronhub">Electron Hub</option>
+                        <option value="chutes">Chutes</option>
+                        <option value="nanogpt">NanoGPT</option>
+                        <option value="ollama">Ollama</option>
+                        <option value="llamacpp">llama.cpp</option>
+                        <option value="vllm">vLLM</option>
+                      </select>
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-setting-embed-backend-model"
+                        >Model backend</label
+                      >
+                      <input
+                        id="bme-setting-embed-backend-model"
+                        class="bme-config-input"
+                        type="text"
+                        placeholder="text-embedding-3-small / nomic-embed-text / BAAI/bge-m3"
+                      />
+                    </div>
+                    <div class="bme-model-fetch-block">
+                      <button
+                        class="bme-config-secondary-btn"
+                        id="bme-fetch-embed-backend-models"
+                        type="button"
+                      >
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Lấy model</span>
+                      </button>
+                      <select
+                        id="bme-select-embed-backend-model"
+                        class="bme-config-input bme-model-select"
+                        style="display: none"
+                      >
+                        <option value="">Chọn model từ kết quả tải về</option>
+                      </select>
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-setting-embed-backend-url"
+                        >Địa chỉ API backend</label
+                      >
+                      <input
+                        id="bme-setting-embed-backend-url"
+                        class="bme-config-input"
+                        type="text"
+                        placeholder="Chỉ Ollama / llama.cpp / vLLM mới cần điền"
+                      />
+                    </div>
+                    <div class="bme-config-row inline">
+                      <label
+                        class="checkbox_label"
+                        for="bme-setting-embed-auto-suffix"
+                      >
+                        <input
+                          id="bme-setting-embed-auto-suffix"
+                          type="checkbox"
+                        />
+                        <span>Tự động bổ sung hậu tố /embeddings</span>
+                      </label>
+                    </div>
+                    <div class="bme-config-help">
+                      Nếu trang hiện tại dùng HTTPS mà bạn lại điền
+                      HTTP, trình duyệt cục bộ có thể chặn mixed content; khi triển khai từ xa hãy ưu tiên dùng
+                      HTTPS hoặc lối vào cùng nguồn mà host có thể truy cập.
+                    </div>
+                  </div>
+
+                  <div id="bme-embed-direct-fields">
+                    <div class="bme-config-help">
+                      Chế độ trực tiếp sẽ dùng bộ cấu hình riêng bên dưới.
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-setting-embed-url"
+                        >Địa chỉ API Embedding</label
+                      >
+                      <input
+                        id="bme-setting-embed-url"
+                        class="bme-config-input"
+                        type="text"
+                        placeholder="https://api.openai.com/v1"
+                      />
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-setting-embed-key"
+                        >Embedding API Key</label
+                      >
+                      <input
+                        id="bme-setting-embed-key"
+                        class="bme-config-input"
+                        type="password"
+                        placeholder="sk-..."
+                      />
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-setting-embed-model"
+                        >Model Embedding</label
+                      >
+                      <input
+                        id="bme-setting-embed-model"
+                        class="bme-config-input"
+                        type="text"
+                        placeholder="text-embedding-3-small"
+                      />
+                    </div>
+                    <div class="bme-model-fetch-block">
+                      <button
+                        class="bme-config-secondary-btn"
+                        id="bme-fetch-embed-direct-models"
+                        type="button"
+                      >
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Lấy model</span>
+                      </button>
+                      <select
+                        id="bme-select-embed-direct-model"
+                        class="bme-config-input bme-model-select"
+                        style="display: none"
+                      >
+                        <option value="">Chọn model từ kết quả tải về</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="bme-config-actions">
+                    <button
+                      class="bme-config-test-btn"
+                      id="bme-test-embedding"
+                      type="button"
+                    >
+                      <i class="fa-solid fa-plug"></i>
+                      <span>Kiểm tra Embedding</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <details
+                class="bme-config-card bme-collapsible-card"
+                id="bme-advanced-network-settings"
+              >
+                <summary class="bme-config-card-head bme-collapsible-summary">
+                  <div>
+                    <div class="bme-config-card-title">Cài đặt mạng nâng cao</div>
+                    <div class="bme-config-card-subtitle">
+                      Mặc định thu gọn; điều khiển thống nhất
+                      thời gian chờ yêu cầu của LLM, Embedding, vector backend và vector cục bộ.
+                    </div>
+                  </div>
+                  <span class="bme-collapsible-indicator" aria-hidden="true">
+                    <i class="fa-solid fa-chevron-down"></i>
+                  </span>
+                </summary>
+                <div class="bme-config-row">
+                  <label for="bme-setting-timeout-ms">Thời gian chờ thống nhất (ms)</label>
+                  <input
+                    id="bme-setting-timeout-ms"
+                    class="bme-config-input"
+                    type="number"
+                    min="1000"
+                    step="1000"
+                    placeholder="300000"
+                  />
+                </div>
+                <div class="bme-config-help">
+                  Giá trị mặc định là 300000ms (5
+                  phút). Để trống hoặc điền giá trị không hợp lệ sẽ quay về mặc định.
+                </div>
+              </details>
+            </section>
+
+            <section class="bme-config-section active" data-config-section="toggles">
+              <div class="bme-config-section-head">
+                <div class="bme-config-section-kicker">Công tắc chức năng</div>
+                <h3 class="bme-config-section-title">Chuỗi chính và năng lực tăng cường</h3>
+                <p class="bme-config-section-desc">
+                  Trước tiên quyết định năng lực nào tham gia chuỗi ký ức, sau đó tinh chỉnh hành vi của từng mô-đun trong tham số chi tiết.
+                </p>
+              </div>
+
+              <div class="bme-capability-grid">
+                <label class="bme-capability-card" for="bme-setting-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-brain"></i></span>
+                    <input id="bme-setting-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Ghi nhớ tự động</div>
+                  <div class="bme-cap-desc">Bật trích xuất tự động, ghi vào đồ thị và bảo trì.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-recall-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input id="bme-setting-recall-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Truy hồi trước khi sinh</div>
+                  <div class="bme-cap-desc">Tìm ký ức liên quan trước khi sinh và chèn vào prompt.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-consolidation-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-code-merge"></i></span>
+                    <input id="bme-setting-consolidation-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Hợp nhất ký ức</div>
+                  <div class="bme-cap-desc">Khử trùng lặp/phát hiện xung đột + sửa ngược ký ức hiện có + tạo cạnh liên kết.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-synopsis-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-scroll"></i></span>
+                    <input id="bme-setting-synopsis-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Tóm tắt phân tầng</div>
+                  <div class="bme-cap-desc">Tạo tóm tắt ngắn neo theo nguyên văn theo nhịp trích xuất, rồi tự động gộp thành tóm tắt cấp cao hơn.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-visibility-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                    <input id="bme-setting-visibility-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Ranh giới nhận thức</div>
+                  <div class="bme-cap-desc">Giới hạn nhân vật chỉ truy cập ký ức mà mình có thể nhận biết.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-cross-recall-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-diagram-project"></i></span>
+                    <input id="bme-setting-cross-recall-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Truy xuất chéo</div>
+                  <div class="bme-cap-desc">Mở rộng sang vùng lân cận nhiều bước nhảy và truy hồi xuyên manh mối.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-smart-trigger-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-bolt"></i></span>
+                    <input id="bme-setting-smart-trigger-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Kích hoạt bất ngờ</div>
+                  <div class="bme-cap-desc">Tăng độ nhạy trích xuất khi lượng thông tin cao hoặc ở chế độ chỉ định.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-sleep-cycle-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-moon"></i></span>
+                    <input id="bme-setting-sleep-cycle-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Lãng quên chủ động</div>
+                  <div class="bme-cap-desc">Dọn các nút giá trị thấp theo chu kỳ (lưu trữ).</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-auto-compression-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-compress"></i></span>
+                    <input id="bme-setting-auto-compression-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Nén tự động</div>
+                  <div class="bme-cap-desc">Thực hiện nén phân tầng theo chu kỳ trích xuất, giảm tình trạng ký ức cùng loại tích lũy rồi phân tán.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-prob-recall-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-dice"></i></span>
+                    <input id="bme-setting-prob-recall-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Truy hồi xác suất</div>
+                  <div class="bme-cap-desc">Cho phép một lượng nhỏ ký ức liên quan yếu lọt vào theo xác suất.</div>
+                </label>
+                <label class="bme-capability-card" for="bme-setting-reflection-enabled">
+                  <div class="bme-cap-header">
+                    <span class="bme-cap-icon"><i class="fa-solid fa-lightbulb"></i></span>
+                    <input id="bme-setting-reflection-enabled" type="checkbox" />
+                  </div>
+                  <div class="bme-cap-title">Phản tư</div>
+                  <div class="bme-cap-desc">Tạo phản tư dài hạn và trọng tâm chú ý theo chu kỳ.</div>
+                </label>
+              </div>
+
+              <div class="bme-config-card" style="margin-top: 20px;">
+                <div class="bme-config-card-head">
+                  <div>
+                    <div class="bme-config-card-title">Chế độ lưu trữ đám mây</div>
+                    <div class="bme-config-card-subtitle">
+                      Chế độ tự động tiếp tục dùng đồng bộ mirror hiện tại; chế độ thủ công dừng ghi đám mây tự động và chuyển sang sao lưu/khôi phục thủ công theo chat hiện tại.
+                    </div>
+                  </div>
+                </div>
+                <div class="bme-config-row">
+                  <label for="bme-setting-cloud-storage-mode">Chế độ lưu trữ</label>
+                  <select
+                    id="bme-setting-cloud-storage-mode"
+                    class="bme-config-input"
+                  >
+                    <option value="automatic">Lưu tự động</option>
+                    <option value="manual">Lưu thủ công</option>
+                  </select>
+                </div>
+                <div class="bme-config-help" id="bme-cloud-storage-mode-help">
+                  Lưu tự động sẽ tiếp tục đồng bộ theo logic mirror hiện tại; lưu thủ công chỉ giữ ghi cục bộ, bạn cần tự sao lưu và khôi phục.
+                </div>
+                <div
+                  class="bme-config-help"
+                  id="bme-cloud-storage-mode-status"
+                  style="display: none; margin-top: 8px;"
+                ></div>
+                <div
+                  id="bme-cloud-backup-manual-actions"
+                  class="bme-config-actions"
+                  style="display: none; margin-top: 12px; flex-wrap: wrap;"
+                >
+                  <button
+                    class="bme-config-secondary-btn"
+                    id="bme-act-backup-to-cloud"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Sao lưu lên đám mây</span>
+                  </button>
+                  <button
+                    class="bme-config-secondary-btn"
+                    id="bme-act-restore-from-cloud"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                    <span>Lấy bản sao lưu từ đám mây</span>
+                  </button>
+                  <button
+                    class="bme-config-secondary-btn"
+                    id="bme-act-manage-server-backups"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-box-archive"></i>
+                    <span>Quản lý bản sao lưu trên máy chủ</span>
+                  </button>
+                  <button
+                    class="bme-config-secondary-btn"
+                    id="bme-act-rollback-last-restore"
+                    type="button"
+                    disabled
+                  >
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Hoàn tác lần khôi phục trước</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="bme-config-grid bme-config-grid-2" style="margin-top: 20px;">
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">Lọc World Info</div>
+                      <div class="bme-config-card-subtitle">
+                        Điều khiển chiến lược lọc khi ST-BME đọc các mục World Info. Chế độ mặc định tự lọc các mục liên quan MVU; chế độ tùy chỉnh chỉ lọc theo từ khóa tên mục.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-wi-filter-mode">Chế độ lọc</label>
+                    <select
+                      id="bme-setting-wi-filter-mode"
+                      class="bme-config-input"
+                    >
+                      <option value="default">Mặc định (tự lọc mục MVU)</option>
+                      <option value="custom">Tùy chỉnh (lọc theo từ khóa tên)</option>
+                    </select>
+                  </div>
+                  <div id="bme-wi-filter-custom-section" style="display: none">
+                    <div class="bme-config-row">
+                      <label for="bme-setting-wi-filter-keywords"
+                        >Từ khóa lọc</label
+                      >
+                      <input
+                        id="bme-setting-wi-filter-keywords"
+                        class="bme-config-input"
+                        type="text"
+                        placeholder="Phân tách bằng dấu phẩy, ví dụ: BME,mvu,kiểm thử"
+                      />
+                    </div>
+                    <div class="bme-config-help">
+                      Nếu tên mục chứa bất kỳ từ khóa nào thì sẽ bỏ qua (không phân biệt hoa thường). Để trống sẽ không lọc mục nào (chỉ bỏ qua các mục đã tắt).
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">Ẩn các tầng cũ</div>
+                      <div class="bme-config-card-subtitle">
+                        Không xóa nội dung chat, chỉ tạm đánh dấu các tầng cũ thành tin nhắn hệ thống để phản hồi chính và ST-BME bỏ qua chúng khi đọc chat.
+                      </div>
+                    </div>
+                  </div>
+                  <label
+                    class="bme-toggle-item"
+                    for="bme-setting-hide-old-messages-enabled"
+                  >
+                    <span class="bme-toggle-copy">
+                      <span class="bme-toggle-title">Bật ẩn tầng cũ</span>
+                      <span class="bme-toggle-desc">
+                        Phù hợp để kiểm soát token khi chat dài. Khi đổi chat sẽ tự áp dụng lại, không xóa tầng gốc.
+                      </span>
+                    </span>
+                    <input
+                      id="bme-setting-hide-old-messages-enabled"
+                      type="checkbox"
+                    />
+                  </label>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-hide-old-messages-keep-last-n">
+                      Giữ lại N tin nhắn gần nhất
+                    </label>
+                    <input
+                      id="bme-setting-hide-old-messages-keep-last-n"
+                      class="bme-config-input"
+                      type="number"
+                      min="0"
+                      max="200"
+                      placeholder="0 = không ẩn"
+                    />
+                  </div>
+                  <div class="bme-config-help">
+                    Thay đổi cài đặt sẽ tự có hiệu lực. `0` nghĩa là không ẩn; “Bỏ toàn bộ ẩn” sẽ khôi phục ngay các tầng do ST-BME ẩn trong chat hiện tại.
+                  </div>
+                  <div class="bme-config-actions">
+                    <button
+                      class="bme-config-secondary-btn"
+                      id="bme-apply-hide-settings"
+                      type="button"
+                    >
+                      <i class="fa-solid fa-eye-slash"></i>
+                      <span>Áp dụng lại ẩn hiện tại</span>
+                    </button>
+                    <button
+                      class="bme-config-secondary-btn"
+                      id="bme-clear-hide-settings"
+                      type="button"
+                    >
+                      <i class="fa-solid fa-eye"></i>
+                      <span>Bỏ toàn bộ ẩn</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">Thông tin nhắc</div>
+                      <div class="bme-config-card-subtitle">
+                        Điều khiển kiểu hiển thị của các thông báo đầu trang như trích xuất, truy hồi, v.v.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-notice-display-mode">Chế độ hiển thị</label>
+                    <select
+                      id="bme-setting-notice-display-mode"
+                      class="bme-config-input"
+                    >
+                      <option value="normal">Bình thường</option>
+                      <option value="compact">Rút gọn (chỉ hiển thị tiêu đề)</option>
+                    </select>
+                  </div>
+                  <div class="bme-config-help">
+                    Chế độ rút gọn sẽ nén các nhắc nhở đang hoạt động thành thẻ tiêu đề; lỗi và cảnh báo vẫn hiển thị đầy đủ để tránh ẩn mất thông tin quan trọng.
+                  </div>
+                </div>
+
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">Nhật ký gỡ lỗi</div>
+                      <div class="bme-config-card-subtitle">
+                        Mặc định tắt; chỉ nên tạm thời bật nhật ký console của trình duyệt khi cần điều tra sự cố.
+                      </div>
+                    </div>
+                  </div>
+                  <label
+                    class="bme-toggle-item"
+                    for="bme-setting-debug-logging-enabled"
+                  >
+                    <span class="bme-toggle-copy">
+                      <span class="bme-toggle-title">Bật nhật ký gỡ lỗi</span>
+                      <span class="bme-toggle-desc">
+                        Chỉ xuất nhật ký chẩn đoán nội bộ và theo dõi luồng khi bật; có thể bao gồm tóm tắt prompt đã được khử nhạy cảm.
+                      </span>
+                    </span>
+                    <input
+                      id="bme-setting-debug-logging-enabled"
+                      type="checkbox"
+                    />
+                  </label>
+                </div>
+
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">Giám sát tác vụ</div>
+                      <div class="bme-config-card-subtitle">
+                        Ghi lại dòng thời gian các tác vụ gần đây như trích xuất, truy hồi, nén; mặc định tắt, nên dùng cùng công tắc gỡ lỗi.
+                      </div>
+                    </div>
+                  </div>
+                  <label class="bme-toggle-item" for="bme-setting-ai-monitor-enabled">
+                    <span class="bme-toggle-copy">
+                      <span class="bme-toggle-title">Bật giám sát tác vụ</span>
+                      <span class="bme-toggle-desc">
+                        Sau khi bật, bảng sẽ hiển thị tuyến model, tóm tắt dọn nội dung và bản xem trước message cuối của các tác vụ gần đây.
+                      </span>
+                    </span>
+                    <input
+                      id="bme-setting-ai-monitor-enabled"
+                      type="checkbox"
+                    />
+                  </label>
+                </div>
+
+                <div class="bme-config-card">
+                  <div class="bme-config-card-head">
+                    <div>
+                      <div class="bme-config-card-title">Trang trí đầu vào người dùng</div>
+                      <div class="bme-config-card-subtitle">
+                        Điều khiển việc Recall Card có tiếp quản cách hiển thị đầu vào người dùng của lượt này hay không, không ảnh hưởng tới truy hồi và tiêm thực tế.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="bme-config-row">
+                    <label for="bme-setting-recall-card-user-input-display-mode">
+                      Chế độ hiển thị
+                    </label>
+                    <select
+                      id="bme-setting-recall-card-user-input-display-mode"
+                      class="bme-config-input"
+                    >
+                      <option value="off">Tắt làm đẹp, chỉ hiển thị đầu vào gốc</option>
+                      <option value="beautify_only">
+                        Để Recall Card tiếp quản hiển thị và ẩn đầu vào gốc
+                      </option>
+                      <option value="mirror">Hiển thị đồng thời Recall Card và đầu vào gốc</option>
+                    </select>
+                  </div>
+                  <div class="bme-config-help">
+                    Chỉ điều chỉnh cách hiển thị trong các tầng chat, không thay đổi truy hồi ký ức, prompt tiêm hay nội dung message thực tế được gửi.
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="bme-config-section" data-config-section="advanced">
+              <div class="bme-config-section-head">
+                <div class="bme-config-section-kicker">Tham số chi tiết</div>
+                <h3 class="bme-config-section-title">Hành vi chi tiết và chiến lược chấm điểm</h3>
+                <p class="bme-config-section-desc">
+                  Khu vực này tiếp nhận các mục nâng cao từ trang cài đặt cũ. Nếu chức năng tương ứng đang tắt, tham số sẽ bị làm mờ và nhắc bạn bật trước ở “Công tắc chức năng”.
+                </p>
+              </div>
+
+              <div class="bme-stripe-section">
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Trích xuất</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển tần suất trích xuất tự động và cửa sổ ngữ cảnh tính theo lượt. Mặc định là 2
+                      lượt, thường tương đương bù ngược 4 tầng tin nhắn thường.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div class="bme-config-card">
+                      <div class="bme-config-row">
+                        <label for="bme-setting-extract-every"
+                          >Trích xuất mỗi N phản hồi</label
+                        >
+                        <input
+                          id="bme-setting-extract-every"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="50"
+                        />
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-extract-context-turns"
+                          >Số lượt ngữ cảnh trích xuất</label
+                        >
+                        <input
+                          id="bme-setting-extract-context-turns"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="20"
+                        />
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-extract-auto-delay-latest-assistant"
+                      >
+                        <input
+                          id="bme-setting-extract-auto-delay-latest-assistant"
+                          type="checkbox"
+                        />
+                        <span>Trích xuất tự động trễ một tầng</span>
+                      </label>
+                      <div class="bme-config-help">
+                        Sau khi bật, tầng AI mới nhất sẽ chưa được trích xuất tự động ngay; phải chờ tầng AI tiếp theo xuất hiện mới trích xuất lô nội dung trước. Trích xuất phần chưa xử lý và trích xuất lại theo phạm vi không bị ảnh hưởng.
+                      </div>
+                      <details
+                        class="bme-config-subdetails bme-collapsible-card"
+                        id="bme-extract-advanced-settings"
+                      >
+                        <summary class="bme-collapsible-summary bme-config-subdetails-summary">
+                          <div>
+                            <div class="bme-config-subgroup-title">Mục nâng cao của trích xuất</div>
+                            <div class="bme-config-subgroup-desc">
+                              Điều khiển cách biểu đạt của prompt trích xuất và cách cắt recentMessages có cấu trúc. Thường cứ để mặc định là đủ.
+                            </div>
+                          </div>
+                          <span class="bme-collapsible-indicator" aria-hidden="true">
+                            <i class="fa-solid fa-chevron-down"></i>
+                          </span>
+                        </summary>
+                        <div class="bme-config-subgroup">
+                          <div class="bme-config-row">
+                            <label for="bme-setting-extract-recent-message-cap"
+                              >Giới hạn message có cấu trúc (0 = không giới hạn)</label
+                            >
+                            <input
+                              id="bme-setting-extract-recent-message-cap"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="200"
+                            />
+                          </div>
+                          <div class="bme-config-help">
+                            Chỉ giới hạn số lượng structured recentMessages trong prompt trích xuất, không ảnh hưởng tới phạm vi lát cắt trích xuất thực tế.
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-extract-prompt-structured-mode"
+                              >Định dạng đầu vào trích xuất</label
+                            >
+                            <select
+                              id="bme-setting-extract-prompt-structured-mode"
+                              class="bme-config-input"
+                            >
+                              <option value="both">Kết hợp (transcript + structured)</option>
+                              <option value="transcript">Chỉ transcript</option>
+                              <option value="structured">Chỉ structured</option>
+                            </select>
+                          </div>
+                          <div class="bme-config-help">
+                            Điều khiển việc LLM khi trích xuất sẽ thấy transcript thuần, recentMessages có cấu trúc hay cả hai cùng lúc. Thường cứ giữ “Kết hợp” là đủ.
+                          </div>
+                        </div>
+                      </details>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-extract-worldbook-mode"
+                          >World Info khi trích xuất</label
+                        >
+                        <select
+                          id="bme-setting-extract-worldbook-mode"
+                          class="bme-config-input"
+                        >
+                          <option value="active">Bật (phân tích các mục đang kích hoạt)</option>
+                          <option value="none">Tắt</option>
+                        </select>
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-extract-include-summaries"
+                      >
+                        <input
+                          id="bme-setting-extract-include-summaries"
+                          type="checkbox"
+                        />
+                        <span>Bao gồm tóm tắt đang hoạt động khi trích xuất</span>
+                      </label>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-extract-include-story-time"
+                      >
+                        <input
+                          id="bme-setting-extract-include-story-time"
+                          type="checkbox"
+                        />
+                        <span>Bao gồm dòng thời gian câu chuyện khi trích xuất</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Truy hồi và tiêm</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển tầng tiêm cuối cùng. Hiện việc tiêm đi theo
+                      IN_CHAT@Depth, giá trị càng lớn thì vị trí càng về trước.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="recallEnabled"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-inject-depth"
+                          >Độ sâu tiêm (giá trị càng lớn càng lên trước)</label
+                        >
+                        <input
+                          id="bme-setting-inject-depth"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="9999"
+                        />
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-recall-use-authoritative-generation-input"
+                      >
+                        <input
+                          id="bme-setting-recall-use-authoritative-generation-input"
+                          type="checkbox"
+                        />
+                        <span>Dùng đầu vào generation chuẩn quyền (thử nghiệm)</span>
+                      </label>
+                      <div class="bme-config-help">
+                        Sau khi bật, truy vấn truy hồi sẽ ưu tiên dùng văn bản gần với điểm gửi thực hơn (như send-intent, snapshot host, planner handoff), thay vì lùi về chat tail hoặc textarea.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Lọc trước bằng vector</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển việc có bật truy xuất ứng viên vector hay không, cũng như độ rộng Top-K của đầu ra giai đoạn vector
+                      .
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card bme-stage-card"
+                      data-guard-settings="recallEnabled"
+                      data-stage-toggle-id="bme-setting-recall-vector-prefilter-enabled"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-recall-vector-prefilter-enabled"
+                      >
+                        <input
+                          id="bme-setting-recall-vector-prefilter-enabled"
+                          type="checkbox"
+                        />
+                        <span>Bật lọc trước bằng vector</span>
+                      </label>
+                      <div class="bme-config-row bme-stage-param">
+                        <label for="bme-setting-recall-top-k">Top-K lọc trước bằng vector</label>
+                        <input
+                          id="bme-setting-recall-top-k"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="100"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Khuếch tán đồ thị</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển việc có tiếp tục khuếch tán ứng viên theo cấu trúc đồ thị hay không, cùng giới hạn ứng viên giữ lại ở giai đoạn khuếch tán.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card bme-stage-card"
+                      data-guard-settings="recallEnabled"
+                      data-stage-toggle-id="bme-setting-recall-graph-diffusion-enabled"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-recall-graph-diffusion-enabled"
+                      >
+                        <input
+                          id="bme-setting-recall-graph-diffusion-enabled"
+                          type="checkbox"
+                        />
+                        <span>Bật khuếch tán đồ thị</span>
+                      </label>
+                      <div class="bme-config-row bme-stage-param">
+                        <label for="bme-setting-recall-diffusion-top-k"
+                          >Top-K khuếch tán đồ thị</label
+                        >
+                        <input
+                          id="bme-setting-recall-diffusion-top-k"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="300"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Tăng cường truy hồi</div>
+                    <div class="bme-stripe-label-desc">
+                      Trước tiên điều chỉnh đa ý định, kéo lại sau khuếch tán và chuỗi thời gian; các phần gom ứng viên và bắt tín hiệu yếu phía sau được đặt trong phần gấp gọn.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="recallEnabled"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-recall-multi-intent-enabled"
+                      >
+                        <input
+                          id="bme-setting-recall-multi-intent-enabled"
+                          type="checkbox"
+                        />
+                        <span>Bật tách đa ý định</span>
+                      </label>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-recall-multi-intent-max-segments"
+                          >Số đoạn tách tối đa</label
+                        >
+                        <input
+                          id="bme-setting-recall-multi-intent-max-segments"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="8"
+                        />
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-recall-teleport-alpha"
+                          >Cường độ kéo lại sau khuếch tán</label
+                        >
+                        <input
+                          id="bme-setting-recall-teleport-alpha"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                        />
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-recall-temporal-links-enabled"
+                      >
+                        <input
+                          id="bme-setting-recall-temporal-links-enabled"
+                          type="checkbox"
+                        />
+                        <span>Bật cạnh tổng hợp chuỗi thời gian</span>
+                      </label>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-recall-temporal-link-strength"
+                          >Cường độ chuỗi thời gian</label
+                        >
+                        <input
+                          id="bme-setting-recall-temporal-link-strength"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.01"
+                        />
+                      </div>
+                      <details
+                        class="bme-config-subdetails bme-collapsible-card"
+                        id="bme-recall-advanced-settings"
+                      >
+                        <summary class="bme-collapsible-summary bme-config-subdetails-summary">
+                          <div>
+                            <div class="bme-config-subgroup-title">Thêm mục nâng cao</div>
+                            <div class="bme-config-subgroup-desc">
+                              Bao gồm truy vấn trộn ngữ cảnh, cộng điểm văn bản, cùng DPP, tăng cường đồng xuất hiện và truy hồi phần dư tín hiệu yếu.
+                            </div>
+                          </div>
+                          <span class="bme-collapsible-indicator" aria-hidden="true">
+                            <i class="fa-solid fa-chevron-down"></i>
+                          </span>
+                        </summary>
+                        <div class="bme-config-subgroup">
+                          <div class="bme-config-subgroup-title">Ký ức theo phạm vi</div>
+                          <div class="bme-config-subgroup-desc">
+                            Để truy hồi ưu tiên hiểu “ai nhớ chuyện này như thế nào” và “sự thật khách quan của khu vực hiện tại”, tránh trộn mọi ký ức dưới góc nhìn toàn tri.
+                          </div>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-scoped-memory-enabled"
+                          >
+                            <input
+                              id="bme-setting-scoped-memory-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật truy hồi ký ức theo phạm vi</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-pov-memory-enabled"
+                          >
+                            <input
+                              id="bme-setting-pov-memory-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật ký ức POV nhân vật / người dùng</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-region-scoped-objective-enabled"
+                          >
+                            <input
+                              id="bme-setting-region-scoped-objective-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật trọng số tầng khách quan theo khu vực</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-cognitive-memory-enabled"
+                          >
+                            <input
+                              id="bme-setting-cognitive-memory-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật tầng nhận thức đa nhân vật</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-spatial-adjacency-enabled"
+                          >
+                            <input
+                              id="bme-setting-spatial-adjacency-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật đồ thị kề khu vực</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-enable-story-timeline"
+                          >
+                            <input
+                              id="bme-setting-enable-story-timeline"
+                              type="checkbox"
+                            />
+                            <span>Bật tầng thời gian cốt truyện</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-story-time-soft-directing"
+                          >
+                            <input
+                              id="bme-setting-story-time-soft-directing"
+                              type="checkbox"
+                            />
+                            <span>Bật đạo diễn mềm theo thời gian cốt truyện</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-inject-story-time-label"
+                          >
+                            <input
+                              id="bme-setting-inject-story-time-label"
+                              type="checkbox"
+                            />
+                            <span>Tiêm nhãn thời gian</span>
+                          </label>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-character-pov-weight"
+                              >Trọng số POV nhân vật</label
+                            >
+                            <input
+                              id="bme-setting-recall-character-pov-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="3"
+                              step="0.05"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-user-pov-weight"
+                              >Trọng số POV người dùng</label
+                            >
+                            <input
+                              id="bme-setting-recall-user-pov-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="3"
+                              step="0.05"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-objective-current-region-weight"
+                              >Trọng số khách quan của khu vực hiện tại</label
+                            >
+                            <input
+                              id="bme-setting-recall-objective-current-region-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="3"
+                              step="0.05"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-objective-adjacent-region-weight"
+                              >Trọng số khách quan của khu vực lân cận</label
+                            >
+                            <input
+                              id="bme-setting-recall-objective-adjacent-region-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="3"
+                              step="0.05"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-objective-global-weight"
+                              >Trọng số khách quan toàn cục</label
+                            >
+                            <input
+                              id="bme-setting-recall-objective-global-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="3"
+                              step="0.05"
+                            />
+                          </div>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-inject-user-pov-memory"
+                          >
+                            <input
+                              id="bme-setting-inject-user-pov-memory"
+                              type="checkbox"
+                            />
+                            <span>Tiêm ký ức POV người dùng</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-inject-objective-global-memory"
+                          >
+                            <input
+                              id="bme-setting-inject-objective-global-memory"
+                              type="checkbox"
+                            />
+                            <span>Tiêm một lượng nhỏ ký ức khách quan toàn cục</span>
+                          </label>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-inject-low-confidence-objective-memory"
+                          >
+                            <input
+                              id="bme-setting-inject-low-confidence-objective-memory"
+                              type="checkbox"
+                            />
+                            <span>Cho phép tiêm trực tiếp ký ức khách quan độ tin cậy thấp</span>
+                          </label>
+                        </div>
+                        <div class="bme-config-subgroup">
+                          <div class="bme-config-subgroup-title">Hiệu chỉnh truy vấn</div>
+                          <div class="bme-config-subgroup-desc">
+                            Giúp truy hồi ổn định hơn trong các câu hỏi truy tiếp kiểu “sau đó thì sao” hoặc “vì sao anh ta làm vậy” nhờ tận dụng ngữ cảnh gần đây.
+                          </div>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-recall-context-query-blend-enabled"
+                          >
+                            <input
+                              id="bme-setting-recall-context-query-blend-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật truy vấn trộn ngữ cảnh</span>
+                          </label>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-context-assistant-weight"
+                              >Trọng số assistant gần nhất</label
+                            >
+                            <input
+                              id="bme-setting-recall-context-assistant-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="1"
+                              step="0.01"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-context-previous-user-weight"
+                              >Trọng số user trước đó</label
+                            >
+                            <input
+                              id="bme-setting-recall-context-previous-user-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="1"
+                              step="0.01"
+                            />
+                          </div>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-recall-lexical-boost-enabled"
+                          >
+                            <input
+                              id="bme-setting-recall-lexical-boost-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật cộng điểm khớp văn bản</span>
+                          </label>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-lexical-weight"
+                              >Trọng số cộng điểm văn bản</label
+                            >
+                            <input
+                              id="bme-setting-recall-lexical-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="1"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+                        <div class="bme-config-subgroup">
+                          <div class="bme-config-subgroup-title">DPP và tăng cường đồng xuất hiện</div>
+                          <div class="bme-config-subgroup-desc">
+                            Dùng để giảm ứng viên trùng lặp và đẩy nhẹ các nút liên quan thường xuất hiện cùng nhau khi cần.
+                          </div>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-recall-diversity-enabled"
+                          >
+                            <input
+                              id="bme-setting-recall-diversity-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật DPP khử trùng lặp đa dạng</span>
+                          </label>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-dpp-candidate-multiplier"
+                              >Hệ số ứng viên DPP</label
+                            >
+                            <input
+                              id="bme-setting-recall-dpp-candidate-multiplier"
+                              class="bme-config-input"
+                              type="number"
+                              min="1"
+                              max="10"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-dpp-quality-weight"
+                              >Trọng số chất lượng DPP</label
+                            >
+                            <input
+                              id="bme-setting-recall-dpp-quality-weight"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="10"
+                              step="0.1"
+                            />
+                          </div>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-recall-cooccurrence-enabled"
+                          >
+                            <input
+                              id="bme-setting-recall-cooccurrence-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật tăng cường đồng xuất hiện</span>
+                          </label>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-cooccurrence-scale"
+                              >Hệ số tăng cường đồng xuất hiện</label
+                            >
+                            <input
+                              id="bme-setting-recall-cooccurrence-scale"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="10"
+                              step="0.01"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-cooccurrence-max-neighbors"
+                              >Số láng giềng được tăng cường tối đa cho mỗi neo</label
+                            >
+                            <input
+                              id="bme-setting-recall-cooccurrence-max-neighbors"
+                              class="bme-config-input"
+                              type="number"
+                              min="1"
+                              max="50"
+                            />
+                          </div>
+                        </div>
+                        <div class="bme-config-subgroup">
+                          <div class="bme-config-subgroup-title">Truy hồi tín hiệu yếu</div>
+                          <div class="bme-config-subgroup-desc">
+                            Chỉ dùng khi embedding kết nối trực tiếp và cục bộ có đủ vector, nhằm bắt thêm các manh mối yếu bị chủ đề chính lấn át.
+                          </div>
+                          <label
+                            class="bme-inline-checkbox"
+                            for="bme-setting-recall-residual-enabled"
+                          >
+                            <input
+                              id="bme-setting-recall-residual-enabled"
+                              type="checkbox"
+                            />
+                            <span>Bật truy hồi phần dư tín hiệu yếu</span>
+                          </label>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-residual-basis-max-nodes"
+                              >Giới hạn nút nền ngữ nghĩa</label
+                            >
+                            <input
+                              id="bme-setting-recall-residual-basis-max-nodes"
+                              class="bme-config-input"
+                              type="number"
+                              min="2"
+                              max="64"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-nmf-topics"
+                              >Số chủ đề NMF</label
+                            >
+                            <input
+                              id="bme-setting-recall-nmf-topics"
+                              class="bme-config-input"
+                              type="number"
+                              min="2"
+                              max="64"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-nmf-novelty-threshold"
+                              >Ngưỡng độ mới</label
+                            >
+                            <input
+                              id="bme-setting-recall-nmf-novelty-threshold"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="1"
+                              step="0.01"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-residual-threshold"
+                              >Ngưỡng phần dư</label
+                            >
+                            <input
+                              id="bme-setting-recall-residual-threshold"
+                              class="bme-config-input"
+                              type="number"
+                              min="0"
+                              max="10"
+                              step="0.01"
+                            />
+                          </div>
+                          <div class="bme-config-row">
+                            <label for="bme-setting-recall-residual-top-k"
+                              >Top-K truy xuất lần hai của phần dư</label
+                            >
+                            <input
+                              id="bme-setting-recall-residual-top-k"
+                              class="bme-config-input"
+                              type="number"
+                              min="1"
+                              max="20"
+                            />
+                          </div>
+                        </div>
+                      </details>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Chấm điểm hỗn hợp</div>
+                    <div class="bme-stripe-label-desc">
+                      Tầng chấm điểm luôn chạy; ba
+                      trọng số bên dưới cùng quyết định tỷ trọng của khuếch tán đồ thị, độ tương đồng vector và độ quan trọng trong truy hồi.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="recallEnabled"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-graph-weight">Trọng số khuếch tán đồ thị</label>
+                        <input
+                          id="bme-setting-graph-weight"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                        />
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-vector-weight">Trọng số vector</label>
+                        <input
+                          id="bme-setting-vector-weight"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                        />
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-importance-weight"
+                          >Trọng số độ quan trọng</label
+                        >
+                        <input
+                          id="bme-setting-importance-weight"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="1"
+                          step="0.05"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Truy hồi chính xác bằng LLM</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển việc có bật xếp hạng tinh bằng LLM hay không, cùng với số ngữ cảnh truyền cho LLM
+                      , kích thước hồ ứng viên và giới hạn giữ lại cuối cùng.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card bme-stage-card"
+                      data-guard-settings="recallEnabled"
+                      data-stage-toggle-id="bme-setting-recall-llm"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <label
+                        class="bme-inline-checkbox"
+                        for="bme-setting-recall-llm"
+                      >
+                        <input id="bme-setting-recall-llm" type="checkbox" />
+                        <span>Bật xếp hạng tinh bằng LLM</span>
+                      </label>
+                      <div class="bme-config-row bme-stage-param">
+                        <label for="bme-setting-recall-llm-context-messages"
+                          >Số message ngữ cảnh cho xếp hạng tinh LLM</label
+                        >
+                        <input
+                          id="bme-setting-recall-llm-context-messages"
+                          class="bme-config-input"
+                          type="number"
+                          min="0"
+                          max="20"
+                        />
+                      </div>
+                      <div class="bme-config-row bme-stage-param">
+                        <label for="bme-setting-recall-llm-candidate-pool"
+                          >Pool ứng viên cho xếp hạng tinh LLM</label
+                        >
+                        <input
+                          id="bme-setting-recall-llm-candidate-pool"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="100"
+                        />
+                      </div>
+                      <div class="bme-config-row bme-stage-param">
+                        <label for="bme-setting-recall-max-nodes"
+                          >Giới hạn chọn cuối cùng của LLM</label
+                        >
+                        <input
+                          id="bme-setting-recall-max-nodes"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Hợp nhất ký ức</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển quy mô tìm kiếm lân cận và ngưỡng phán định xung đột.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="enableConsolidation"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-consolidation-neighbor-count"
+                          >Số lượng lân cận</label
+                        >
+                        <input
+                          id="bme-setting-consolidation-neighbor-count"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="20"
+                        />
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-consolidation-threshold"
+                          >Ngưỡng phán định xung đột</label
+                        >
+                        <input
+                          id="bme-setting-consolidation-threshold"
+                          class="bme-config-input"
+                          type="number"
+                          min="0.5"
+                          max="0.99"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Tóm tắt phân tầng</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển chu kỳ kích hoạt tóm tắt ngắn; tóm tắt lớn sẽ tự động gộp theo 3 tóm tắt ngắn cùng tầng.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="enableHierarchicalSummary"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-synopsis-every"
+                          >Tạo tóm tắt ngắn mỗi N lần trích xuất</label
+                        >
+                        <input
+                          id="bme-setting-synopsis-every"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="100"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Kích hoạt bất ngờ</div>
+                    <div class="bme-stripe-label-desc">
+                      Quy tắc và ngưỡng kích hoạt khi lượng thông tin cao.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="enableSmartTrigger"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-trigger-patterns"
+                          >Chế độ kích hoạt tùy chỉnh</label
+                        >
+                        <input
+                          id="bme-setting-trigger-patterns"
+                          class="bme-config-input"
+                          type="text"
+                          placeholder="đột nhiên,sự thật,bí mật,phản bội hoặc regex"
+                        />
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-smart-trigger-threshold"
+                          >Ngưỡng kích hoạt</label
+                        >
+                        <input
+                          id="bme-setting-smart-trigger-threshold"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="10"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Lãng quên khi ngủ</div>
+                    <div class="bme-stripe-label-desc">
+                      Cấu hình ngưỡng lãng quên và chu kỳ thực thi.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="enableSleepCycle"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-forget-threshold">Ngưỡng lãng quên</label>
+                        <input
+                          id="bme-setting-forget-threshold"
+                          class="bme-config-input"
+                          type="number"
+                          min="0.1"
+                          max="1"
+                          step="0.05"
+                        />
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-sleep-every">Thực thi mỗi N lần trích xuất</label>
+                        <input
+                          id="bme-setting-sleep-every"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Kích hoạt hợp nhất tự động</div>
+                    <div class="bme-stripe-label-desc">
+                      Khi số nút mới thêm trong lô này không đủ, hệ thống vẫn sẽ kiểm tra xem có trùng lặp cao với ký ức cũ hay không; nếu trúng vẫn sẽ hợp nhất tự động.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div class="bme-config-card">
+                      <div class="bme-config-row">
+                        <label for="bme-setting-consolidation-auto-min-new-nodes"
+                          >Số nút mới tối thiểu</label
+                        >
+                        <input
+                          id="bme-setting-consolidation-auto-min-new-nodes"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="50"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Chu kỳ nén tự động</div>
+                    <div class="bme-stripe-label-desc">
+                      Đếm theo số lần trích xuất; chỉ khi đến mốc chu kỳ mới thử nén tự động.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="enableAutoCompression"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-compression-every"
+                          >Thử một lần mỗi N lần trích xuất</label
+                        >
+                        <input
+                          id="bme-setting-compression-every"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Truy hồi xác suất</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều chỉnh xác suất các ký ức liên quan yếu được đưa vào truy hồi.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="enableProbRecall"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-prob-recall-chance">Xác suất kích hoạt</label>
+                        <input
+                          id="bme-setting-prob-recall-chance"
+                          class="bme-config-input"
+                          type="number"
+                          min="0.01"
+                          max="0.5"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bme-stripe-row">
+                  <div class="bme-stripe-label">
+                    <div class="bme-stripe-label-title">Phản tư</div>
+                    <div class="bme-stripe-label-desc">
+                      Điều khiển khoảng cách sinh các nút phản tư tự sự.
+                    </div>
+                  </div>
+                  <div class="bme-stripe-content">
+                    <div
+                      class="bme-config-card bme-guarded-card"
+                      data-guard-settings="enableReflection"
+                    >
+                      <div class="bme-config-guard-note">
+                        Có hiệu lực sau khi bật trong “Công tắc chức năng”.
+                      </div>
+                      <div class="bme-config-row">
+                        <label for="bme-setting-reflect-every"
+                          >Sinh mỗi N lần trích xuất</label
+                        >
+                        <input
+                          id="bme-setting-reflect-every"
+                          class="bme-config-input"
+                          type="number"
+                          min="1"
+                          max="200"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="bme-config-section" data-config-section="prompts">
+              <div class="bme-config-section-head">
+                <div class="bme-config-section-kicker">Preset tác vụ</div>
+                <h3 class="bme-config-section-title">Không gian preset tác vụ</h3>
+                <p class="bme-config-section-desc">
+                  Tại đây bạn có thể duy trì preset riêng cho từng tác vụ, thống nhất cấu hình dàn prompt, tham số sinh và quy tắc regex.
+                </p>
+              </div>
+              <div id="bme-task-profile-workspace" class="bme-task-profile-workspace"></div>
+              <input
+                id="bme-task-profile-import"
+                type="file"
+                accept=".json,application/json"
+                hidden
+              />
+              <input
+                id="bme-task-profile-import-all"
+                type="file"
+                accept=".json,application/json"
+                hidden
+              />
+            </section>
+
+            <section
+              class="bme-config-section"
+              data-config-section="appearance"
+            >
+              <div class="bme-config-section-head">
+                <div class="bme-config-section-kicker">Giao diện bảng</div>
+                <h3 class="bme-config-section-title">Đồng bộ chủ đề và hình ảnh</h3>
+                <p class="bme-config-section-desc">
+                  Lựa chọn chủ đề ở đây sẽ đồng bộ với lối tắt bảng màu phía trên và làm mới màu sắc đồ thị ngay lập tức.
+                </p>
+              </div>
+
+              <div class="bme-config-card">
+                <div class="bme-config-card-head">
+                  <div>
+                    <div class="bme-config-card-title">Chủ đề bảng</div>
+                    <div class="bme-config-card-subtitle">
+                      Chọn phong cách bảng phù hợp nhất với không khí câu chuyện hiện tại và thói quen đọc của bạn.
+                    </div>
+                  </div>
+                </div>
+                <div class="bme-theme-card-grid">
+                  <button
+                    class="bme-theme-card"
+                    data-theme="crimson"
+                    type="button"
+                  >
+                    <span
+                      class="bme-theme-card-swatch"
+                      style="background: #e94560"
+                    ></span>
+                    <span class="bme-theme-card-copy">
+                      <span class="bme-theme-card-title">Tổng hợp đỏ thẫm</span>
+                      <span class="bme-theme-card-desc"
+                        >Độ tương phản cao, nhấn mạnh thay đổi và cảm giác cảnh báo.</span
+                      >
+                    </span>
+                    <span class="bme-theme-card-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                  <button
+                    class="bme-theme-card"
+                    data-theme="cyan"
+                    type="button"
+                  >
+                    <span
+                      class="bme-theme-card-swatch"
+                      style="background: #00e5ff"
+                    ></span>
+                    <span class="bme-theme-card-copy">
+                      <span class="bme-theme-card-title">Neon lam ngọc</span>
+                      <span class="bme-theme-card-desc"
+                        >Cảm giác quan sát điềm tĩnh hơn, phù hợp để rà soát lâu dài.</span
+                      >
+                    </span>
+                    <span class="bme-theme-card-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                  <button
+                    class="bme-theme-card"
+                    data-theme="amber"
+                    type="button"
+                  >
+                    <span
+                      class="bme-theme-card-swatch"
+                      style="background: #ffb300"
+                    ></span>
+                    <span class="bme-theme-card-copy">
+                      <span class="bme-theme-card-title">Terminal hổ phách</span>
+                      <span class="bme-theme-card-desc"
+                        >Giống terminal cổ điển hơn, tầng đọc ổn định.</span
+                      >
+                    </span>
+                    <span class="bme-theme-card-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                  <button
+                    class="bme-theme-card"
+                    data-theme="violet"
+                    type="button"
+                  >
+                    <span
+                      class="bme-theme-card-swatch"
+                      style="background: #b388ff"
+                    ></span>
+                    <span class="bme-theme-card-copy">
+                      <span class="bme-theme-card-title">Sương tím mờ ảo</span>
+                      <span class="bme-theme-card-desc"
+                        >Chất cảm ban đêm mềm hơn, phù hợp để duyệt nhập vai.</span
+                      >
+                    </span>
+                    <span class="bme-theme-card-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                  <button
+                    class="bme-theme-card"
+                    data-theme="paperDawn"
+                    type="button"
+                  >
+                    <span
+                      class="bme-theme-card-swatch"
+                      style="background: #0d9488"
+                    ></span>
+                    <span class="bme-theme-card-copy">
+                      <span class="bme-theme-card-title">Giấy sáng ban mai</span>
+                      <span class="bme-theme-card-desc"
+                        >Tông giấy sáng ấm, màu chủ đạo xanh ngọc với điểm nhấn hổ phách, thân thiện khi đọc ban ngày.</span
+                      >
+                    </span>
+                    <span class="bme-theme-card-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                  <button
+                    class="bme-theme-card"
+                    data-theme="glacierSky"
+                    type="button"
+                  >
+                    <span
+                      class="bme-theme-card-swatch"
+                      style="background: #2563eb"
+                    ></span>
+                    <span class="bme-theme-card-copy">
+                      <span class="bme-theme-card-title">Bầu trời băng hà</span>
+                      <span class="bme-theme-card-desc"
+                        >Nền xám lạnh sáng với xanh dương bão hòa, phù hợp hiển thị cùng giao diện sáng của hệ thống.</span
+                      >
+                    </span>
+                    <span class="bme-theme-card-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="bme-config-section"
+              data-config-section="cleanup"
+            >
+              <div class="bme-config-section-head">
+                <div class="bme-config-section-kicker">Dọn dữ liệu</div>
+                <h3 class="bme-config-section-title">Dọn đồ thị, bộ đệm và lưu trữ</h3>
+                <p class="bme-config-section-desc">
+                  Thực hiện các thao tác dọn dẹp rủi ro cao tại đây. Mọi thao tác đều cần xác nhận hai lần, một số thao tác không thể hoàn tác.
+                </p>
+              </div>
+
+              <!-- Dọn đồ thị -->
+              <div class="bme-config-card">
+                <div class="bme-config-card-head">
+                  <div>
+                    <div class="bme-config-card-title">Dọn đồ thị</div>
+                    <div class="bme-config-card-subtitle">
+                      Xóa toàn bộ đồ thị hoặc xóa các nút ký ức trong phạm vi tầng chỉ định. Thao tác này không thể hoàn tác.
+                    </div>
+                  </div>
+                </div>
+                <div class="bme-action-grid">
+                  <button
+                    class="bme-action-btn danger"
+                    id="bme-act-clear-graph"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Xóa đồ thị hiện tại</span>
+                  </button>
+                  <button
+                    class="bme-action-btn danger"
+                    id="bme-act-clear-graph-range"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-scissors"></i>
+                    <span>Dọn theo phạm vi tầng</span>
+                  </button>
+                </div>
+                <div class="bme-action-group-extra">
+                  <div class="bme-config-help">
+                    Dọn theo phạm vi tầng: xóa toàn bộ nút và cạnh liên quan trong phạm vi tầng đã chỉ định. Để trống thì không thực hiện.
+                  </div>
+                  <div class="bme-action-range-row">
+                    <div class="bme-config-row">
+                      <label for="bme-cleanup-range-start">Tầng bắt đầu</label>
+                      <input
+                        id="bme-cleanup-range-start"
+                        class="bme-config-input"
+                        type="number"
+                        min="0"
+                        max="999999"
+                      />
+                    </div>
+                    <div class="bme-config-row">
+                      <label for="bme-cleanup-range-end">Tầng kết thúc</label>
+                      <input
+                        id="bme-cleanup-range-end"
+                        class="bme-config-input"
+                        type="number"
+                        min="0"
+                        max="999999"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bme-config-card">
+                <div class="bme-config-card-head">
+                  <div>
+                    <div class="bme-config-card-title">Dọn trạng thái tóm tắt</div>
+                    <div class="bme-config-card-subtitle">
+                      Xóa trạng thái tóm tắt phân tầng của chat hiện tại, không ảnh hưởng tới các nút đồ thị và nguyên văn chat.
+                    </div>
+                  </div>
+                </div>
+                <div class="bme-action-grid">
+                  <button
+                    class="bme-action-btn danger"
+                    id="bme-act-summary-clear"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-eraser"></i>
+                    <span>Xóa trạng thái tóm tắt của chat hiện tại</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dọn bộ đệm -->
+              <div class="bme-config-card">
+                <div class="bme-config-card-head">
+                  <div>
+                    <div class="bme-config-card-title">Dọn bộ đệm</div>
+                    <div class="bme-config-card-subtitle">
+                      Xóa bộ đệm vector lúc chạy hoặc lịch sử trích xuất. Không ảnh hưởng tới các nút đồ thị đã lưu bền.
+                    </div>
+                  </div>
+                </div>
+                <div class="bme-action-grid">
+                  <button
+                    class="bme-action-btn"
+                    id="bme-act-clear-vector-cache"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-database"></i>
+                    <span>Xóa bộ đệm vector</span>
+                  </button>
+                  <button
+                    class="bme-action-btn"
+                    id="bme-act-clear-batch-journal"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Xóa lịch sử trích xuất</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dọn lưu trữ dữ liệu -->
+              <div class="bme-config-card">
+                <div class="bme-config-card-head">
+                  <div>
+                    <div class="bme-config-card-title">Dọn lưu trữ dữ liệu</div>
+                    <div class="bme-config-card-subtitle">
+                      Xóa lưu trữ đồ thị cục bộ OPFS / IndexedDB, hoặc dọn dữ liệu đồng bộ phía máy chủ.
+                    </div>
+                  </div>
+                </div>
+                <div class="bme-action-grid">
+                  <button
+                    class="bme-action-btn danger"
+                    id="bme-act-delete-current-idb"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-hard-drive"></i>
+                    <span>Xóa lưu trữ cục bộ của chat hiện tại</span>
+                  </button>
+                  <button
+                    class="bme-action-btn danger"
+                    id="bme-act-delete-all-idb"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-explosion"></i>
+                    <span>Xóa toàn bộ lưu trữ cục bộ của BME</span>
+                  </button>
+                  <button
+                    class="bme-action-btn danger"
+                    id="bme-act-delete-server-sync"
+                    type="button"
+                  >
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                    <span>Xóa dữ liệu đồng bộ máy chủ</span>
+                  </button>
+                </div>
+                <div class="bme-config-help bme-cleanup-warning-text">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  “Xóa toàn bộ lưu trữ cục bộ của BME” và “Xóa dữ liệu đồng bộ máy chủ” yêu cầu nhập DELETE để xác nhận.
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div class="bme-task-workspace" id="bme-task-workspace">
+          <div class="bme-task-workspace-header">
+            <div>
+              <div class="bme-task-workspace-kicker" id="bme-task-ws-kicker">Giám sát tác vụ</div>
+              <h2 class="bme-task-workspace-title" id="bme-task-ws-title">Không gian luồng tác vụ ST-BME</h2>
+              <p class="bme-task-workspace-desc" id="bme-task-ws-desc">
+                Xem trạng thái chạy của toàn bộ pipeline tác vụ và tiến độ của lô hiện tại theo thời gian thực.
+              </p>
+            </div>
+          </div>
+
+          <div class="bme-task-nav-mobile" id="bme-task-nav-mobile">
+            <button class="bme-task-nav-pill active" data-task-section="pipeline" type="button">Pipeline</button>
+            <button class="bme-task-nav-pill" data-task-section="timeline" type="button">Dòng thời gian</button>
+            <button class="bme-task-nav-pill" data-task-section="memory" type="button">Ký ức</button>
+            <button class="bme-task-nav-pill" data-task-section="injection" type="button">Tiêm</button>
+            <button class="bme-task-nav-pill" data-task-section="trace" type="button">Theo dõi</button>
+            <button class="bme-task-nav-pill" data-task-section="persistence" type="button">Lưu bền</button>
+          </div>
+
+          <div class="bme-task-workspace-body">
+            <div class="bme-task-section active" data-task-section="pipeline" id="bme-task-pipeline"></div>
+            <div class="bme-task-section" data-task-section="timeline" id="bme-task-timeline"></div>
+            <div class="bme-task-section" data-task-section="memory" id="bme-task-memory"></div>
+            <div class="bme-task-section" data-task-section="injection" id="bme-task-injection"></div>
+            <div class="bme-task-section" data-task-section="trace" id="bme-task-trace"></div>
+            <div class="bme-task-section" data-task-section="persistence" id="bme-task-persistence"></div>
+          </div>
+
+          <div class="bme-memory-popup-scrim" id="bme-memory-popup-scrim" hidden></div>
+          <div class="bme-memory-popup" id="bme-memory-popup">
+            <div class="bme-memory-popup__header">
+              <h3 class="bme-memory-popup__title" id="bme-memory-popup-title">Chi tiết nút</h3>
+              <div class="bme-memory-popup__actions">
+                <button class="bme-detail-action-btn" id="bme-memory-popup-save" type="button" title="Lưu thay đổi">
+                  <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+                <button class="bme-detail-action-btn bme-detail-action-danger" id="bme-memory-popup-delete" type="button" title="Xóa nút">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+                <button class="bme-panel-close" id="bme-memory-popup-close" type="button" title="Tắt">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+            <div class="bme-memory-popup__badges" id="bme-memory-popup-badges"></div>
+            <div class="bme-memory-popup__body" id="bme-memory-popup-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="bme-mobile-content"
+        id="bme-mobile-content"
+        style="display: none"
+      ></div>
+    </div>
+
+    <div class="bme-panel-tabbar">
+      <button class="bme-tab-btn" data-tab="graph" type="button">
+        <i class="fa-solid fa-diagram-project"></i>
+        <span>đồ thị</span>
+      </button>
+      <button class="bme-tab-btn active" data-tab="dashboard" type="button">
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>Tổng quan</span>
+      </button>
+      <button class="bme-tab-btn" data-tab="task" type="button">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Tác vụ</span>
+      </button>
+      <button class="bme-tab-btn" data-tab="actions" type="button">
+        <i class="fa-solid fa-gear"></i>
+        <span>Thao tác</span>
+      </button>
+      <button class="bme-tab-btn" data-tab="config" type="button">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Cấu hình</span>
+      </button>
+    </div>
+  </div>
+
+      <div class="bme-fullscreen-graph-overlay" id="bme-fullscreen-graph" hidden>
+        <div class="bme-fullscreen-graph-toolbar">
+          <div class="bme-graph-toolbar-title">
+            <i class="fa-solid fa-diagram-project"></i>
+            <span>Đồ thị thời gian thực (toàn màn hình)</span>
+          </div>
+          <div class="bme-fullscreen-graph-controls">
+            <button id="bme-fs-zoom-in" title="Phóng to" type="button">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            <button id="bme-fs-zoom-out" title="Thu nhỏ" type="button">
+              <i class="fa-solid fa-minus"></i>
+            </button>
+            <button id="bme-fs-close" title="Tắt" type="button">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <canvas id="bme-fullscreen-graph-canvas"></canvas>
+      </div>
+
+</div>

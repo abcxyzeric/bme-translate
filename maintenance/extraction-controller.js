@@ -901,7 +901,7 @@ export async function onManualExtractController(runtime, options = {}) {
         syncRuntime: true,
       },
     );
-    runtime.toastr.warning("Lô lưu bền trước vẫn chưa xác nhận, hãy bấm "Thử lưu bền lại" hoặc "Thăm dò lại đồ thị" trước");
+    runtime.toastr.warning("Lô lưu bền trước vẫn chưa xác nhận, hãy bấm “Thử lưu bền lại” hoặc “Thăm dò lại đồ thị” trước");
     return;
   }
   if (!(await runtime.recoverHistoryIfNeeded("manual-extract"))) return;

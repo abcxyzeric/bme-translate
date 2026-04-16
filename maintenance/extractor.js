@@ -1925,7 +1925,7 @@ function buildDefaultExtractPrompt(schema) {
     "- Mỗi lô hội thoại tối đa chỉ tạo 1 nút sự kiện; nhiều tiểu sự kiện phải hợp nhất thành một mục",
     "- batchStoryTime biểu thị thời gian cốt truyện của tuyến tự sự chính trong lô hội thoại này; thông thường hãy cố điền cảnh hiện tại, nếu không suy ra được thì để trống",
     "- operations[].storyTime dùng cho thời gian cốt truyện riêng của nút; nếu không ghi thì hệ thống sẽ kế thừa batchStoryTime",
-    "- Bắt buộc phải phân biệt thứ tự chat và thứ tự cốt truyện; đừng nhầm "được nhắc sau" thành "xảy ra sau"",
+    "- Bắt buộc phải phân biệt thứ tự chat và thứ tự cốt truyện; đừng nhầm “được nhắc sau” thành “xảy ra sau”",
     "- Flashback / hypothetical / future có thể ghi storyTime, nhưng thông thường đừng đặt advancesActiveTimeline = true",
     "- Với các nhân vật có liên quan, hãy cố gắng sinh POV memory và cognitionUpdates tương ứng; không cần ép bao phủ toàn bộ nhân vật trong đồ thị",
     "- cognitionUpdates dùng để thể hiện ai biết chắc điều gì, ai hiểu sai điều gì, ai chỉ thấy mơ hồ",
@@ -1959,7 +1959,7 @@ function buildCognitiveExtractAugmentPrompt() {
     "- visibility.score lấy trong khoảng 0..1; 1 biểu thị trực tiếp trải qua hoặc biết chắc, khoảng 0.5 biểu thị nghe gián tiếp.",
     "- regionUpdates.activeRegionHint chỉ điền khi lô hội thoại này rơi rõ ràng vào một khu vực nào đó.",
     "- regionUpdates.adjacency chỉ điền khi trong văn bản có quan hệ kề cận được nêu rõ, đừng đoán.",
-    "- batchStoryTime.label nên được viết thành nhãn thời gian cốt truyện có thể tái sử dụng, ví dụ "Sáng sớm ngày thứ hai", "Sau đêm qua", "Thời thơ ấu trong hồi ức".",
+    "- batchStoryTime.label nên được viết thành nhãn thời gian cốt truyện có thể tái sử dụng, ví dụ “Sáng sớm ngày thứ hai”, “Sau đêm qua”, “Thời thơ ấu trong hồi ức”.",
     "- advancesActiveTimeline chỉ được viết là true khi lô này thực sự đẩy tuyến thời gian tự sự chính hiện tại tiến về phía trước.",
     "- Nếu không có thay đổi về nhận thức hoặc không gian thì có thể trả về mảng rỗng hoặc đối tượng rỗng, nhưng đừng trả về cấu trúc không hợp lệ.",
   ].join("\n");

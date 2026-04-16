@@ -7409,7 +7409,7 @@ function _bindTaskProfileWorkspace() {
         const text = await file.text();
         const parsed = JSON.parse(text);
         if (parsed?.format !== "st-bme-all-task-profiles" || !parsed?.profiles) {
-          throw new Error("Định dạng tệp không đúng, vui lòng chọn tệp được tạo từ "Xuất tất cả"");
+          throw new Error("Định dạng tệp không đúng, vui lòng chọn tệp được tạo từ “Xuất tất cả”");
         }
         const settings = _getSettings?.() || {};
         let mergedProfiles = settings.taskProfiles || {};
@@ -11655,7 +11655,7 @@ function _formatPersistMismatchHelp(reason = "") {
   const normalized = String(reason || "").trim();
   switch (normalized) {
     case "persist-mismatch:indexeddb-behind-commit-marker":
-      return "Bản ghi hiển thị của chat hiện tại cho thấy đồ thị đã được xác nhận lên phiên bản cao hơn, nhưng trong lưu trữ cục bộ OPFS / IndexedDB vẫn chưa có dữ liệu tương ứng. Tình huống này thường gặp ngay sau khi vừa xóa bộ đệm cục bộ hoặc khi bước xác nhận ghi vẫn chưa hoàn tất. Hãy thử bấm "Thăm dò lại đồ thị" trước; nếu vẫn bất thường thì bấm "Thử lưu bền lại" hoặc chạy xây lại/khôi phục.";
+      return "Bản ghi hiển thị của chat hiện tại cho thấy đồ thị đã được xác nhận lên phiên bản cao hơn, nhưng trong lưu trữ cục bộ OPFS / IndexedDB vẫn chưa có dữ liệu tương ứng. Tình huống này thường gặp ngay sau khi vừa xóa bộ đệm cục bộ hoặc khi bước xác nhận ghi vẫn chưa hoàn tất. Hãy thử bấm “Thăm dò lại đồ thị” trước; nếu vẫn bất thường thì bấm “Thử lưu bền lại” hoặc chạy xây lại/khôi phục.";
     default:
       return `Phát hiện lưu bền bất thường về tính nhất quán: ${_formatPersistMismatchReason(normalized)}. Hãy thăm dò lại đồ thị trước; nếu vẫn bất thường thì hãy xây lại hoặc khôi phục.`;
   }
@@ -11830,8 +11830,8 @@ function _refreshPersistenceRepairUi(
     help.textContent = "";
     if (actionHelp) {
       actionHelp.textContent = isLuker
-        ? "Khu vực này tập trung các lối sửa lưu bền. Trường hợp thường gặp hãy dùng "Thử lưu bền lại" và "Thăm dò lại đồ thị" trước; nếu sidecar chính của Luker bị lệch thì mới dùng 3 nút sửa chuyên sâu bên phải."
-        : "Khu vực này tập trung các lối sửa lưu bền. Thông thường hãy thử "Thử lưu bền lại" trước, nếu trạng thái chưa khôi phục thì thử tiếp "Thăm dò lại đồ thị".";
+        ? "Khu vực này tập trung các lối sửa lưu bền. Trường hợp thường gặp hãy dùng “Thử lưu bền lại” và “Thăm dò lại đồ thị” trước; nếu sidecar chính của Luker bị lệch thì mới dùng 3 nút sửa chuyên sâu bên phải."
+        : "Khu vực này tập trung các lối sửa lưu bền. Thông thường hãy thử “Thử lưu bền lại” trước, nếu trạng thái chưa khôi phục thì thử tiếp “Thăm dò lại đồ thị”.";
     }
     return;
   }
@@ -11840,8 +11840,8 @@ function _refreshPersistenceRepairUi(
   if (loadInfo?.pendingPersist === true) {
     helpText =
       isLuker
-        ? "Lô trích xuất gần nhất đã hoàn tất nhưng manifest Luker vẫn chưa xác nhận. Hãy thử "Thử lưu bền lại" trước; nếu vẫn chưa xác nhận thì sang khu vực Luker Sidecar ở trang "Thao tác" để chạy "Sửa Sidecar chính" hoặc "Xây lại bộ đệm cục bộ"."
-        : "Lô trích xuất gần nhất đã hoàn tất nhưng ghi ngược chính thức vẫn chưa được xác nhận. Hãy thử "Thử lưu bền lại" trước; nếu trạng thái không đổi thì thử tiếp "Thăm dò lại đồ thị".";
+        ? "Lô trích xuất gần nhất đã hoàn tất nhưng manifest Luker vẫn chưa xác nhận. Hãy thử “Thử lưu bền lại” trước; nếu vẫn chưa xác nhận thì sang khu vực Luker Sidecar ở trang “Thao tác” để chạy “Sửa Sidecar chính” hoặc “Xây lại bộ đệm cục bộ”."
+        : "Lô trích xuất gần nhất đã hoàn tất nhưng ghi ngược chính thức vẫn chưa được xác nhận. Hãy thử “Thử lưu bền lại” trước; nếu trạng thái không đổi thì thử tiếp “Thăm dò lại đồ thị”.";
     if (loadInfo?.indexedDbLastError) {
       helpText = `${helpText}\nCục bộLỗi：${loadInfo.indexedDbLastError}`;
     }
@@ -11851,11 +11851,11 @@ function _refreshPersistenceRepairUi(
     helpText =
       persistence?.recoverable === true
         ? isLuker
-          ? "Lô gần nhất đã bắt được neo khôi phục nhưng sidecar chính của Luker vẫn chưa xác nhận. Có thể thử "Thử lưu bền lại" trước; khi cần thì vào khu vực sửa lưu bền của trang "Thao tác" để chạy bản sửa sâu hơn."
-          : "Lô gần nhất đã bắt được neo khôi phục nhưng vẫn chưa đi vào vùng lưu trữ accepted chính thức. Có thể thử "Thử lưu bền lại" trước; nếu vẫn chưa xác nhận thì hãy thăm dò lại đồ thị."
+          ? "Lô gần nhất đã bắt được neo khôi phục nhưng sidecar chính của Luker vẫn chưa xác nhận. Có thể thử “Thử lưu bền lại” trước; khi cần thì vào khu vực sửa lưu bền của trang “Thao tác” để chạy bản sửa sâu hơn."
+          : "Lô gần nhất đã bắt được neo khôi phục nhưng vẫn chưa đi vào vùng lưu trữ accepted chính thức. Có thể thử “Thử lưu bền lại” trước; nếu vẫn chưa xác nhận thì hãy thăm dò lại đồ thị."
         : isLuker
-          ? "Lô lưu bền gần nhất chưa được Luker manifest chấp nhận. Có thể thử "Thử lưu bền lại" trước; nếu sidecar chính bị lệch với bộ đệm cục bộ thì sang khu vực sửa lưu bền ở trang "Thao tác" để chạy bản sửa sâu hơn."
-          : "Lô lưu bền gần nhất chưa được chấp nhận. Có thể thử "Thử lưu bền lại" trước; nếu host tải lưu trữ cục bộ bị trễ thì hãy thăm dò lại đồ thị.";
+          ? "Lô lưu bền gần nhất chưa được Luker manifest chấp nhận. Có thể thử “Thử lưu bền lại” trước; nếu sidecar chính bị lệch với bộ đệm cục bộ thì sang khu vực sửa lưu bền ở trang “Thao tác” để chạy bản sửa sâu hơn."
+          : "Lô lưu bền gần nhất chưa được chấp nhận. Có thể thử “Thử lưu bền lại” trước; nếu host tải lưu trữ cục bộ bị trễ thì hãy thăm dò lại đồ thị.";
   }
   help.textContent = helpText;
   if (actionHelp) {

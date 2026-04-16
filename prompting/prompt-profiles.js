@@ -126,7 +126,7 @@ const BUILTIN_BLOCK_DEFINITIONS = [
     sourceKey: "currentRange",
     name: "Phạm vi hiện tại",
     role: "system",
-    description: "Chèn phạm vi tầng tin nhắn đang xử lý hiện tại (ví dụ: "Tầng 5 ~ Tầng 10"). Dùng cho tác vụ extract và compress.",
+    description: "Chèn phạm vi tầng tin nhắn đang xử lý hiện tại (ví dụ: “Tầng 5 ~ Tầng 10”). Dùng cho tác vụ extract và compress.",
   },
   {
     sourceKey: "nodeContent",

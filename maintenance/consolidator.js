@@ -70,7 +70,7 @@ function throwIfAborted(signal) {
 /**
  * thống nhấtHợp nhất ký ứcprompt hệ thống（hỗ trợhàng loạtđầu ra）
  */
-const CONSOLIDATION_SYSTEM_PROMPT = `Bạn là bộ phân tích hợp nhất ký ức. Khi ký ức mới được thêm vào đồ thị tri thức, bạn cần đồng thời hoàn tất hai tác vụ:`
+const CONSOLIDATION_SYSTEM_PROMPT = `Bạn là bộ phân tích hợp nhất ký ức. Khi ký ức mới được thêm vào đồ thị tri thức, bạn cần đồng thời hoàn tất hai tác vụ:
 
 **Tác vụ 1: phát hiện kiểm tra xung đột**
 Phán định xem ký ức mới có xung đột hoặc trùng lặp với ký ức đã có ở vùng lân cận gần nhất hay không:
